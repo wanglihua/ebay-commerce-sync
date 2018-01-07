@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/context
+            http://www.springframework.org/schema/context/spring-context.xsd
+            http://www.springframework.org/schema/aop
+            http://www.springframework.org/schema/aop/spring-aop.xsd
+            http://www.springframework.org/schema/tx
+            http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <!-- 获得jdbc.properties属性文件 -->
+    <!--// ClassPath
+        <context:property-placeholder location="classpath:jdbc.properties" />
+     -->
+    <!--// WEB-INF -->
+    <context:property-placeholder location="classpath:jdbc.properties"/>
+
+    <!-- 配置c3p0数据源 -->
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <!-- connection -->
+        <property name="driverClass" value="${jdbc.driverClass}"/>
+        <property name="jdbcUrl" value="${jdbc.jdbcUrl}"/>
+        <property name="user" value="${jdbc.user}"/>
+        <property name="password" value="${jdbc.password}"/>
+
+        <!-- c3p0 pool -->
+        <property name="minPoolSize" value="${c3p0.pool.minPoolSize}"/>
+        <!-- 最小连接数 -->
+        <property name="maxPoolSize" value="${c3p0.pool.maxPoolSize}"/>
+        <!-- 最大连接数 -->
+        <property name="initialPoolSize" value="${c3p0.pool.initialPoolSize}"/>
+        <!-- 初始化连接池的大小 -->
+        <property name="maxStatements" value="${c3p0.pool.maxStatements}"/>
+        <!-- 最大的PreparedStatement的数量 -->
+        <property name="acquireIncrement" value="${c3p0.pool.acquireIncrement}"/>
+        <!-- 当连接池里面的连接用完的时候，C3P0获取的新的连接数 -->
+        <property name="checkoutTimeout" value="${c3p0.pool.checkoutTimeout}"/>
+        <!-- 连接的超时时间 -->
+        <property name="idleConnectionTestPeriod" value="${c3p0.pool.idleConnectionTestPeriod}"/>
+        <!-- 检查连接池里空闲连接时间 -->
+        <property name="testConnectionOnCheckout" value="${c3p0.pool.testConnectionOnCheckout}"/>
+        <!-- 验证连接是否可用 -->
+    </bean>
+
+    <!-- 配置sessionFactory实例工厂 -->
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">${hibernate.dialect}</prop>
+                <prop key="hibernate.hbm2ddl.auto">${hibernate.hbm2ddl.auto}</prop>
+                <prop key="hibernate.show_sql">${hibernate.show_sql}</prop>
+                <prop key="hibernate.format_sql">${hibernate.format_sql}</prop>
+                <prop key="hibernate.jdbc.fetch_size">100</prop>
+                <prop key="hibernate.jdbc.batch_size">30</prop>
+                <!--<prop key="hibernate.cache.provider_class">net.sf.ehcache.hibernate.EhCacheProvider</prop>-->
+
+                <!--
+                <prop key="hibernate.cache.region.factory_class">org.hibernate.cache.ehcache.EhCacheRegionFactory</prop>
+                <prop key="hibernate.cache.use_second_level_cache">true</prop>
+                <prop key="hibernate.cache.use_query_cache">true</prop>
+                -->
+
+                <prop key="hibernate.cache.use_second_level_cache">false</prop>
+                <prop key="hibernate.cache.use_query_cache">false</prop>
+
+                <prop key="hibernate.current_session_context_class">
+                    org.springframework.orm.hibernate4.SpringSessionContext
+                </prop>
+                <!--// 非WEB环境下使用如下配置，否则会报如下错误
+                    // No Session found for current thread
+                    <prop key="hibernate.current_session_context_class">thread</prop>
+                 -->
+                <!--// 异常：java.lang.reflect.InvocationTargetException，jar版本不兼容问题
+                    // 或者将mysql的jar替换为mysql-connector-java-3.1.14-bin(低版本)
+                    <prop key="hibernate.temp.use_jdbc_metadata_defaults">true</prop>
+                 -->
+            </props>
+        </property>
+
+        <property name="packagesToScan">
+            <list>
+                <value>ozosync.domain</value>
+            </list>
+        </property>
+        <!--
+        <property name="mappingLocations">
+            <list>
+                <value>classpath:ozosync/domain/**/*.hbm.xml</value>
+            </list>
+        </property>
+        <property name="annotatedClasses">
+            <list>
+                <value>com.onjava.modelplanes.domain.PlaneType</value>
+                <value>com.onjava.modelplanes.domain.ModelPlane</value>
+            </list>
+        </property>
+        -->
+    </bean>
+
+    <!-- 配置事务管理器 -->
+    <bean id="transactionManager"
+          class="org.springframework.orm.hibernate4.HibernateTransactionManager" lazy-init="default">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+
+    <!--
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="save*" propagation="REQUIRED" isolation="DEFAULT"/>
+            <tx:method name="update*" propagation="REQUIRED" isolation="DEFAULT"/>
+            <tx:method name="delete*" propagation="REQUIRED" isolation="DEFAULT"/>
+            <tx:method name="batch*" propagation="REQUIRED" isolation="DEFAULT"/>
+
+            <tx:method name="get*" propagation="REQUIRED" isolation="DEFAULT" read-only="true"/>
+            <tx:method name="load*" propagation="REQUIRED" isolation="DEFAULT" read-only="true"/>
+            <tx:method name="find*" propagation="REQUIRED" isolation="DEFAULT" read-only="true"/>
+
+            <tx:method name="*" propagation="REQUIRED" isolation="DEFAULT"/>
+        </tx:attributes>
+    </tx:advice>
+
+    <aop:config>
+        <aop:pointcut id="affectMethods" expression="execution(* ozosync.dao.*.*(..))"/>
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="affectMethods"/>
+    </aop:config>
+    -->
+
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="*" propagation="REQUIRED" isolation="DEFAULT"/>
+        </tx:attributes>
+    </tx:advice>
+
+    <aop:config>
+        <aop:pointcut id="affectMethods" expression="execution(org.springframework.web.servlet.ModelAndView ozosync.web.mvc.*.*(..))"/>
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="affectMethods"/>
+    </aop:config>
+
+    <!-- 使Spring关注Annotation -->
+    <context:annotation-config/>
+
+    <!-- 让Spring通过自动扫描来查询和管理Bean -->
+    <context:component-scan base-package="ozosync"/>
+</beans>
