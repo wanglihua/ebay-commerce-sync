@@ -1,7 +1,6 @@
 package ozosync.test;
 
 import com.ebay.sdk.ApiContext;
-import com.ebay.sdk.ApiCredential;
 import com.ebay.sdk.call.GeteBayOfficialTimeCall;
 import java.util.Calendar;
 import org.junit.Test;
@@ -25,13 +24,7 @@ When making Trading SOAP call or using Trading SDKs,  you need to use https://ap
             System.out.print("+++++++++++++++++++++++++++++++++++++++\n");
             System.out.print("\n");
 
-            ApiContext apiContext = new ApiContext();
-
-            //set Api Token to access eBay Api Server
-            ApiCredential cred = apiContext.getApiCredential();
-
-            cred.seteBayToken("***REMOVED***");
-            apiContext.setApiServerUrl("https://api.ebay.com/wsapi");
+            ApiContext apiContext = TestUtil.getApiContext();
 
             // [Step 2] Create call object and execute the call
             GeteBayOfficialTimeCall apiCall = new GeteBayOfficialTimeCall(apiContext);
