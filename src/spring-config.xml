@@ -146,4 +146,29 @@
 
     <!-- 让Spring通过自动扫描来查询和管理Bean -->
     <context:component-scan base-package="ozosync"/>
+
+    <!-- 定时任务 begin -->
+
+    <!-- Hello World 任务-->
+    <bean id="helloWorldJobDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="jobClass" value="ozosync.job.HelloWorldJob"/>
+        <property name="durability" value="true"/>
+    </bean>
+    <bean id="helloWorldJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="helloWorldJobDetail"/>
+        <property name="cronExpression" value="*/2 * * * * ?"/>
+        <property name="startDelay" value="1000"/>
+    </bean>
+
+    <!-- 店铺 任务 -->
+
+    <bean id="schedulerFactoryBean" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="triggers">
+            <list>
+                <ref bean="helloWorldJobTrigger"/>
+            </list>
+        </property>
+    </bean>
+
+    <!-- 定时任务 end -->
 </beans>

@@ -1,14 +1,6 @@
 package ozosync.test;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.Locale;
-
 import com.ebay.sdk.ApiContext;
-import com.ebay.sdk.ApiCredential;
 import com.ebay.sdk.ApiException;
 import com.ebay.sdk.SdkException;
 import com.ebay.sdk.TimeFilter;
@@ -23,8 +15,12 @@ import com.ebay.soap.eBLBaseComponents.OrderIDArrayType;
 import com.ebay.soap.eBLBaseComponents.OrderType;
 import com.ebay.soap.eBLBaseComponents.PaginationType;
 import com.ebay.soap.eBLBaseComponents.ShippingServiceOptionsType;
-import com.ebay.soap.eBLBaseComponents.SiteCodeType;
 import com.ebay.soap.eBLBaseComponents.TransactionType;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.TimeZone;
 import org.junit.Test;
 
@@ -51,10 +47,6 @@ public class GetEBayOrdersTest {
     private void getSalesTransactions() throws ApiException, SdkException, Exception {
         ApiContext apiContext = TestUtil.getApiContext();
 
-        apiContext.getApiLogging().setLogSOAPMessages(true);// This will log SOAP requests and responses
-
-        apiContext.setSite(SiteCodeType.UK); // Set site to UK
-
         GetSellerTransactionsCall getTrans = new GetSellerTransactionsCall(
                 apiContext);
 
@@ -64,7 +56,8 @@ public class GetEBayOrdersTest {
 // Create a filter, in this example we are using from and to filter, to get all transactions in the last 15 minutes.
         Calendar to = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
         Calendar from = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-        from.roll(Calendar.MINUTE, -15);
+        //from.roll(Calendar.DATE, -1);
+        from.roll(Calendar.DATE, -1);
 
         TimeFilter filter = new TimeFilter(from, to);
         getTrans.setModifiedTimeFilter(filter);

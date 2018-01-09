@@ -2,6 +2,7 @@ package ozosync.test;
 
 import com.ebay.sdk.ApiContext;
 import com.ebay.sdk.ApiCredential;
+import com.ebay.soap.eBLBaseComponents.SiteCodeType;
 
 public class TestUtil {
 
@@ -13,6 +14,10 @@ public class TestUtil {
 
         cred.seteBayToken("***REMOVED***");
         apiContext.setApiServerUrl("https://api.ebay.com/wsapi");
+
+        apiContext.getApiLogging().setLogSOAPMessages(true);// This will log SOAP requests and responses
+
+        apiContext.setSite(SiteCodeType.AUSTRALIA); // Set site to UK
 
         return apiContext;
     }
