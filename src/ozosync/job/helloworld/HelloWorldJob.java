@@ -14,11 +14,9 @@ import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.orm.hibernate4.SessionFactoryUtils;
 import org.springframework.orm.hibernate4.SessionHolder;
 import org.springframework.scheduling.quartz.QuartzJobBean;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import ozosync.domain.NowTimeInfo;
 
-@Component
 public class HelloWorldJob extends QuartzJobBean {
 
     private Logger log = Logger.getLogger(HelloWorldJob.class);
