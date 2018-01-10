@@ -44,9 +44,9 @@ public class HelloWorldJob extends QuartzJobBean {
 
     @NotNull
     private Date getNowTime() {
+        Session session;
         SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.getResource(getSessionFactory());
         boolean existingTransaction = sessionHolder != null;
-        Session session;
         if (existingTransaction) {
             log.error("Found thread-bound Session for HibernateInterceptor");
             session = sessionHolder.getSession();
