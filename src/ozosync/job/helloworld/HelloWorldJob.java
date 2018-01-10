@@ -1,4 +1,4 @@
-package ozosync.job;
+package ozosync.job.helloworld;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -15,12 +15,10 @@ import org.springframework.orm.hibernate4.SessionFactoryUtils;
 import org.springframework.orm.hibernate4.SessionHolder;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import ozosync.domain.NowTimeInfo;
 
 @Component
-@Service
 public class HelloWorldJob extends QuartzJobBean {
 
     private Logger log = Logger.getLogger(HelloWorldJob.class);

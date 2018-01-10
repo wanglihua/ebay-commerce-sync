@@ -151,7 +151,7 @@
 
     <!-- Hello World 任务-->
     <bean id="helloWorldJobDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
-        <property name="jobClass" value="ozosync.job.HelloWorldJob"/>
+        <property name="jobClass" value="ozosync.job.helloworld.HelloWorldJob"/>
         <property name="durability" value="true"/>
         <property name="jobDataAsMap">
             <map>
