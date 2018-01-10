@@ -166,11 +166,26 @@
     </bean>
 
     <!-- 店铺 任务 -->
+    <bean id="shopJobDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="jobClass" value="ozosync.job.shop.ShopJob"/>
+        <property name="durability" value="true"/>
+        <property name="jobDataAsMap">
+            <map>
+                <entry key="sessionFactory" value-ref="sessionFactory"/>
+            </map>
+        </property>
+    </bean>
+    <bean id="shopJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="shopJobDetail"/>
+        <property name="cronExpression" value="*/2 * * * * ?"/>
+        <property name="startDelay" value="1000"/>
+    </bean>
 
     <bean id="schedulerFactoryBean" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
         <property name="triggers">
             <list>
                 <ref bean="helloWorldJobTrigger"/>
+                <ref bean="shopJobTrigger"/>
             </list>
         </property>
     </bean>
