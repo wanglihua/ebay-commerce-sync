@@ -68,6 +68,7 @@ public class OrderDownloader {
                             // 保存订单信息
                             insertOrUpdateOrder(order);
 
+                            // 保存订单明细
                             TransactionArrayType transactionArray = order.getTransactionArray();
 
                             if (transactionArray != null && transactionArray.getTransactionLength() > 0) {
@@ -85,6 +86,7 @@ public class OrderDownloader {
                                 }
                             }
 
+                            // 保存订单邮寄地址
                             ShippingServiceOptionsType shippingServiceOptions = order.getShippingServiceSelected();
                             if (shippingServiceOptions == null) {
                                 if (order.getCheckoutStatus().getStatus() == CompleteStatusCodeType.COMPLETE) {
