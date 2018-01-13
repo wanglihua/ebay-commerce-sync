@@ -1,0 +1,25 @@
+package ozosync.domain.schema
+
+object OrderItemSchema {
+    const val id = "id"
+    const val createTime = "createTime"
+    const val desc = "desc"
+    const val itemTitle = "itemTitle"
+    const val costPrice = "costPrice"
+    const val grossProfit = "grossProfit"
+    const val createdDate = "createdDate"
+    const val updaetTime = "updaetTime"
+    const val order = "order"
+    const val quantity = "quantity"
+    const val transactionId = "transactionId"
+    const val itemProductId = "itemProductId"
+    const val itemId = "itemId"
+    const val itemSku = "itemSku"
+    const val orderLineItemId = "orderLineItemId"
+    const val transactionPriceCurrency = "transactionPriceCurrency"
+    const val transactionPrice = "transactionPrice"
+    const val transactionPriceRmb = "transactionPriceRmb"
+    const val productStoreItemId = "productStoreItemId"
+    const val itemConditionId = "itemConditionId"
+    const val itemConditionDisplayName = "itemConditionDisplayName"
+}

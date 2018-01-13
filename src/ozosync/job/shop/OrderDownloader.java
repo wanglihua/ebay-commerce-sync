@@ -3,16 +3,10 @@ package ozosync.job.shop;
 import com.ebay.sdk.ApiAccount;
 import com.ebay.sdk.ApiContext;
 import com.ebay.sdk.ApiCredential;
-import com.ebay.sdk.TimeFilter;
 import com.ebay.sdk.call.GetOrdersCall;
-import com.ebay.sdk.call.GetSellerTransactionsCall;
-import com.ebay.soap.eBLBaseComponents.AddressType;
-import com.ebay.soap.eBLBaseComponents.AmountType;
-import com.ebay.soap.eBLBaseComponents.CheckoutStatusCodeType;
 import com.ebay.soap.eBLBaseComponents.CompleteStatusCodeType;
 import com.ebay.soap.eBLBaseComponents.DetailLevelCodeType;
 import com.ebay.soap.eBLBaseComponents.ExternalTransactionType;
-import com.ebay.soap.eBLBaseComponents.OrderIDArrayType;
 import com.ebay.soap.eBLBaseComponents.OrderStatusCodeType;
 import com.ebay.soap.eBLBaseComponents.OrderType;
 import com.ebay.soap.eBLBaseComponents.PaginationType;
@@ -21,18 +15,12 @@ import com.ebay.soap.eBLBaseComponents.SiteCodeType;
 import com.ebay.soap.eBLBaseComponents.TradingRoleCodeType;
 import com.ebay.soap.eBLBaseComponents.TransactionArrayType;
 import com.ebay.soap.eBLBaseComponents.TransactionType;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.TimeZone;
 import org.apache.log4j.Logger;
 import org.hibernate.SessionFactory;
 import ozosync.domain.EBayApiConfigInfo;
 import ozosync.job.shop.database.GetEBayApiConfigListExecuter;
 import ozosync.job.shop.database.OrderSaveExecuter;
-import ozosync.test.TestUtil;
 
 public class OrderDownloader {
 
@@ -66,7 +54,7 @@ public class OrderDownloader {
                             System.out.println("order id: " + order.getOrderID());
 
                             // 保存订单信息
-                            insertOrUpdateOrder(order);
+                            insertOrUpdateOrder(ebayApiConfigInfo, order);
 
                             // 保存订单明细
                             TransactionArrayType transactionArray = order.getTransactionArray();
@@ -157,8 +145,9 @@ public class OrderDownloader {
         return getOrdersCall;
     }
 
-    private void insertOrUpdateOrder(OrderType order) {
-        orderSaveExecuter.setOrder(order);
+    private void insertOrUpdateOrder(EBayApiConfigInfo apiConfigInfo, OrderType order) {
+        orderSaveExecuter.setOrderDownload(order);
+        orderSaveExecuter.setApiConfigInfo(apiConfigInfo);
         orderSaveExecuter.execute();
     }
 }

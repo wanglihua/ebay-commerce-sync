@@ -65,18 +65,23 @@ public class DateTest {
         size = collection.size();
         System.out.println("集合大小: " + size + "\n");
 
-        List stuff = Arrays.asList(new String[] { "a", "b" });
+        List stuff = Arrays.asList(new String[]{"a", "b"});
         List list = new ArrayList<String>(stuff);
         list = Collections.unmodifiableList(list);
         try {
             list.set(0, "new value");
-        }
-        catch (UnsupportedOperationException e) {
+        } catch (UnsupportedOperationException e) {
         }
         Set set = new HashSet(stuff);
         set = Collections.unmodifiableSet(set);
         Map map = new HashMap();
         map = Collections.unmodifiableMap(map);
         System.out.println("集合现在是只读");
+    }
+
+    @Test
+    public void learn1() {
+        Integer i = new Integer(1);
+        System.out.println(i.toString());
     }
 }
