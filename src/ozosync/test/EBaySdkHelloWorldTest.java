@@ -1,7 +1,9 @@
 package ozosync.test;
 
 import com.ebay.sdk.ApiContext;
+import com.ebay.sdk.call.GetTokenStatusCall;
 import com.ebay.sdk.call.GeteBayOfficialTimeCall;
+import com.ebay.soap.eBLBaseComponents.TokenStatusType;
 import java.util.Calendar;
 import org.junit.Test;
 
@@ -14,30 +16,36 @@ When making Trading SOAP call or using Trading SDKs,  you need to use https://ap
 
     @Test
     public void getEBayTime() {
-
         try {
-
-            System.out.print("\n");
-            System.out.print("+++++++++++++++++++++++++++++++++++++++\n");
-            System.out.print("+ Welcome to eBay SDK for Java Sample +\n");
-            System.out.print("+  - HelloWorld                   +\n");
-            System.out.print("+++++++++++++++++++++++++++++++++++++++\n");
-            System.out.print("\n");
-
             ApiContext apiContext = TestUtil.getApiContext();
 
-            // [Step 2] Create call object and execute the call
             GeteBayOfficialTimeCall apiCall = new GeteBayOfficialTimeCall(apiContext);
             System.out.println("Begin to call eBay API, please wait ... ");
             Calendar cal = apiCall.geteBayOfficialTime();
             System.out.println("End to call eBay API, show call result ...");
 
-            // [Setp 3] Handle the result returned
             System.out.println("Official eBay Time : " + cal.getTime().toString());
         } catch (Exception e) {
             System.out.println("Fail to get eBay official time.");
             e.printStackTrace();
         }
+    }
 
+    @Test
+    public void getTokenStatus() {
+        try {
+            ApiContext apiContext = TestUtil.getApiContext();
+
+            GetTokenStatusCall apiCall = new GetTokenStatusCall(apiContext);
+            System.out.println("Begin to call eBay API, please wait ... ");
+            TokenStatusType tokenStatus = apiCall.getTokenStatus();
+            System.out.println("End to call eBay API, show call result ...");
+
+            System.out.println("token expiration time: " + tokenStatus.getExpirationTime().getTime().toString());
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            System.out.println(e.toString());
+            //e.printStackTrace();
+        }
     }
 }

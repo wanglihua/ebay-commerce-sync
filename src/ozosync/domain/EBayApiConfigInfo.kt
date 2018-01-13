@@ -40,6 +40,10 @@ data class EBayApiConfigInfo(
     @VerboseName("cert id")
     var certId: String = ""
 
+    @Column(name = "dev_id")
+    @VerboseName("dev id")
+    var devId: String = ""
+
     @Column(name = "token")
     @VerboseName("token")
     var token: String = ""

@@ -1,62 +1,162 @@
 package ozosync.job.shop;
 
-import java.util.Date;
+import com.ebay.sdk.ApiAccount;
+import com.ebay.sdk.ApiContext;
+import com.ebay.sdk.ApiCredential;
+import com.ebay.sdk.TimeFilter;
+import com.ebay.sdk.call.GetOrdersCall;
+import com.ebay.sdk.call.GetSellerTransactionsCall;
+import com.ebay.soap.eBLBaseComponents.AddressType;
+import com.ebay.soap.eBLBaseComponents.AmountType;
+import com.ebay.soap.eBLBaseComponents.CheckoutStatusCodeType;
+import com.ebay.soap.eBLBaseComponents.CompleteStatusCodeType;
+import com.ebay.soap.eBLBaseComponents.DetailLevelCodeType;
+import com.ebay.soap.eBLBaseComponents.ExternalTransactionType;
+import com.ebay.soap.eBLBaseComponents.OrderIDArrayType;
+import com.ebay.soap.eBLBaseComponents.OrderStatusCodeType;
+import com.ebay.soap.eBLBaseComponents.OrderType;
+import com.ebay.soap.eBLBaseComponents.PaginationType;
+import com.ebay.soap.eBLBaseComponents.ShippingServiceOptionsType;
+import com.ebay.soap.eBLBaseComponents.SiteCodeType;
+import com.ebay.soap.eBLBaseComponents.TradingRoleCodeType;
+import com.ebay.soap.eBLBaseComponents.TransactionArrayType;
+import com.ebay.soap.eBLBaseComponents.TransactionType;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.TimeZone;
 import org.apache.log4j.Logger;
-import org.hibernate.FlushMode;
-import org.hibernate.HibernateException;
-import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.springframework.dao.DataAccessResourceFailureException;
-import org.springframework.orm.hibernate4.SessionFactoryUtils;
-import org.springframework.orm.hibernate4.SessionHolder;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
+import ozosync.domain.EBayApiConfigInfo;
+import ozosync.job.shop.database.GetEBayApiConfigListExecuter;
+import ozosync.job.shop.database.OrderSaveExecuter;
+import ozosync.test.TestUtil;
 
 public class OrderDownloader {
 
     private Logger log = Logger.getLogger(OrderDownloader.class);
 
-    private SessionFactory sessionFactory;
+    private GetEBayApiConfigListExecuter getEBayApiConfigListExecuter;
+    private OrderSaveExecuter orderSaveExecuter;
+
 
     public OrderDownloader(SessionFactory sessionFactory) {
-        this.sessionFactory = sessionFactory;
+        this.getEBayApiConfigListExecuter = new GetEBayApiConfigListExecuter(sessionFactory);
+        this.orderSaveExecuter = new OrderSaveExecuter(sessionFactory);
     }
 
+    @SuppressWarnings("unchecked")
     public void execute() {
+        try {
+            List<EBayApiConfigInfo> ebayApiConfigList = (List<EBayApiConfigInfo>) this.getEBayApiConfigListExecuter.execute();
+            for (EBayApiConfigInfo ebayApiConfigInfo : ebayApiConfigList) {
+                GetOrdersCall getOrdersCall = createGetOrdersCall(ebayApiConfigInfo);
 
+                int pageNumber = 0;
+                int orderCount = 0;
+
+                do {
+                    getOrdersCall.getPagination().setPageNumber(++pageNumber);
+                    OrderType[] orderList = getOrdersCall.getOrders();
+                    if (getOrdersCall.getReturnedReturnedOrderCountActual() > 0) {
+                        for (OrderType order : orderList) {
+                            System.out.println("order: " + ++orderCount);
+                            System.out.println("order id: " + order.getOrderID());
+
+                            // 保存订单信息
+                            insertOrUpdateOrder(order);
+
+                            TransactionArrayType transactionArray = order.getTransactionArray();
+
+                            if (transactionArray != null && transactionArray.getTransactionLength() > 0) {
+                                int transactionLength = transactionArray.getTransactionLength();
+                                for (int index = 0; index < transactionLength; index++) {
+                                    TransactionType transaction = transactionArray.getTransaction(index);
+                                    System.out.println("transaction id: " + transaction.getTransactionID());
+                                }
+                            }
+
+                            ExternalTransactionType[] externalTransactions = order.getExternalTransaction();
+                            if (externalTransactions != null && externalTransactions.length > 0) {
+                                for (ExternalTransactionType externalTransaction : externalTransactions) {
+                                    System.out.println("external transaction id: " + externalTransaction.getExternalTransactionID());
+                                }
+                            }
+
+                            ShippingServiceOptionsType shippingServiceOptions = order.getShippingServiceSelected();
+                            if (shippingServiceOptions == null) {
+                                if (order.getCheckoutStatus().getStatus() == CompleteStatusCodeType.COMPLETE) {
+                                    shippingServiceOptions = order.getShippingDetails().getShippingServiceOptions(0);
+                                } else {
+                                    shippingServiceOptions = new ShippingServiceOptionsType();
+                                }
+                            }
+
+                            //1. shipping.ShippingService;
+                            //2. shipping.ShippingServiceCost.Value;
+                            //3. salesTax;
+                            //4. order.AdjustmentAmount.Value;
+                            //5. order.Total.Value;
+                            //6. order.CheckoutStatus.Status;
+                            //7. order.CheckoutStatus.eBayPaymentStatus;
+                            //8. order.CheckoutStatus.PaymentMethod;
+                            //9. shipAddress;
+
+                            System.out.println();
+                        }
+                    }
+
+                } while (getOrdersCall.getReturnedHasMoreOrders());
+            }
+        } catch (Exception exp) {
+            log.fatal(exp.getMessage());
+            log.fatal(exp);
+        }
     }
 
-    private void saveOrUpdateOrder() {
-        Session session;
-        SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
-        boolean existingTransaction = sessionHolder != null;
-        if (existingTransaction) {
-            log.error("Found thread-bound Session for HibernateInterceptor");
-            session = sessionHolder.getSession();
-        } else {
-            try {
-                session = sessionFactory.openSession();
-                session.setFlushMode(FlushMode.MANUAL);
-            } catch (HibernateException ex) {
-                throw new DataAccessResourceFailureException("Could not open Hibernate Session", ex);
-            }
-            TransactionSynchronizationManager.bindResource(sessionFactory, new SessionHolder(session));
-        }
-        try {
-            // 这里写数据库访问业务逻辑代码
+    private ApiContext getApiContextByConfig(EBayApiConfigInfo ebayApiConfigInfo) {
+        ApiContext apiContext = new ApiContext();
 
-            session.flush();
-        } catch (Exception ex) {
-            //错误信息
-            log.fatal(ex.getMessage(), ex);
-            //ex.printStackTrace();
-            throw ex;
-        } finally {
-            if (existingTransaction) {
-                log.debug("Not closing pre-bound Hibernate Session after TransactionalQuartzTask");
-            } else {
-                SessionFactoryUtils.closeSession(session);
-                TransactionSynchronizationManager.unbindResource(sessionFactory);
-            }
-        }
+        ApiCredential apiCredential = apiContext.getApiCredential();
+
+        ApiAccount apiAccount = new ApiAccount();
+        apiAccount.setApplication(ebayApiConfigInfo.getAppId());
+        apiAccount.setCertificate(ebayApiConfigInfo.getCertId());
+        apiAccount.setDeveloper(ebayApiConfigInfo.getDevId());
+
+        apiCredential.setApiAccount(apiAccount);
+
+        apiCredential.seteBayToken("");
+        apiContext.setApiServerUrl("https://api.ebay.com/wsapi");
+
+        apiContext.getApiLogging().setLogSOAPMessages(true);// This will log SOAP requests and responses
+
+        apiContext.setSite(SiteCodeType.AUSTRALIA);
+
+        return apiContext;
+    }
+
+    private GetOrdersCall createGetOrdersCall(EBayApiConfigInfo ebayApiConfigInfo) {
+        ApiContext apiContext = getApiContextByConfig(ebayApiConfigInfo);
+
+        GetOrdersCall getOrdersCall = new GetOrdersCall(apiContext);
+        getOrdersCall.setNumberOfDays(1);
+        getOrdersCall.setOrderRole(TradingRoleCodeType.SELLER);
+        getOrdersCall.setOrderStatus(OrderStatusCodeType.ALL);
+        getOrdersCall.addDetailLevel(DetailLevelCodeType.RETURN_ALL);
+        getOrdersCall.setIncludeFinalValueFee(true);
+
+        PaginationType pagination = new PaginationType();
+        pagination.setEntriesPerPage(100);
+        getOrdersCall.setPagination(pagination);
+
+        return getOrdersCall;
+    }
+
+    private void insertOrUpdateOrder(OrderType order) {
+        orderSaveExecuter.setOrder(order);
+        orderSaveExecuter.execute();
     }
 }
