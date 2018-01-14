@@ -72,7 +72,7 @@ public class GetEBayTransationsTest {
         int pageNumber = 0;
         int tranCounter = 0;
 
-        SimpleDateFormat dateFormatter = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss.SSS");
+        SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
         List<String> orderIdList = new ArrayList<String>();
 

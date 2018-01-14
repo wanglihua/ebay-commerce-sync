@@ -1,6 +1,8 @@
 package ozosync.job.shop.database;
 
 import com.ebay.soap.eBLBaseComponents.OrderType;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
@@ -47,6 +49,12 @@ public class OrderSaveExecuter extends DataBaseExecuter {
         orderInDb.setShopAccount(apiConfigInfo.getShopAccount());
         orderInDb.setTranId(orderDownload.getShippingDetails().getSellingManagerSalesRecordNumber().toString());
         orderInDb.setFullTranId(apiConfigInfo.getShopAccount().getCode() + orderDownload.getShippingDetails().getSellingManagerSalesRecordNumber());
+
+        // SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        orderInDb.setCreatedTime(orderDownload.getCreatedTime().getTime());
+        orderInDb.setModifiedTime(orderDownload.getCheckoutStatus().getLastModifiedTime().getTime());
+        orderInDb.setPaidTime(orderDownload.getPaidTime().getTime());
+        orderInDb.setShippedTime(orderDownload.getShippedTime().getTime());
 
         if (orderNotExist) {
             session.save(orderInDb);
