@@ -4,6 +4,7 @@ import org.hibernate.annotations.DynamicInsert
 import org.hibernate.annotations.DynamicUpdate
 import org.hibernate.annotations.Fetch
 import org.hibernate.annotations.FetchMode
+import org.hibernate.annotations.Type
 import ozosync.common.VerboseName
 import java.math.BigDecimal
 import java.util.*
@@ -39,11 +40,17 @@ data class OrderInfo(
     @VerboseName("状态")
     var status: StatusInfo = StatusInfo()
 
+    /*
     @ManyToOne(targetEntity = OrderShippingAddressInfo::class)
     @JoinColumn(name = "address_id", nullable = false)
     @Fetch(FetchMode.SELECT)
     @VerboseName("送货地址")
     var shippingAddress: OrderShippingAddressInfo = OrderShippingAddressInfo()
+    */
+
+    @Column(name = "address_id")
+    @VerboseName("送货地址id")
+    var addressId: Long = 0
 
     @Column(name = "code")
     @VerboseName("订单编号")
@@ -146,18 +153,22 @@ data class OrderInfo(
     var buyerCheckoutMessage: String? = null
 
     @Column(name = "created_time")
+    @Type(type = "timestamp")
     @VerboseName("订单创建时间")
     var createdTime: Date? = null
 
     @Column(name = "modified_time")
+    @Type(type = "timestamp")
     @VerboseName("订单修改时间")
     var modifiedTime: Date? = null
 
     @Column(name = "paid_time")
+    @Type(type = "timestamp")
     @VerboseName("订单修改时间")
     var paidTime: Date? = null
 
     @Column(name = "shipped_time")
+    @Type(type = "timestamp")
     @VerboseName("订单修改时间")
     var shippedTime: Date? = null
 
@@ -226,10 +237,12 @@ data class OrderInfo(
     var cancelStatusId: Long = 0
 
     @Column(name = "create_time")
+    @Type(type = "timestamp")
     @VerboseName("创建时间")
     var createTime: Date = Date()
 
     @Column(name = "update_time")
+    @Type(type = "timestamp")
     @VerboseName("修改时间")
     var updaetTime: Date = Date()
 }

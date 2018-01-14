@@ -56,6 +56,8 @@ public class OrderSaveExecuter extends DataBaseExecuter {
         orderInDb.setPaidTime(orderDownload.getPaidTime().getTime());
         orderInDb.setShippedTime(orderDownload.getShippedTime().getTime());
 
+        
+
         if (orderNotExist) {
             session.save(orderInDb);
         } else {
