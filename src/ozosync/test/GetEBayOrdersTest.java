@@ -42,7 +42,20 @@ public class GetEBayOrdersTest {
                 for (OrderType order : orderList) {
                     System.out.println("order: " + ++orderCount);
                     System.out.println("order id: " + order.getOrderID());
+                    System.out.println("created time: " + order.getCreatedTime());
+                    System.out.println("last modified time: " + order.getCheckoutStatus().getLastModifiedTime());
+                    System.out.println("paid time: " + order.getPaidTime());
+                    System.out.println("shipped time: " + order.getShippedTime());
 
+                    /*
+        orderInDb.setCreatedTime(orderDownload.getCreatedTime().getTime());
+        orderInDb.setModifiedTime(orderDownload.getCheckoutStatus().getLastModifiedTime().getTime());
+        orderInDb.setPaidTime(orderDownload.getPaidTime().getTime());
+        orderInDb.setShippedTime(orderDownload.getShippedTime().getTime());
+
+                     */
+
+                    /*
                     TransactionArrayType transactionArray = order.getTransactionArray();
 
                     if (transactionArray != null && transactionArray.getTransactionLength() > 0) {
@@ -68,6 +81,7 @@ public class GetEBayOrdersTest {
                             shippingServiceOptions = new ShippingServiceOptionsType();
                         }
                     }
+                    */
 
                     //1. shipping.ShippingService;
                     //2. shipping.ShippingServiceCost.Value;

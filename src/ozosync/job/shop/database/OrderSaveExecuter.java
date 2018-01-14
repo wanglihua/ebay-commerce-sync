@@ -1,14 +1,16 @@
 package ozosync.job.shop.database;
 
 import com.ebay.soap.eBLBaseComponents.OrderType;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.math.BigDecimal;
+import java.math.MathContext;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import ozosync.domain.EBayApiConfigInfo;
+import ozosync.domain.ExchangeRateInfo;
 import ozosync.domain.OrderInfo;
 import ozosync.domain.schema.OrderSchema;
+import ozosync.service.ExchangeRateService;
 
 public class OrderSaveExecuter extends DataBaseExecuter {
 
@@ -53,10 +55,79 @@ public class OrderSaveExecuter extends DataBaseExecuter {
         // SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         orderInDb.setCreatedTime(orderDownload.getCreatedTime().getTime());
         orderInDb.setModifiedTime(orderDownload.getCheckoutStatus().getLastModifiedTime().getTime());
-        orderInDb.setPaidTime(orderDownload.getPaidTime().getTime());
-        orderInDb.setShippedTime(orderDownload.getShippedTime().getTime());
 
-        
+        if (orderDownload.getPaidTime() != null) {
+            orderInDb.setPaidTime(orderDownload.getPaidTime().getTime());
+        }
+
+        if (orderDownload.getShippedTime() != null) {
+            orderInDb.setShippedTime(orderDownload.getShippedTime().getTime());
+        }
+
+        ExchangeRateInfo exchangeRateInfo = new ExchangeRateService().getAudExchangeRate();
+
+        orderInDb.setAdjustmentAmountCurrency(orderDownload.getAdjustmentAmount().getCurrencyID().value());
+        orderInDb.setAdjustmentAmount(new BigDecimal(orderDownload.getAdjustmentAmount().getValue(), MathContext.DECIMAL64));
+        orderInDb.setAdjustmentAmountRmb(orderInDb.getAdjustmentAmount().multiply(new BigDecimal(exchangeRateInfo.getRate(), MathContext.DECIMAL64)));
+
+        orderInDb.setAmountPaidCurrency(orderDownload.getAmountPaid().getCurrencyID().value());
+        orderInDb.setAmountPaid(new BigDecimal(orderDownload.getAmountPaid().getValue(), MathContext.DECIMAL64));
+        orderInDb.setAmountPaidRmb(orderInDb.getAmountPaid().multiply(new BigDecimal(exchangeRateInfo.getRate(), MathContext.DECIMAL64)));
+
+        orderInDb.setAmountSavedCurrency(orderDownload.getAmountSaved().getCurrencyID().value());
+        orderInDb.setAmountSaved(new BigDecimal(orderDownload.getAmountSaved().getValue(), MathContext.DECIMAL64));
+        orderInDb.setAmountSavedRmb(orderInDb.getAmountSaved().multiply(new BigDecimal(exchangeRateInfo.getRate(), MathContext.DECIMAL64)));
+
+        orderInDb.setTotalAmountCurrency(orderDownload.getTotal().getCurrencyID().value());
+        orderInDb.setTotalAmount(new BigDecimal(orderDownload.getTotal().getValue(), MathContext.DECIMAL64));
+        orderInDb.setTotalAmountRmb(orderInDb.getTotalAmount().multiply(new BigDecimal(exchangeRateInfo.getRate(), MathContext.DECIMAL64)));
+
+        orderInDb.setSubtotalAmountCurrency(orderDownload.getSubtotal().getCurrencyID().value());
+        orderInDb.setSubtotalAmount(new BigDecimal(orderDownload.getSubtotal().getValue(), MathContext.DECIMAL64));
+        orderInDb.setSubtotalAmountRmb(orderInDb.getSubtotalAmount().multiply(new BigDecimal(exchangeRateInfo.getRate(), MathContext.DECIMAL64)));
+
+        orderInDb.setSellerEmail(orderDownload.getSellerEmail());
+        orderInDb.setSellerUserId(orderDownload.getSellerUserID());
+
+        orderInDb.setBuyerEmail(orderDownload.getTransactionArray().getTransaction(0).getBuyer().getEmail());
+        orderInDb.setBuyerUserId(orderDownload.getBuyerUserID());
+        orderInDb.setBuyerCheckoutMessage(orderDownload.getBuyerCheckoutMessage());
+
+        orderInDb.setPaymentMethods(orderDownload.getCheckoutStatus().getPaymentMethod().value());
+
+        orderInDb.setEBayStatus(orderDownload.getOrderStatus().value());
+
+        Long statusIdBefore = orderInDb.getStatus().getId();
+
+        if (orderDownload.getPaidTime() != null) {
+            orderInDb.setPaidTime(orderDownload.getPaidTime().getTime());
+        }
+
+        if (orderDownload.getShippedTime() != null) {
+            orderInDb.setShippedTime(orderDownload.getShippedTime().getTime());
+        }
+
+        /*
+           // 如果是新的订单，一般是新增的订单，系统数据库中还没有的订单
+           if order_status_id < models.ORDER_STATUS_YCJ && //这个状态检查不能少，否则 待配货，已发货的状态可能会被覆盖
+               order_in_db.PaidTime.Valid == false {
+               order_in_db.StatusId = models.ORDER_STATUS_YCJ // 这个状态，有可能会被接下来的状态逻辑所修改，可能会，更进一步改成 “已支付”, “已完成”
+           }
+
+           // 有可能是新增的订单（最有可能），或者是原来 已创建 的状态过来的。这时支付时间不为空
+           if order_status_id < models.ORDER_STATUS_YZF && //这个状态检查不能少，否则 待配货，已发货的状态可能会被覆盖
+               order_in_db.PaidTime.Valid == true &&
+               strings.ToLower(order_download.CheckoutStatuss.Status) == strings.ToLower("Complete") {
+               order_in_db.StatusId = models.ORDER_STATUS_YZF // 这个状态，有可能会被接下来的状态逻辑所修改，可能会，更进一步改成 “已完成”
+           }
+
+           // 如果 下载订单里面的 OrderStatus 是 Completed， 且订单的发货时间不为空，订单状态就为 已完成
+           if order_in_db.ShippedTime.Valid == true {
+               order_in_db.StatusId = models.ORDER_STATUS_YWC
+           }
+
+         */
+
 
         if (orderNotExist) {
             session.save(orderInDb);
