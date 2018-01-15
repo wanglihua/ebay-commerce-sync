@@ -4,7 +4,7 @@ object OrderItemSchema {
     const val id = "id"
     const val desc = "desc"
     const val createTime = "createTime"
-    const val updaetTime = "updaetTime"
+    const val updateTime = "updateTime"
     const val orderLineItemId = "orderLineItemId"
     const val transactionPriceCurrency = "transactionPriceCurrency"
     const val transactionPrice = "transactionPrice"

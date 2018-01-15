@@ -158,7 +158,7 @@ public class OrderSaveExecuter extends DataBaseExecuter {
 
             insertOrderHistory(session, orderInDb, "订单下载新增订单");
         } else {
-            orderInDb.setUpdaetTime(new Date());
+            orderInDb.setUpdateTime(new Date());
             session.update(orderInDb);
             session.flush();
 

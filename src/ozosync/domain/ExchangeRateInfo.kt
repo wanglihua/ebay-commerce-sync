@@ -46,7 +46,7 @@ data class ExchangeRateInfo(
 
     @Column(name = "update_time")
     @VerboseName("修改时间")
-    var updaetTime: Date = Date()
+    var updateTime: Date = Date()
 }
 
 /*

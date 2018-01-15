@@ -91,54 +91,5 @@ data class OrderItemInfo(
 
     @Column(name = "update_time")
     @VerboseName("修改时间")
-    var updaetTime: Date = Date()
+    var updateTime: Date = Date()
 }
-
-/*
-
-create table erp_order_item
-(
-	id bigint auto_increment primary key,
-	order_id bigint not null,
-
-	order_line_item_id varchar(200) not null,
-	quantity int not null,
-	transaction_id varchar(200) not null,
-	transaction_price_currency varchar(50) not null,
-	transaction_price decimal(18,6) not null,
-	transaction_price_rmb decimal(18,6) not null,
-	product_store_item_id bigint not null,
-	item_id varchar(50) not null,
-	item_product_id bigint not null,
-	item_sku varchar(100) not null,
-	item_title varchar(200) not null,
-	item_condition_id varchar(50) not null,
-	item_condition_display_name varchar(100) not null,
-	created_date datetime not null,
-	`desc` varchar(500) null,
-	cost_price decimal(18,6) default '0.000000' not null,
-	gross_profit decimal(18,6) default '0.000000' not null,
-
-	create_time datetime not null,
-	update_time datetime not null
-)
-engine=InnoDB charset=utf8
-;
-
-create index IDX_erp_order_item_order_id
-	on erp_order_item (order_id)
-;
-
-create index IDX_erp_order_item_product_store_item_id
-	on erp_order_item (product_store_item_id)
-;
-
-create index IDX_erp_order_item_item_product_id
-	on erp_order_item (item_product_id)
-;
-
-create index IDX_erp_order_item_item_sku
-	on erp_order_item (item_sku)
-;
-
- */

@@ -6,5 +6,5 @@ object ExchangeRateSchema {
     const val currency = "currency"
     const val status = "status"
     const val rate = "rate"
-    const val updaetTime = "updaetTime"
+    const val updateTime = "updateTime"
 }

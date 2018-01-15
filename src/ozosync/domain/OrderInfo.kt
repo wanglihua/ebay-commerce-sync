@@ -244,7 +244,7 @@ data class OrderInfo(
     @Column(name = "update_time")
     @Type(type = "timestamp")
     @VerboseName("修改时间")
-    var updaetTime: Date = Date()
+    var updateTime: Date = Date()
 }
 
 /*

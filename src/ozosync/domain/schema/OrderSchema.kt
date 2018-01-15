@@ -10,7 +10,7 @@ object OrderSchema {
     const val shopAccount = "shopAccount"
     const val createTime = "createTime"
     const val status = "status"
-    const val updaetTime = "updaetTime"
+    const val updateTime = "updateTime"
     const val typeId = "typeId"
     const val eBayStatus = "eBayStatus"
     const val amountPaid = "amountPaid"
