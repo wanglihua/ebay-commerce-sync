@@ -1,23 +1,27 @@
 package ozosync.job.shop.database;
 
-import com.ebay.soap.eBLBaseComponents.CheckoutStatusCodeType;
-import com.ebay.soap.eBLBaseComponents.CheckoutStatusType;
+import com.ebay.soap.eBLBaseComponents.AddressType;
 import com.ebay.soap.eBLBaseComponents.CompleteStatusCodeType;
 import com.ebay.soap.eBLBaseComponents.OrderStatusCodeType;
 import com.ebay.soap.eBLBaseComponents.OrderType;
+import com.ebay.soap.eBLBaseComponents.TransactionArrayType;
+import com.ebay.soap.eBLBaseComponents.TransactionType;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.Date;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Property;
 import org.hibernate.criterion.Restrictions;
 import ozosync.domain.EBayApiConfigInfo;
 import ozosync.domain.ExchangeRateInfo;
 import ozosync.domain.OrderHistoryInfo;
 import ozosync.domain.OrderInfo;
+import ozosync.domain.OrderShippingAddressInfo;
 import ozosync.domain.OrderStatus;
 import ozosync.domain.StatusInfo;
 import ozosync.domain.schema.OrderSchema;
+import ozosync.domain.schema.OrderShippingAddressSchema;
 import ozosync.service.ExchangeRateService;
 
 public class OrderSaveExecuter extends DataBaseExecuter {
@@ -40,6 +44,16 @@ public class OrderSaveExecuter extends DataBaseExecuter {
 
     @Override
     protected Object executeInternal(Session session) {
+        // order
+        OrderInfo orderInfo = saveOrder(session, orderDownload);
+
+        // order shipping address
+        saveOrderShippingAddress(session, orderDownload, orderInfo);
+
+        return orderInfo;
+    }
+
+    private OrderInfo saveOrder(Session session, OrderType orderDownload) {
         String orderCode = orderDownload.getOrderID();
         String[] orderCodeSplitArray = orderCode.split("-");
         if (orderCodeSplitArray.length > 1 && orderCodeSplitArray[1].length() > 13) {
@@ -138,7 +152,6 @@ public class OrderSaveExecuter extends DataBaseExecuter {
 
          */
 
-
         if (orderNotExist) {
             session.save(orderInDb);
             session.flush();
@@ -171,5 +184,87 @@ public class OrderSaveExecuter extends DataBaseExecuter {
 
         session.save(orderHistoryInfo);
         session.flush();
+    }
+
+    private void saveOrderEntries(Session session, OrderType orderDownload) {
+        // 保存订单明细
+        TransactionArrayType transactionArray = orderDownload.getTransactionArray();
+
+        if (transactionArray != null && transactionArray.getTransactionLength() > 0) {
+            int transactionLength = transactionArray.getTransactionLength();
+            for (int index = 0; index < transactionLength; index++) {
+                TransactionType transaction = transactionArray.getTransaction(index);
+                System.out.println("transaction id: " + transaction.getTransactionID());
+            }
+        }
+    }
+
+    private void saveOrderShippingAddress(Session session, OrderType orderDownload, OrderInfo orderInfo) {
+
+        AddressType shippingAddress = orderDownload.getShippingAddress();
+
+        if (!shippingAddress.getAddressID().equals("")) {
+            String orderIdProperytyName = Property.forName(OrderShippingAddressSchema.order)
+                    .getProperty(OrderSchema.id)
+                    .getPropertyName();
+
+            OrderShippingAddressInfo shippingAddressInDb = (OrderShippingAddressInfo) session.createCriteria(OrderShippingAddressInfo.class)
+                    .add(Restrictions.and(
+                            Restrictions.eq(OrderShippingAddressSchema.addressOwner, shippingAddress.getAddressOwner().value()),
+                            Restrictions.eq(orderIdProperytyName, orderInfo.getId())
+                    ))
+                    .uniqueResult();
+
+            boolean orderHasShippingAddress = shippingAddressInDb != null;
+
+            if (shippingAddressInDb == null) {
+                shippingAddressInDb = new OrderShippingAddressInfo();
+            }
+
+            shippingAddressInDb.setOrder(orderInfo);
+            shippingAddressInDb.setName(shippingAddress.getName());
+            shippingAddressInDb.setStreet1(shippingAddress.getStreet1());
+            shippingAddressInDb.setStreet2(shippingAddress.getStreet2());
+            shippingAddressInDb.setPhone(normalizePhone(shippingAddress.getPhone()));
+            shippingAddressInDb.setCityName(shippingAddress.getCityName());
+            shippingAddressInDb.setProvince(shippingAddress.getStateOrProvince());
+            shippingAddressInDb.setCountry(shippingAddress.getCountry().value());
+            shippingAddressInDb.setCountryName(shippingAddress.getCountryName());
+            shippingAddressInDb.setPostalCode(shippingAddress.getPostalCode());
+            shippingAddressInDb.setAddressId(shippingAddress.getAddressID());
+            shippingAddressInDb.setAddressOwner(shippingAddress.getAddressOwner().value());
+            shippingAddressInDb.setExternalAddressId(shippingAddress.getExternalAddressID());
+
+            Long addressId = shippingAddressInDb.getId();
+            if (orderHasShippingAddress) {
+                // do update
+                session.update(shippingAddressInDb);
+                session.flush();
+
+                addressId = shippingAddressInDb.getId();
+            } else {
+                // do insert
+                session.save(shippingAddressInDb);
+                session.flush();
+
+                addressId = shippingAddressInDb.getId();
+            }
+
+            orderInfo.setAddressId(addressId);
+            session.update(orderInfo);
+            session.flush();
+        }
+    }
+
+    private String normalizePhone(String phone) {
+        if (phone != null && phone.equals("")) {
+            phone = phone.replace(" ", "");
+
+            if (phone.length() > 4) {
+                return phone.substring(0, 4) + " " + phone.substring(4);
+            }
+        }
+
+        return phone;
     }
 }
