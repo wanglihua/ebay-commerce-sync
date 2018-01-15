@@ -1,14 +1,22 @@
 package ozosync.job.shop.database;
 
+import com.ebay.soap.eBLBaseComponents.CheckoutStatusCodeType;
+import com.ebay.soap.eBLBaseComponents.CheckoutStatusType;
+import com.ebay.soap.eBLBaseComponents.CompleteStatusCodeType;
+import com.ebay.soap.eBLBaseComponents.OrderStatusCodeType;
 import com.ebay.soap.eBLBaseComponents.OrderType;
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.util.Date;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import ozosync.domain.EBayApiConfigInfo;
 import ozosync.domain.ExchangeRateInfo;
+import ozosync.domain.OrderHistoryInfo;
 import ozosync.domain.OrderInfo;
+import ozosync.domain.OrderStatus;
+import ozosync.domain.StatusInfo;
 import ozosync.domain.schema.OrderSchema;
 import ozosync.service.ExchangeRateService;
 
@@ -97,30 +105,32 @@ public class OrderSaveExecuter extends DataBaseExecuter {
 
         orderInDb.setEBayStatus(orderDownload.getOrderStatus().value());
 
-        Long statusIdBefore = orderInDb.getStatus().getId();
+        Long statusId = orderInDb.getStatus().getId();
 
-        if (orderDownload.getPaidTime() != null) {
-            orderInDb.setPaidTime(orderDownload.getPaidTime().getTime());
+        // 如果是新的订单，一般是新增的订单，系统数据库中还没有的订单
+        if (statusId < OrderStatus.ID_YCJ
+                && orderDownload.getPaidTime() == null) { // statusId < OrderStatus.ID_YCJ 这个状态检查不能少，否则 待配货，已发货的状态可能会被覆盖
+            StatusInfo statusYcj = (StatusInfo) session.get(StatusInfo.class, OrderStatus.ID_YCJ);
+            orderInDb.setStatus(statusYcj); // 这个状态，有可能会被接下来的状态逻辑所修改，可能会，更进一步改成 “已支付”, “已完成”
         }
 
-        if (orderDownload.getShippedTime() != null) {
-            orderInDb.setShippedTime(orderDownload.getShippedTime().getTime());
+        // 有可能是新增的订单（最有可能），或者是原来 已创建 的状态过来的。这时支付时间不为空
+        if (statusId < OrderStatus.ID_YZF
+                && orderDownload.getPaidTime() != null
+                && orderDownload.getCheckoutStatus().getStatus() == CompleteStatusCodeType.COMPLETE) { // statusId < OrderStatus.ORDER_STATUS_YZF 这个状态检查不能少，否则 待配货，已发货的状态可能会被覆盖
+            StatusInfo statusYzf = (StatusInfo) session.get(StatusInfo.class, OrderStatus.ID_YZF);
+            orderInDb.setStatus(statusYzf); // 这个状态，有可能会被接下来的状态逻辑所修改，可能会，更进一步改成 “已完成”
+        }
+
+        if (orderDownload.getShippedTime() != null
+                && orderDownload.getPaidTime() != null
+                && orderDownload.getCheckoutStatus().getStatus() == CompleteStatusCodeType.COMPLETE
+                && orderDownload.getOrderStatus() == OrderStatusCodeType.COMPLETED) {
+            StatusInfo statusYwc = (StatusInfo) session.get(StatusInfo.class, OrderStatus.ID_YWC);
+            orderInDb.setStatus(statusYwc);
         }
 
         /*
-           // 如果是新的订单，一般是新增的订单，系统数据库中还没有的订单
-           if order_status_id < models.ORDER_STATUS_YCJ && //这个状态检查不能少，否则 待配货，已发货的状态可能会被覆盖
-               order_in_db.PaidTime.Valid == false {
-               order_in_db.StatusId = models.ORDER_STATUS_YCJ // 这个状态，有可能会被接下来的状态逻辑所修改，可能会，更进一步改成 “已支付”, “已完成”
-           }
-
-           // 有可能是新增的订单（最有可能），或者是原来 已创建 的状态过来的。这时支付时间不为空
-           if order_status_id < models.ORDER_STATUS_YZF && //这个状态检查不能少，否则 待配货，已发货的状态可能会被覆盖
-               order_in_db.PaidTime.Valid == true &&
-               strings.ToLower(order_download.CheckoutStatuss.Status) == strings.ToLower("Complete") {
-               order_in_db.StatusId = models.ORDER_STATUS_YZF // 这个状态，有可能会被接下来的状态逻辑所修改，可能会，更进一步改成 “已完成”
-           }
-
            // 如果 下载订单里面的 OrderStatus 是 Completed， 且订单的发货时间不为空，订单状态就为 已完成
            if order_in_db.ShippedTime.Valid == true {
                order_in_db.StatusId = models.ORDER_STATUS_YWC
@@ -131,12 +141,35 @@ public class OrderSaveExecuter extends DataBaseExecuter {
 
         if (orderNotExist) {
             session.save(orderInDb);
+            session.flush();
+
+            insertOrderHistory(session, orderInDb, "订单下载新增订单");
         } else {
+            orderInDb.setUpdaetTime(new Date());
             session.update(orderInDb);
+            session.flush();
+
+            if (statusId != orderInDb.getStatus().getId()) {
+                insertOrderHistory(session, orderInDb, "订单下载状态更新");
+            }
         }
 
         session.flush();
 
-        return null;
+        return orderInDb;
+    }
+
+    private void insertOrderHistory(Session session, OrderInfo orderInfo, String description) {
+        OrderHistoryInfo orderHistoryInfo = new OrderHistoryInfo();
+        orderHistoryInfo.setOrder(orderInfo);
+        orderHistoryInfo.setOrderCode(orderInfo.getCode());
+        orderHistoryInfo.setStatus(orderInfo.getStatus());
+        orderHistoryInfo.setStatusName(orderInfo.getStatus().getName());
+        orderHistoryInfo.setDescription(description);
+        orderHistoryInfo.setUserId(0);
+        orderHistoryInfo.setDelete(0);
+
+        session.save(orderHistoryInfo);
+        session.flush();
     }
 }
