@@ -35,6 +35,7 @@ public class OrderDownloader {
         this.orderSaveExecuter = new OrderSaveExecuter(sessionFactory);
     }
 
+    // 取名为 execute 只是一个约定
     @SuppressWarnings("unchecked")
     public void execute() {
         try {
@@ -43,18 +44,20 @@ public class OrderDownloader {
                 GetOrdersCall getOrdersCall = createGetOrdersCall(ebayApiConfigInfo);
 
                 int pageNumber = 0;
-                int orderCount = 0;
+                // int orderCount = 0;
 
                 do {
                     getOrdersCall.getPagination().setPageNumber(++pageNumber);
                     OrderType[] orderList = getOrdersCall.getOrders();
                     if (getOrdersCall.getReturnedReturnedOrderCountActual() > 0) {
                         for (OrderType order : orderList) {
-                            System.out.println("order: " + ++orderCount);
-                            System.out.println("order id: " + order.getOrderID());
+                            // System.out.println("order: " + ++orderCount);
+                            // System.out.println("order id: " + order.getOrderID());
 
-                            // 保存订单信息
-                            insertOrUpdateOrder(ebayApiConfigInfo, order);
+                            // 保存订单信息，订单明细，订单邮寄地址等
+                            saveOrder(ebayApiConfigInfo, order);
+
+                            /*
 
                             // 保存订单明细
                             TransactionArrayType transactionArray = order.getTransactionArray();
@@ -95,6 +98,7 @@ public class OrderDownloader {
                             //9. shipAddress;
 
                             System.out.println();
+                            */
                         }
                     }
 
@@ -118,7 +122,7 @@ public class OrderDownloader {
 
         apiCredential.setApiAccount(apiAccount);
 
-        apiCredential.seteBayToken("");
+        apiCredential.seteBayToken(ebayApiConfigInfo.getToken());
         apiContext.setApiServerUrl("https://api.ebay.com/wsapi");
 
         apiContext.getApiLogging().setLogSOAPMessages(true);// This will log SOAP requests and responses
@@ -145,7 +149,7 @@ public class OrderDownloader {
         return getOrdersCall;
     }
 
-    private void insertOrUpdateOrder(EBayApiConfigInfo apiConfigInfo, OrderType order) {
+    private void saveOrder(EBayApiConfigInfo apiConfigInfo, OrderType order) {
         orderSaveExecuter.setOrderDownload(order);
         orderSaveExecuter.setApiConfigInfo(apiConfigInfo);
         orderSaveExecuter.execute();
