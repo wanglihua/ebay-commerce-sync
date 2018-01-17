@@ -3,7 +3,6 @@ package ozosync.domain
 import org.hibernate.annotations.DynamicInsert
 import org.hibernate.annotations.DynamicUpdate
 import org.hibernate.annotations.Type
-import ozosync.common.VerboseName
 import java.util.*
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -29,10 +28,10 @@ data class ProductStoreItemInfo(
     var shopId: Long = 0
 
     @Column(name = "item_id")
-    var itemId: Long = 0
+    var itemId: String = ""
 
     @Column(name = "view_item_url")
-    var viewItemUrl: Long = 0
+    var viewItemUrl: String = ""
 
     @Column(name = "create_time")
     @Type(type = "timestamp")
