@@ -20,7 +20,7 @@ public class OrderEntryRepository {
 
     private ProductBindRespository productBindRespository = new ProductBindRespository();
 
-    public void saveOrderEntries(Session session, OrderInfo orderInfo, OrderType orderDownload) {
+    public void saveOrderEntries(Session session, OrderInfo orderInfo, OrderType orderDownload) throws Exception {
         // 保存订单明细
         TransactionArrayType transactionArray = orderDownload.getTransactionArray();
 
@@ -119,7 +119,11 @@ public class OrderEntryRepository {
                     ProductInfo productInfo = (ProductInfo) session.createCriteria(ProductInfo.class)
                             .add(Restrictions.eq(ProductSchema.sku, itemSku))
                             .uniqueResult();
-                    orderItemInfo.setItemProductId(productInfo.getId());
+                    if (productInfo != null) {
+                        orderItemInfo.setItemProductId(productInfo.getId());
+                    } else {
+                        throw new Exception("订单商品SKU数据库中不存在！ sku: " + itemSku);
+                    }
 
                     ProductStoreItemInfo productStoreItemInfo = (ProductStoreItemInfo) session.createCriteria(ProductStoreItemInfo.class)
                             .add(Restrictions.eq(ProductStoreItemSchema.itemId, transaction.getItem().getItemID()))

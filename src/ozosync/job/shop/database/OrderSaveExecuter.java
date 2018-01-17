@@ -1,12 +1,15 @@
 package ozosync.job.shop.database;
 
 import com.ebay.soap.eBLBaseComponents.OrderType;
+import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import ozosync.domain.EBayApiConfigInfo;
 import ozosync.domain.OrderInfo;
 
 public class OrderSaveExecuter extends DataBaseExecuter {
+
+    private Logger log = Logger.getLogger(OrderSaveExecuter.class);
 
     private OrderType orderDownload;
 
@@ -30,15 +33,23 @@ public class OrderSaveExecuter extends DataBaseExecuter {
 
     @Override
     protected Object executeInternal(Session session) {
+        OrderInfo orderInfo = null;
 
-        // order
-        OrderInfo orderInfo = orderRepository.saveOrder(session, orderDownload, apiConfigInfo);
+        try {
+            // order
+            orderInfo = orderRepository.saveOrder(session, orderDownload, apiConfigInfo);
 
-        // order entry
-        orderEntryRepository.saveOrderEntries(session, orderInfo, orderDownload);
+            // order entry
+            orderEntryRepository.saveOrderEntries(session, orderInfo, orderDownload);
 
-        // order shipping address
-        orderShippingAddressRepository.saveOrderShippingAddress(session, orderDownload, orderInfo);
+            // order shipping address
+            orderShippingAddressRepository.saveOrderShippingAddress(session, orderDownload, orderInfo);
+
+            return orderInfo;
+        } catch (Exception exp) {
+            log.fatal(exp.getMessage());
+            log.fatal(exp);
+        }
 
         return orderInfo;
     }
