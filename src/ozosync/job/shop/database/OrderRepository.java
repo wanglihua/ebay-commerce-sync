@@ -15,11 +15,12 @@ import ozosync.domain.OrderInfo;
 import ozosync.domain.OrderStatus;
 import ozosync.domain.ShopAccountInfo;
 import ozosync.domain.schema.OrderSchema;
-import ozosync.service.ExchangeRateService;
 
 public class OrderRepository {
 
     private OrderHistoryRepository orderHistoryRepository = new OrderHistoryRepository();
+    private ExchangeRateRespository exchangeRateRespository = new ExchangeRateRespository();
+
 
     public OrderInfo saveOrder(Session session, OrderType orderDownload, EBayApiConfigInfo apiConfigInfo) {
         String orderCode = orderDownload.getOrderID();
@@ -56,7 +57,7 @@ public class OrderRepository {
             orderInDb.setShippedTime(orderDownload.getShippedTime().getTime());
         }
 
-        ExchangeRateInfo exchangeRateInfo = new ExchangeRateService().getAudExchangeRate();
+        ExchangeRateInfo exchangeRateInfo = exchangeRateRespository.getAudExchangeRate(session);
 
         orderInDb.setExchangeRate(new BigDecimal(exchangeRateInfo.getRate(), MathContext.DECIMAL64));
 
