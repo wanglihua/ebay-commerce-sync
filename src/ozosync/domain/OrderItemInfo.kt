@@ -66,7 +66,7 @@ data class OrderItemInfo(
     @Column(name = "item_condition_display_name")
     var itemConditionDisplayName: String = ""
 
-    @Column(name = "desc")
+    @Column(name = "`desc`")
     var desc: String = ""
 
     @Column(name = "cost_price")

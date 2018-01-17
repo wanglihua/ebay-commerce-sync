@@ -39,7 +39,7 @@ data class OrderInfo(
     @VerboseName("订单编号")
     var code: String = ""
 
-    @Column(name = "desc")
+    @Column(name = "`desc`")
     @VerboseName("描述")
     var desc: String = ""
 

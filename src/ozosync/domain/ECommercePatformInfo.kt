@@ -26,7 +26,7 @@ data class ECommercePatformInfo(
     @VerboseName("名称")
     var name: String = ""
 
-    @Column(name = "desc")
+    @Column(name = "`desc`")
     @VerboseName("描述")
     var desc: String = ""
 

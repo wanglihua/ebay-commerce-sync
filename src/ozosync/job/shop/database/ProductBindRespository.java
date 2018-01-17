@@ -12,8 +12,8 @@ import ozosync.domain.schema.ProductBindSchema;
 public class ProductBindRespository {
 
     public boolean isProductBindSku(String productSku, Session session) {
-        
-        Long count = (Long) session.createCriteria(ProductBindInfo.class)
+
+        Integer count = (Integer) session.createCriteria(ProductBindInfo.class)
                 .add(Restrictions.eq(ProductBindSchema.code, productSku))
                 .add(Restrictions.eq(ProductBindSchema.statusId, ProductBindStatus.Normal))
                 .setProjection(Projections.rowCount())
@@ -31,7 +31,7 @@ public class ProductBindRespository {
 
         String[] productSkuWithNumberList = productBind.getBindList().split(",");
 
-        Map<String, Integer> productBindSkuList = new HashMap<String, Integer>();
+        Map<String, Integer> productBindSkuList = new HashMap<>();
         for (String productSkuWithNumber : productSkuWithNumberList) {
             String[] productSkuNumberArray = productSkuWithNumber.split("\\*");
             String productSku = productSkuNumberArray[0];

@@ -22,7 +22,7 @@ data class CurrencyInfo(
     @Column(name = "name")
     var name: String = ""
 
-    @Column(name = "desc")
+    @Column(name = "`desc`")
     var desc: String = ""
 }
 

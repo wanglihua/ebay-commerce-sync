@@ -25,7 +25,7 @@ public abstract class DataBaseExecuter {
         SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
         boolean existingTransaction = sessionHolder != null;
         if (existingTransaction) {
-            log.error("Found thread-bound Session for HibernateInterceptor");
+            log.warn("Found thread-bound Session for HibernateInterceptor");
             session = sessionHolder.getSession();
         } else {
             try {

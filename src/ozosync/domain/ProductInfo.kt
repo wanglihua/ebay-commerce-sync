@@ -33,7 +33,7 @@ data class ProductInfo(
     @Column(name = "name")
     var name: String = ""
 
-    @Column(name = "desc")
+    @Column(name = "`desc`")
     var desc: String = ""
 
     @Column(name = "image_url")

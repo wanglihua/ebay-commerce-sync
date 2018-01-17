@@ -49,7 +49,7 @@ data class ShopAccountInfo(
     @VerboseName("token过期时间")
     var tokenExpire: Date = Date()
 
-    @Column(name = "desc")
+    @Column(name = "`desc`")
     @VerboseName("描述")
     var desc: String = ""
 

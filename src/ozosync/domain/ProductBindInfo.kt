@@ -29,7 +29,7 @@ data class ProductBindInfo(
     @Column(name = "name")
     var name: String = ""
 
-    @Column(name = "desc")
+    @Column(name = "`desc`")
     var desc: String = ""
 
     @Column(name = "bind_list")
