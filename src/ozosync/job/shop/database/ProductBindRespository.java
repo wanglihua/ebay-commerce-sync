@@ -13,7 +13,7 @@ public class ProductBindRespository {
 
     public boolean isProductBindSku(String productSku, Session session) {
 
-        Integer count = (Integer) session.createCriteria(ProductBindInfo.class)
+        Long count = (Long) session.createCriteria(ProductBindInfo.class)
                 .add(Restrictions.eq(ProductBindSchema.code, productSku))
                 .add(Restrictions.eq(ProductBindSchema.statusId, ProductBindStatus.Normal))
                 .setProjection(Projections.rowCount())

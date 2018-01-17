@@ -25,7 +25,7 @@ public class OrderRepository {
     public OrderInfo saveOrder(Session session, OrderType orderDownload, EBayApiConfigInfo apiConfigInfo) {
         String orderCode = orderDownload.getOrderID();
         String[] orderCodeSplitArray = orderCode.split("-");
-        if (orderCodeSplitArray.length > 1 && orderCodeSplitArray[1].length() > 13) {
+        if (orderCodeSplitArray.length > 1 && orderCodeSplitArray[1].length() >= 13) {
             orderCode = orderCodeSplitArray[1];
         }
 

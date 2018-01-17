@@ -124,7 +124,9 @@ public class OrderEntryRepository {
                     ProductStoreItemInfo productStoreItemInfo = (ProductStoreItemInfo) session.createCriteria(ProductStoreItemInfo.class)
                             .add(Restrictions.eq(ProductStoreItemSchema.itemId, transaction.getItem().getItemID()))
                             .uniqueResult();
-                    orderItemInfo.setProductStoreItemId(productStoreItemInfo.getId());
+                    if (productStoreItemInfo != null) {
+                        orderItemInfo.setProductStoreItemId(productStoreItemInfo.getId());
+                    }
 
                     orderItemInfo.setCreatedDate(transaction.getCreatedDate().getTime());
 

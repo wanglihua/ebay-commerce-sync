@@ -40,7 +40,7 @@ data class ProductInfo(
     var imageUrl: String = ""
 
     @Column(name = "cate_id")
-    var cateId: Long = 0
+    var cateId: Long? = null
 
     @Column(name = "cost_price")
     var costPrice: Float = 0f
@@ -70,10 +70,10 @@ data class ProductInfo(
     var auDeclName: String = ""
 
     @Column(name = "supplier_id")
-    var supplierId: Long = 0
+    var supplierId: Long? = null
 
     @Column(name = "pkg_mtrl_id")
-    var pkgMtrlId: Long = 0
+    var pkgMtrlId: Long? = null
 
     @Column(name = "need_invoice")
     var needInvoice: Long = 0
