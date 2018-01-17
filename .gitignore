@@ -3,5 +3,6 @@
 /web/WEB-INF/classes
 /web/static/product
 /web/logs/app.log
+/web/logs/app.log.*
 ~$*
 /temp.txt

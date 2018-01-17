@@ -123,6 +123,7 @@ public class OrderEntryRepository {
 
                     ProductStoreItemInfo productStoreItemInfo = (ProductStoreItemInfo) session.createCriteria(ProductStoreItemInfo.class)
                             .add(Restrictions.eq(ProductStoreItemSchema.itemId, transaction.getItem().getItemID()))
+                            .setMaxResults(1)
                             .uniqueResult();
                     if (productStoreItemInfo != null) {
                         orderItemInfo.setProductStoreItemId(productStoreItemInfo.getId());

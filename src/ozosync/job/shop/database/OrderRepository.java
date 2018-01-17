@@ -105,13 +105,14 @@ public class OrderRepository {
             }
         }
 
-        orderInDb.setExpressFee(new BigDecimal(shippingOptions.getShippingServiceCost().getValue(), MathContext.DECIMAL64));
+        if (shippingOptions.getShippingServiceCost() != null) {
+            orderInDb.setExpressFee(new BigDecimal(shippingOptions.getShippingServiceCost().getValue(), MathContext.DECIMAL64));
+        }
 
         Long statusId = orderInDb.getStatusId();
 
         // 如果是新的订单，一般是新增的订单，系统数据库中还没有的订单
-        if (statusId < OrderStatus.ID_YCJ
-                && orderDownload.getPaidTime() == null) { // statusId < OrderStatus.ID_YCJ 这个状态检查不能少，否则 待配货，已发货的状态可能会被覆盖
+        if (statusId < OrderStatus.ID_YCJ) { // statusId < OrderStatus.ID_YCJ 这个状态检查不能少，否则 待配货，已发货的状态可能会被覆盖 //  这个条件先不用 && orderDownload.getPaidTime() == null
             orderInDb.setStatusId(OrderStatus.ID_YCJ); // 这个状态，有可能会被接下来的状态逻辑所修改，可能会，更进一步改成 “已支付”, “已完成”
         }
 
@@ -122,20 +123,15 @@ public class OrderRepository {
             orderInDb.setStatusId(OrderStatus.ID_YZF); // 这个状态，有可能会被接下来的状态逻辑所修改，可能会，更进一步改成 “已完成”
         }
 
+        // 先不启用这个，已完成的订单的状态设置，通过ERP界面自己手工设置
+        /*
         if (orderDownload.getShippedTime() != null
                 && orderDownload.getPaidTime() != null
                 && orderDownload.getCheckoutStatus().getStatus() == CompleteStatusCodeType.COMPLETE
                 && orderDownload.getOrderStatus() == OrderStatusCodeType.COMPLETED) {
             orderInDb.setStatusId(OrderStatus.ID_YWC);
         }
-
-        /*
-           // 如果 下载订单里面的 OrderStatus 是 Completed， 且订单的发货时间不为空，订单状态就为 已完成
-           if order_in_db.ShippedTime.Valid == true {
-               order_in_db.StatusId = models.ORDER_STATUS_YWC
-           }
-
-         */
+        */
 
         if (orderNotExist) {
             session.save(orderInDb);

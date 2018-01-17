@@ -14,7 +14,11 @@ public class OrderHistoryRepository {
         orderHistoryInfo.setStatusId(orderInfo.getStatusId());
 
         StatusInfo statusInfo = (StatusInfo) session.get(StatusInfo.class, orderInfo.getStatusId());
-        orderHistoryInfo.setStatusName(statusInfo.getName());
+        if (statusInfo != null) {
+            orderHistoryInfo.setStatusName(statusInfo.getName());
+        } else {
+            orderHistoryInfo.setStatusName("");
+        }
 
         orderHistoryInfo.setDescription(description);
         orderHistoryInfo.setUserId(0);
