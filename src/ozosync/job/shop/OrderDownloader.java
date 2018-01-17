@@ -144,8 +144,13 @@ public class OrderDownloader {
     }
 
     private void saveOrder(EBayApiConfigInfo apiConfigInfo, OrderType order) {
-        orderSaveExecuter.setOrderDownload(order);
-        orderSaveExecuter.setApiConfigInfo(apiConfigInfo);
-        orderSaveExecuter.execute();
+        try {
+            orderSaveExecuter.setOrderDownload(order);
+            orderSaveExecuter.setApiConfigInfo(apiConfigInfo);
+            orderSaveExecuter.execute();
+        } catch (Exception exp) {
+            log.fatal(exp.getMessage());
+            log.fatal(exp);
+        }
     }
 }
