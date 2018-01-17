@@ -2,8 +2,6 @@ package ozosync.domain
 
 import org.hibernate.annotations.DynamicInsert
 import org.hibernate.annotations.DynamicUpdate
-import org.hibernate.annotations.Fetch
-import org.hibernate.annotations.FetchMode
 import org.hibernate.annotations.Type
 import ozosync.common.VerboseName
 import java.util.*
@@ -12,8 +10,6 @@ import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
-import javax.persistence.JoinColumn
-import javax.persistence.ManyToOne
 import javax.persistence.Table
 
 @Entity
@@ -27,17 +23,11 @@ data class OrderHistoryInfo(
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         var id: Long = 0
 ) {
-    @ManyToOne(targetEntity = OrderInfo::class)
-    @JoinColumn(name = "order_id", nullable = false)
-    @Fetch(FetchMode.SELECT)
-    @VerboseName("订单")
-    var order: OrderInfo = OrderInfo()
+    @Column(name = "order_id")
+    var orderId: Long = 0
 
-    @ManyToOne(targetEntity = StatusInfo::class)
-    @JoinColumn(name = "status_id", nullable = false)
-    @Fetch(FetchMode.SELECT)
-    @VerboseName("状态")
-    var status: StatusInfo = StatusInfo()
+    @Column(name = "status_id")
+    var statusId: Long = 0
 
     @Column(name = "order_code")
     var orderCode: String = ""

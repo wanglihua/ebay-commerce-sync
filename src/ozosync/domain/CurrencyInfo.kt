@@ -2,9 +2,6 @@ package ozosync.domain
 
 import org.hibernate.annotations.DynamicInsert
 import org.hibernate.annotations.DynamicUpdate
-import org.hibernate.annotations.Subselect
-import org.hibernate.annotations.Synchronize
-
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.Id

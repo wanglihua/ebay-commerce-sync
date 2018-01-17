@@ -2,8 +2,6 @@ package ozosync.domain
 
 import org.hibernate.annotations.DynamicInsert
 import org.hibernate.annotations.DynamicUpdate
-import org.hibernate.annotations.Fetch
-import org.hibernate.annotations.FetchMode
 import org.hibernate.annotations.Type
 import ozosync.common.VerboseName
 import java.math.BigDecimal
@@ -13,8 +11,6 @@ import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
-import javax.persistence.JoinColumn
-import javax.persistence.ManyToOne
 import javax.persistence.Table
 
 @Entity
@@ -28,25 +24,12 @@ data class OrderInfo(
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         var id: Long = 0) {
 
-    @ManyToOne(targetEntity = ShopAccountInfo::class)
-    @JoinColumn(name = "shop_id", nullable = false)
-    @Fetch(FetchMode.SELECT)
-    @VerboseName("店铺")
-    var shopAccount: ShopAccountInfo = ShopAccountInfo()
+    @Column(name = "shop_id")
+    var shopId: Long = 0
 
-    @ManyToOne(targetEntity = StatusInfo::class)
-    @JoinColumn(name = "status_id", nullable = false)
-    @Fetch(FetchMode.SELECT)
-    @VerboseName("状态")
-    var status: StatusInfo = StatusInfo()
+    @Column(name = "status_id")
+    var statusId: Long = 0
 
-    /*
-    @ManyToOne(targetEntity = OrderShippingAddressInfo::class)
-    @JoinColumn(name = "address_id", nullable = false)
-    @Fetch(FetchMode.SELECT)
-    @VerboseName("送货地址")
-    var shippingAddress: OrderShippingAddressInfo = OrderShippingAddressInfo()
-    */
 
     @Column(name = "address_id")
     @VerboseName("送货地址id")

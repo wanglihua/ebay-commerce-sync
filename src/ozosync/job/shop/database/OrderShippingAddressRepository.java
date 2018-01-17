@@ -3,11 +3,9 @@ package ozosync.job.shop.database;
 import com.ebay.soap.eBLBaseComponents.AddressType;
 import com.ebay.soap.eBLBaseComponents.OrderType;
 import org.hibernate.Session;
-import org.hibernate.criterion.Property;
 import org.hibernate.criterion.Restrictions;
 import ozosync.domain.OrderInfo;
 import ozosync.domain.OrderShippingAddressInfo;
-import ozosync.domain.schema.OrderSchema;
 import ozosync.domain.schema.OrderShippingAddressSchema;
 
 public class OrderShippingAddressRepository {
@@ -17,14 +15,11 @@ public class OrderShippingAddressRepository {
         AddressType shippingAddress = orderDownload.getShippingAddress();
 
         if (!shippingAddress.getAddressID().equals("")) {
-            String orderIdProperytyName = Property.forName(OrderShippingAddressSchema.order)
-                    .getProperty(OrderSchema.id)
-                    .getPropertyName();
 
             OrderShippingAddressInfo shippingAddressInDb = (OrderShippingAddressInfo) session.createCriteria(OrderShippingAddressInfo.class)
                     .add(Restrictions.and(
                             Restrictions.eq(OrderShippingAddressSchema.addressOwner, shippingAddress.getAddressOwner().value()),
-                            Restrictions.eq(orderIdProperytyName, orderInfo.getId())
+                            Restrictions.eq(OrderShippingAddressSchema.orderId, orderInfo.getId())
                     ))
                     .uniqueResult();
 
@@ -34,7 +29,7 @@ public class OrderShippingAddressRepository {
                 shippingAddressInDb = new OrderShippingAddressInfo();
             }
 
-            shippingAddressInDb.setOrder(orderInfo);
+            shippingAddressInDb.setOrderId(orderInfo.getId());
             shippingAddressInDb.setName(shippingAddress.getName());
             shippingAddressInDb.setStreet1(shippingAddress.getStreet1());
             shippingAddressInDb.setStreet2(shippingAddress.getStreet2());

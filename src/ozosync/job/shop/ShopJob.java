@@ -23,6 +23,6 @@ public class ShopJob extends QuartzJobBean {
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         OrderDownloader orderDownloader = new OrderDownloader(sessionFactory);
-        orderDownloader.execute();
+        orderDownloader.download();
     }
 }

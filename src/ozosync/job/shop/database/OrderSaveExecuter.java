@@ -35,7 +35,7 @@ public class OrderSaveExecuter extends DataBaseExecuter {
         OrderInfo orderInfo = orderRepository.saveOrder(session, orderDownload, apiConfigInfo);
 
         // order entry
-        orderEntryRepository.saveOrderEntries(session, orderDownload);
+        orderEntryRepository.saveOrderEntries(session, orderInfo, orderDownload);
 
         // order shipping address
         orderShippingAddressRepository.saveOrderShippingAddress(session, orderDownload, orderInfo);

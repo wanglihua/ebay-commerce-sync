@@ -2,7 +2,6 @@ package ozosync.domain
 
 import org.hibernate.annotations.DynamicInsert
 import org.hibernate.annotations.DynamicUpdate
-import org.hibernate.annotations.Fetch
 import ozosync.common.VerboseName
 import java.util.*
 import javax.persistence.Column
@@ -10,10 +9,7 @@ import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
-import javax.persistence.JoinColumn
-import javax.persistence.ManyToOne
 import javax.persistence.Table
-import org.hibernate.annotations.FetchMode
 
 @Entity
 @DynamicInsert
@@ -26,11 +22,8 @@ data class ShopAccountInfo(
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         var id: Long = 0) {
 
-    @ManyToOne(targetEntity = ECommercePatformInfo::class)
-    @JoinColumn(name = "platform_id", nullable = false)
-    @Fetch(FetchMode.SELECT)
-    @VerboseName("平台")
-    var patform: ECommercePatformInfo = ECommercePatformInfo()
+    @Column(name = "platform_id")
+    var platformId: Long = 0
 
     @Column(name = "code")
     @VerboseName("编码")
@@ -60,11 +53,8 @@ data class ShopAccountInfo(
     @VerboseName("描述")
     var desc: String = ""
 
-    @ManyToOne(targetEntity = StatusInfo::class)
-    @JoinColumn(name = "status_id", nullable = false)
-    @Fetch(FetchMode.SELECT)
-    @VerboseName("状态")
-    var status: StatusInfo = StatusInfo()
+    @Column(name = "status_id")
+    var statusId: Long = 0
 
     @Column(name = "create_time")
     @VerboseName("创建时间")

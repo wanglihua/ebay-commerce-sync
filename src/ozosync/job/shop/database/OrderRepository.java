@@ -13,7 +13,7 @@ import ozosync.domain.EBayApiConfigInfo;
 import ozosync.domain.ExchangeRateInfo;
 import ozosync.domain.OrderInfo;
 import ozosync.domain.OrderStatus;
-import ozosync.domain.StatusInfo;
+import ozosync.domain.ShopAccountInfo;
 import ozosync.domain.schema.OrderSchema;
 import ozosync.service.ExchangeRateService;
 
@@ -38,9 +38,11 @@ public class OrderRepository {
         }
 
         orderInDb.setCode(orderCode);
-        orderInDb.setShopAccount(apiConfigInfo.getShopAccount());
+        orderInDb.setShopId(apiConfigInfo.getShopId());
         orderInDb.setTranId(orderDownload.getShippingDetails().getSellingManagerSalesRecordNumber().toString());
-        orderInDb.setFullTranId(apiConfigInfo.getShopAccount().getCode() + orderDownload.getShippingDetails().getSellingManagerSalesRecordNumber());
+
+        ShopAccountInfo shopAccountInfo = (ShopAccountInfo) session.get(ShopAccountInfo.class, apiConfigInfo.getShopId());
+        orderInDb.setFullTranId(shopAccountInfo.getCode() + orderDownload.getShippingDetails().getSellingManagerSalesRecordNumber());
 
         // SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         orderInDb.setCreatedTime(orderDownload.getCreatedTime().getTime());
@@ -55,6 +57,8 @@ public class OrderRepository {
         }
 
         ExchangeRateInfo exchangeRateInfo = new ExchangeRateService().getAudExchangeRate();
+
+        orderInDb.setExchangeRate(new BigDecimal(exchangeRateInfo.getRate(), MathContext.DECIMAL64));
 
         orderInDb.setAdjustmentAmountCurrency(orderDownload.getAdjustmentAmount().getCurrencyID().value());
         orderInDb.setAdjustmentAmount(new BigDecimal(orderDownload.getAdjustmentAmount().getValue(), MathContext.DECIMAL64));
@@ -102,29 +106,26 @@ public class OrderRepository {
 
         orderInDb.setExpressFee(new BigDecimal(shippingOptions.getShippingServiceCost().getValue(), MathContext.DECIMAL64));
 
-        Long statusId = orderInDb.getStatus().getId();
+        Long statusId = orderInDb.getStatusId();
 
         // 如果是新的订单，一般是新增的订单，系统数据库中还没有的订单
         if (statusId < OrderStatus.ID_YCJ
                 && orderDownload.getPaidTime() == null) { // statusId < OrderStatus.ID_YCJ 这个状态检查不能少，否则 待配货，已发货的状态可能会被覆盖
-            StatusInfo statusYcj = (StatusInfo) session.get(StatusInfo.class, OrderStatus.ID_YCJ);
-            orderInDb.setStatus(statusYcj); // 这个状态，有可能会被接下来的状态逻辑所修改，可能会，更进一步改成 “已支付”, “已完成”
+            orderInDb.setStatusId(OrderStatus.ID_YCJ); // 这个状态，有可能会被接下来的状态逻辑所修改，可能会，更进一步改成 “已支付”, “已完成”
         }
 
         // 有可能是新增的订单（最有可能），或者是原来 已创建 的状态过来的。这时支付时间不为空
         if (statusId < OrderStatus.ID_YZF
                 && orderDownload.getPaidTime() != null
                 && orderDownload.getCheckoutStatus().getStatus() == CompleteStatusCodeType.COMPLETE) { // statusId < OrderStatus.ORDER_STATUS_YZF 这个状态检查不能少，否则 待配货，已发货的状态可能会被覆盖
-            StatusInfo statusYzf = (StatusInfo) session.get(StatusInfo.class, OrderStatus.ID_YZF);
-            orderInDb.setStatus(statusYzf); // 这个状态，有可能会被接下来的状态逻辑所修改，可能会，更进一步改成 “已完成”
+            orderInDb.setStatusId(OrderStatus.ID_YZF); // 这个状态，有可能会被接下来的状态逻辑所修改，可能会，更进一步改成 “已完成”
         }
 
         if (orderDownload.getShippedTime() != null
                 && orderDownload.getPaidTime() != null
                 && orderDownload.getCheckoutStatus().getStatus() == CompleteStatusCodeType.COMPLETE
                 && orderDownload.getOrderStatus() == OrderStatusCodeType.COMPLETED) {
-            StatusInfo statusYwc = (StatusInfo) session.get(StatusInfo.class, OrderStatus.ID_YWC);
-            orderInDb.setStatus(statusYwc);
+            orderInDb.setStatusId(OrderStatus.ID_YWC);
         }
 
         /*
@@ -145,7 +146,7 @@ public class OrderRepository {
             session.update(orderInDb);
             session.flush();
 
-            if (statusId != orderInDb.getStatus().getId()) {
+            if (statusId != orderInDb.getStatusId()) {
                 orderHistoryRepository.insertOrderHistory(session, orderInDb, "订单下载状态更新");
             }
         }

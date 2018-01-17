@@ -4,17 +4,12 @@ import com.ebay.sdk.ApiAccount;
 import com.ebay.sdk.ApiContext;
 import com.ebay.sdk.ApiCredential;
 import com.ebay.sdk.call.GetOrdersCall;
-import com.ebay.soap.eBLBaseComponents.CompleteStatusCodeType;
 import com.ebay.soap.eBLBaseComponents.DetailLevelCodeType;
-import com.ebay.soap.eBLBaseComponents.ExternalTransactionType;
 import com.ebay.soap.eBLBaseComponents.OrderStatusCodeType;
 import com.ebay.soap.eBLBaseComponents.OrderType;
 import com.ebay.soap.eBLBaseComponents.PaginationType;
-import com.ebay.soap.eBLBaseComponents.ShippingServiceOptionsType;
 import com.ebay.soap.eBLBaseComponents.SiteCodeType;
 import com.ebay.soap.eBLBaseComponents.TradingRoleCodeType;
-import com.ebay.soap.eBLBaseComponents.TransactionArrayType;
-import com.ebay.soap.eBLBaseComponents.TransactionType;
 import java.util.List;
 import org.apache.log4j.Logger;
 import org.hibernate.SessionFactory;
@@ -35,9 +30,8 @@ public class OrderDownloader {
         this.orderSaveExecuter = new OrderSaveExecuter(sessionFactory);
     }
 
-    // 取名为 execute 只是一个约定
     @SuppressWarnings("unchecked")
-    public void execute() {
+    public void download() {
         try {
             List<EBayApiConfigInfo> ebayApiConfigList = (List<EBayApiConfigInfo>) this.getEBayApiConfigListExecuter.execute();
             for (EBayApiConfigInfo ebayApiConfigInfo : ebayApiConfigList) {

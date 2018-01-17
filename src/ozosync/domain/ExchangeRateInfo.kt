@@ -2,18 +2,11 @@ package ozosync.domain
 
 import org.hibernate.annotations.DynamicInsert
 import org.hibernate.annotations.DynamicUpdate
-import org.hibernate.annotations.Fetch
-import org.hibernate.annotations.FetchMode
-import org.hibernate.annotations.Subselect
-import org.hibernate.annotations.Synchronize
 import ozosync.common.VerboseName
 import java.util.*
-
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.Id
-import javax.persistence.JoinColumn
-import javax.persistence.ManyToOne
 import javax.persistence.Table
 
 @Entity
@@ -25,17 +18,11 @@ data class ExchangeRateInfo(
         @Column(name = "id", nullable = false)
         var id: Long = 0) {
 
-    @ManyToOne(targetEntity = CurrencyInfo::class)
-    @JoinColumn(name = "currency_id", nullable = false, unique = true)
-    @Fetch(FetchMode.SELECT)
-    var currency: CurrencyInfo = CurrencyInfo()
+    @Column(name = "currency_id")
+    var currencyId: Long = 0
 
-
-    @ManyToOne(targetEntity = StatusInfo::class)
-    @JoinColumn(name = "status_id", nullable = false)
-    @Fetch(FetchMode.SELECT)
-    @VerboseName("状态")
-    var status: StatusInfo = StatusInfo()
+    @Column(name = "status_id")
+    var statusId: Long = 0
 
     @Column(name = "rate")
     var rate: Float = 0F

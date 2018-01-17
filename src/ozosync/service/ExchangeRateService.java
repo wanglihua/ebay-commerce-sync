@@ -2,7 +2,6 @@ package ozosync.service;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Property;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,12 +27,8 @@ public class ExchangeRateService {
             return null;
         }
 
-        String currencyIdPropertyName = Property.forName(ExchangeRateSchema.currency)
-                .getProperty(CurrencySchema.id)
-                .getPropertyName();
-
         return (ExchangeRateInfo) session.createCriteria(ExchangeRateInfo.class)
-                .add(Restrictions.eq(currencyIdPropertyName, currencyInfo.getId()))
+                .add(Restrictions.eq(ExchangeRateSchema.currencyId, currencyInfo.getId()))
                 .uniqueResult();
     }
 }

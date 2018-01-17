@@ -2,8 +2,6 @@ package ozosync.domain
 
 import org.hibernate.annotations.DynamicInsert
 import org.hibernate.annotations.DynamicUpdate
-import org.hibernate.annotations.Fetch
-import org.hibernate.annotations.FetchMode
 import ozosync.common.VerboseName
 import java.util.*
 import javax.persistence.Column
@@ -11,8 +9,6 @@ import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
-import javax.persistence.JoinColumn
-import javax.persistence.ManyToOne
 import javax.persistence.Table
 
 @Entity
@@ -26,11 +22,8 @@ data class EBayApiConfigInfo(
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         var id: Long = 0) {
 
-    @ManyToOne(targetEntity = ShopAccountInfo::class)
-    @JoinColumn(name = "shop_id", nullable = false, unique = true)
-    @Fetch(FetchMode.SELECT)
-    @VerboseName("店铺")
-    var shopAccount: ShopAccountInfo = ShopAccountInfo()
+    @Column(name = "shop_id")
+    var shopId: Long = 0
 
     @Column(name = "app_id")
     @VerboseName("app id")

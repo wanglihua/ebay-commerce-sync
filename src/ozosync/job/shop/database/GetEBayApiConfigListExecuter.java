@@ -1,6 +1,5 @@
 package ozosync.job.shop.database;
 
-import java.util.List;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import ozosync.domain.EBayApiConfigInfo;

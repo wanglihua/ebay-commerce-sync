@@ -7,6 +7,6 @@ object ProductBindSchema {
     const val desc = "desc"
     const val createTime = "createTime"
     const val updateTime = "updateTime"
-    const val status = "status"
+    const val statusId = "statusId"
     const val bindList = "bindList"
 }
