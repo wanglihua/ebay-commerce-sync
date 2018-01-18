@@ -10,6 +10,7 @@ import com.ebay.soap.eBLBaseComponents.OrderType;
 import com.ebay.soap.eBLBaseComponents.PaginationType;
 import com.ebay.soap.eBLBaseComponents.SiteCodeType;
 import com.ebay.soap.eBLBaseComponents.TradingRoleCodeType;
+import java.util.Arrays;
 import java.util.List;
 import org.apache.log4j.Logger;
 import org.hibernate.SessionFactory;
@@ -100,7 +101,7 @@ public class OrderDownloader {
             }
         } catch (Exception exp) {
             log.fatal(exp.getMessage());
-            log.fatal(exp);
+            log.fatal(Arrays.toString(exp.getStackTrace()));
         }
     }
 
@@ -150,7 +151,7 @@ public class OrderDownloader {
             orderSaveExecuter.execute();
         } catch (Exception exp) {
             log.fatal(exp.getMessage());
-            log.fatal(exp);
+            log.fatal(Arrays.toString(exp.getStackTrace()));
         }
     }
 }

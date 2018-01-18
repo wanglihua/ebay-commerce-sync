@@ -1,6 +1,7 @@
 package ozosync.job.shop.database;
 
 import com.ebay.soap.eBLBaseComponents.OrderType;
+import java.util.Arrays;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -48,7 +49,7 @@ public class OrderSaveExecuter extends DataBaseExecuter {
             return orderInfo;
         } catch (Exception exp) {
             log.fatal(exp.getMessage());
-            log.fatal(exp);
+            log.fatal(Arrays.toString(exp.getStackTrace()));
         }
 
         return orderInfo;

@@ -1,5 +1,6 @@
 package ozosync.job.shop;
 
+import java.util.Arrays;
 import org.apache.log4j.Logger;
 import org.hibernate.SessionFactory;
 import org.quartz.JobExecutionContext;
@@ -27,7 +28,7 @@ public class ShopJob extends QuartzJobBean {
             orderDownloader.download();
         } catch (Exception exp) {
             log.fatal(exp.getMessage());
-            log.fatal(exp);
+            log.fatal(Arrays.toString(exp.getStackTrace()));
         }
     }
 }
