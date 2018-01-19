@@ -29,6 +29,9 @@ public class OrderEntryRepository {
             for (int index = 0; index < transactionLength; index++) {
                 TransactionType transaction = transactionArray.getTransaction(index);
                 String itemSku = transaction.getItem().getSKU();
+                if (itemSku.contains("AU-")) {
+                    itemSku = itemSku.substring(0, itemSku.indexOf("AU-"));
+                }
 
                 if (productBindRespository.isProductBindSku(itemSku, session)) {
 

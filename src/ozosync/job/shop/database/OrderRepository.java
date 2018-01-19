@@ -1,5 +1,6 @@
 package ozosync.job.shop.database;
 
+import com.ebay.soap.eBLBaseComponents.CancelStatusCodeType;
 import com.ebay.soap.eBLBaseComponents.CompleteStatusCodeType;
 import com.ebay.soap.eBLBaseComponents.OrderStatusCodeType;
 import com.ebay.soap.eBLBaseComponents.OrderType;
@@ -121,6 +122,11 @@ public class OrderRepository {
                 && orderDownload.getPaidTime() != null
                 && orderDownload.getCheckoutStatus().getStatus() == CompleteStatusCodeType.COMPLETE) { // statusId < OrderStatus.ORDER_STATUS_YZF 这个状态检查不能少，否则 待配货，已发货的状态可能会被覆盖
             orderInDb.setStatusId(OrderStatus.ID_YZF); // 这个状态，有可能会被接下来的状态逻辑所修改，可能会，更进一步改成 “已完成”
+        }
+
+        // 平台已取消的订单的处理
+        if (orderDownload.getCancelStatus() == CancelStatusCodeType.CANCEL_COMPLETE) { // 如果用户在平台上已取消订单
+            orderInDb.setStatusId(OrderStatus.ID_YQX);
         }
 
         // 先不启用这个，已完成的订单的状态设置，通过ERP界面自己手工设置
