@@ -30,7 +30,7 @@ public class OrderEntryRepository {
                 TransactionType transaction = transactionArray.getTransaction(index);
                 String itemSku = transaction.getItem().getSKU();
                 if (itemSku.contains("AU-")) {
-                    itemSku = itemSku.substring(0, itemSku.indexOf("AU-"));
+                    itemSku = itemSku.substring(0, itemSku.indexOf("AU-") + 2); // 123489AU-DG => 123489AU
                 }
 
                 if (productBindRespository.isProductBindSku(itemSku, session)) {

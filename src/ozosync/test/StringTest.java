@@ -12,11 +12,11 @@ public class StringTest {
     @Test
     public void indexOf() {
         String sku = "123489AU-DG";
-        sku = sku.substring(0, sku.indexOf("AU-"));
+        sku = sku.substring(0, sku.indexOf("AU-") + 2);
 
         System.out.println(sku);
 
-        Assert.assertEquals(sku, "123489");
+        Assert.assertEquals(sku, "123489AU");
     }
 
 }
