@@ -28,7 +28,7 @@ public class ShopJob extends QuartzJobBean {
             orderDownloader.download();
         } catch (Exception exp) {
             log.fatal(exp.getMessage());
-            log.fatal(Arrays.toString(exp.getStackTrace()));
+            log.fatal(Arrays.toString(exp.getStackTrace()).replace(",", "\r\n"));
         }
     }
 }

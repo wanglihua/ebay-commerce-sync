@@ -54,6 +54,7 @@ public class OrderEntryRepository {
                         OrderItemInfo orderItemInfo = (OrderItemInfo) session.createCriteria(OrderItemInfo.class)
                                 .add(Restrictions.eq(OrderItemSchema.orderId, orderInfo.getId()))
                                 .add(Restrictions.eq(OrderItemSchema.itemSku, productSku))
+                                .setMaxResults(1)
                                 .uniqueResult();
 
                         boolean hasOrderItem = orderItemInfo != null;
@@ -82,6 +83,7 @@ public class OrderEntryRepository {
 
                         ProductStoreItemInfo productStoreItemInfo = (ProductStoreItemInfo) session.createCriteria(ProductStoreItemInfo.class)
                                 .add(Restrictions.eq(ProductStoreItemSchema.itemId, transaction.getItem().getItemID()))
+                                .setMaxResults(1)
                                 .uniqueResult();
                         orderItemInfo.setProductStoreItemId(productStoreItemInfo.getId());
 

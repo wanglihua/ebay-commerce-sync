@@ -101,7 +101,7 @@ public class OrderDownloader {
             }
         } catch (Exception exp) {
             log.fatal(exp.getMessage());
-            log.fatal(Arrays.toString(exp.getStackTrace()));
+            log.fatal(Arrays.toString(exp.getStackTrace()).replace(",", "\r\n"));
         }
     }
 
@@ -151,7 +151,7 @@ public class OrderDownloader {
             orderSaveExecuter.execute();
         } catch (Exception exp) {
             log.fatal(exp.getMessage());
-            log.fatal(Arrays.toString(exp.getStackTrace()));
+            log.fatal(Arrays.toString(exp.getStackTrace()).replace(",", "\r\n"));
         }
     }
 }
