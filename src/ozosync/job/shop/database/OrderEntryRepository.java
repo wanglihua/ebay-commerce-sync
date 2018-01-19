@@ -98,6 +98,7 @@ public class OrderEntryRepository {
                     OrderItemInfo orderItemInfo = (OrderItemInfo) session.createCriteria(OrderItemInfo.class)
                             .add(Restrictions.eq(OrderItemSchema.orderId, orderInfo.getId()))
                             .add(Restrictions.eq(OrderItemSchema.itemSku, itemSku))
+                            .setMaxResults(1)
                             .uniqueResult();
 
                     boolean hasOrderItem = orderItemInfo != null;
