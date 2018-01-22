@@ -128,7 +128,7 @@ public class OrderEntryRepository {
                     if (productInfo != null) {
                         orderItemInfo.setItemProductId(productInfo.getId());
                     } else {
-                        throw new Exception("订单商品SKU数据库中不存在！ sku: " + itemSku);
+                        throw new Exception(String.format("订单商品SKU数据库中不存在！ 订单： %s, sku: %s", orderInfo.getCode(), itemSku));
                     }
 
                     ProductStoreItemInfo productStoreItemInfo = (ProductStoreItemInfo) session.createCriteria(ProductStoreItemInfo.class)
