@@ -48,6 +48,7 @@ public class OrderDownloader {
                         for (OrderType order : orderList) {
                             // System.out.println("order: " + ++orderCount);
                             // System.out.println("order id: " + order.getOrderID());
+                            log.error("同步订单： order id: " + order.getOrderID());
 
                             // 保存订单信息，订单明细，订单邮寄地址等
                             saveOrder(ebayApiConfigInfo, order);
