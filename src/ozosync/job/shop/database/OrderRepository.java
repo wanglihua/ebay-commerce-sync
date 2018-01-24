@@ -129,15 +129,20 @@ public class OrderRepository {
             orderInDb.setStatusId(OrderStatus.ID_YQX);
         }
 
-        // 先不启用这个，已完成的订单的状态设置，通过ERP界面自己手工设置
-        /*
+        // 已发货
+        if (orderDownload.getShippedTime() != null
+                && orderDownload.getPaidTime() != null
+                && orderDownload.getCheckoutStatus().getStatus() == CompleteStatusCodeType.COMPLETE) {
+            orderInDb.setStatusId(OrderStatus.ID_YFH);
+        }
+
+        // 已完成
         if (orderDownload.getShippedTime() != null
                 && orderDownload.getPaidTime() != null
                 && orderDownload.getCheckoutStatus().getStatus() == CompleteStatusCodeType.COMPLETE
                 && orderDownload.getOrderStatus() == OrderStatusCodeType.COMPLETED) {
             orderInDb.setStatusId(OrderStatus.ID_YWC);
         }
-        */
 
         if (orderNotExist) {
             session.save(orderInDb);

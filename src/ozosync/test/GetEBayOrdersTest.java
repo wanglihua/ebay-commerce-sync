@@ -5,10 +5,13 @@ import com.ebay.sdk.ApiException;
 import com.ebay.sdk.SdkException;
 import com.ebay.sdk.call.GetOrdersCall;
 import com.ebay.soap.eBLBaseComponents.DetailLevelCodeType;
+import com.ebay.soap.eBLBaseComponents.OrderIDArrayType;
 import com.ebay.soap.eBLBaseComponents.OrderStatusCodeType;
 import com.ebay.soap.eBLBaseComponents.OrderType;
 import com.ebay.soap.eBLBaseComponents.PaginationType;
 import com.ebay.soap.eBLBaseComponents.TradingRoleCodeType;
+import com.ebay.soap.eBLBaseComponents.TransactionArrayType;
+import com.ebay.soap.eBLBaseComponents.TransactionType;
 import org.junit.Test;
 
 public class GetEBayOrdersTest {
@@ -111,4 +114,31 @@ public class GetEBayOrdersTest {
         }
     }
 
+    @Test
+    public void getSingleOrder() throws Exception {
+        ApiContext apiContext = TestUtil.getApiContext();
+        GetOrdersCall getOrders = new GetOrdersCall(apiContext);
+
+        OrderIDArrayType orderIdArray = new OrderIDArrayType();
+        // Convert ArrayList to String Array
+        String[] orderId = {"282625337606-1785863740018"};
+        // Set it to the orderIdArrayType
+        orderIdArray.setOrderID(orderId);
+
+        getOrders.setOrderIDArray(orderIdArray);
+
+        OrderType[] orders = getOrders.getOrders();
+
+        System.out.println("order count :" + orders.length);
+
+        for (OrderType order : orders) {
+            System.out.println(order.getOrderID());
+            TransactionArrayType transactionArray = order.getTransactionArray();
+            int transactionLength = transactionArray.getTransactionLength();
+            for (int tranIndex = 0; tranIndex < transactionLength; tranIndex++) {
+                TransactionType transaction = transactionArray.getTransaction(tranIndex);
+                System.out.println(transaction.getItem().getSKU());
+            }
+        }
+    }
 }

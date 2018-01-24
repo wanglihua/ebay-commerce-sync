@@ -13,6 +13,19 @@ public class TestUtil {
         //set Api Token to access eBay Api Server
         ApiCredential cred = apiContext.getApiCredential();
 
+        // eBay ozo.estore
+        /*
+        ApiAccount apiAccount = new ApiAccount();
+        apiAccount.setApplication("***REMOVED***");
+        apiAccount.setCertificate("***REMOVED***");
+        apiAccount.setDeveloper("***REMOVED***");
+
+        cred.setApiAccount(apiAccount);
+        cred.seteBayToken("***REMOVED***");
+        apiContext.setApiServerUrl("https://api.ebay.com/wsapi");
+        */
+
+        // ozmart.living
         ApiAccount apiAccount = new ApiAccount();
         apiAccount.setApplication("***REMOVED***");
         apiAccount.setCertificate("***REMOVED***");
@@ -32,6 +45,8 @@ public class TestUtil {
 
 /*
 
+eBay ozo.estore
+
 AppID
 ***REMOVED***
 
@@ -44,5 +59,22 @@ DevID
 Token
 ***REMOVED***
 
+ */
+
+/*
+
+ozmart.living
+
+AppID
+***REMOVED***
+
+CertID
+***REMOVED***
+
+DevID
+***REMOVED***
+
+Token
+***REMOVED***
 
  */
