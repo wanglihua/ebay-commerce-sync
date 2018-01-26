@@ -1,6 +1,8 @@
 package ozosync.test;
 
 
+import java.util.Arrays;
+import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -8,6 +10,8 @@ import org.junit.runners.BlockJUnit4ClassRunner;
 
 @RunWith(BlockJUnit4ClassRunner.class)
 public class StringTest {
+
+    private Logger log = Logger.getLogger(StringTest.class);
 
     @Test
     public void indexOf() {
@@ -17,6 +21,17 @@ public class StringTest {
         System.out.println(sku);
 
         Assert.assertEquals(sku, "123489AU");
+
+        try {
+            String xx = null;
+            if (xx.length() == 0) {
+                System.out.println("0");
+            }
+
+        } catch (Exception exp) {
+            log.fatal(exp);
+            log.fatal(Arrays.toString(exp.getStackTrace()).replace(",", "\r\n"));
+        }
     }
 
 }

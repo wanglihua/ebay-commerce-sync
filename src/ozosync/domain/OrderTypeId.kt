@@ -1,6 +1,6 @@
 package ozosync.domain
 
-object OrderType {
+object OrderTypeId {
 
     // 手工创建
     const val SGCJ: Long = 1010

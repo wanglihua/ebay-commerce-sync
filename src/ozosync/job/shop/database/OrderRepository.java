@@ -14,6 +14,7 @@ import ozosync.domain.EBayApiConfigInfo;
 import ozosync.domain.ExchangeRateInfo;
 import ozosync.domain.OrderInfo;
 import ozosync.domain.OrderStatus;
+import ozosync.domain.OrderTypeId;
 import ozosync.domain.ShopAccountInfo;
 import ozosync.domain.schema.OrderSchema;
 
@@ -145,6 +146,7 @@ public class OrderRepository {
         }
 
         if (orderNotExist) {
+            orderInDb.setTypeId(OrderTypeId.ZCDD);
             session.save(orderInDb);
             session.flush();
 
