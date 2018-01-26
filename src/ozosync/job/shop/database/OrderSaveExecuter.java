@@ -48,7 +48,7 @@ public class OrderSaveExecuter extends DataBaseExecuter {
 
             return orderInfo;
         } catch (Exception exp) {
-            log.fatal(exp.getMessage());
+            log.fatal(exp);
             log.fatal(Arrays.toString(exp.getStackTrace()).replace(",", "\r\n"));
         }
 

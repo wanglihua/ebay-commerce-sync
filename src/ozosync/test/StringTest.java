@@ -23,10 +23,7 @@ public class StringTest {
         Assert.assertEquals(sku, "123489AU");
 
         try {
-            String xx = null;
-            if (xx.length() == 0) {
-                System.out.println("0");
-            }
+            throw new Exception("abcdef");
 
         } catch (Exception exp) {
             log.fatal(exp);
