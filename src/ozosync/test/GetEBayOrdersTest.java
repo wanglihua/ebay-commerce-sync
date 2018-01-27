@@ -123,7 +123,7 @@ public class GetEBayOrdersTest {
         // Convert ArrayList to String Array
         // String[] orderId = {"282625337606-1785863740018"};
 
-        String[] orderId = {"282306873416-1787930836018"};
+        String[] orderId = {"253339785015-2198847347015"};
 
         // Set it to the orderIdArrayType
         orderIdArray.setOrderID(orderId);
@@ -136,12 +136,11 @@ public class GetEBayOrdersTest {
 
         for (OrderType order : orders) {
             System.out.println(order.getOrderID());
+            System.out.println("order cancel status:" + order.getCancelStatus().name());
             TransactionArrayType transactionArray = order.getTransactionArray();
             int transactionLength = transactionArray.getTransactionLength();
             for (int tranIndex = 0; tranIndex < transactionLength; tranIndex++) {
                 TransactionType transaction = transactionArray.getTransaction(tranIndex);
-                System.out.println(transaction.getItem().getSKU());
-                System.out.println(transaction.getVariation().getSKU());
             }
         }
     }

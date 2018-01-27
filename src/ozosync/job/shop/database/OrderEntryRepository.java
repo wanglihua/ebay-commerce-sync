@@ -89,7 +89,9 @@ public class OrderEntryRepository {
                                 .add(Restrictions.eq(ProductStoreItemSchema.itemId, transaction.getItem().getItemID()))
                                 .setMaxResults(1)
                                 .uniqueResult();
-                        orderItemInfo.setProductStoreItemId(productStoreItemInfo.getId());
+                        if (productStoreItemInfo != null) {
+                            orderItemInfo.setProductStoreItemId(productStoreItemInfo.getId());
+                        }
 
                         orderItemInfo.setCreatedDate(transaction.getCreatedDate().getTime());
 
@@ -121,7 +123,8 @@ public class OrderEntryRepository {
                     orderItemInfo.setTransactionPrice(new BigDecimal(transaction.getTransactionPrice().getValue(), MathContext.DECIMAL64));
                     orderItemInfo.setTransactionPriceRmb(orderItemInfo.getTransactionPrice().multiply(orderInfo.getExchangeRate()));
                     orderItemInfo.setItemId(transaction.getItem().getItemID());
-                    orderItemInfo.setItemSku(transaction.getItem().getSKU());
+                    // orderItemInfo.setItemSku(transaction.getItem().getSKU()); // 这个有问题的，多list的时候会有问题
+                    orderItemInfo.setItemSku(itemSku);
                     orderItemInfo.setItemTitle(transaction.getItem().getTitle());
                     orderItemInfo.setItemConditionId(transaction.getItem().getConditionID().toString());
                     orderItemInfo.setItemConditionDisplayName(transaction.getItem().getConditionDisplayName());

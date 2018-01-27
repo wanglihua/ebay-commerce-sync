@@ -125,24 +125,48 @@ public class OrderRepository {
             orderInDb.setStatusId(OrderStatus.ID_YZF); // 这个状态，有可能会被接下来的状态逻辑所修改，可能会，更进一步改成 “已完成”
         }
 
-        // 平台已取消的订单的处理
-        if (orderDownload.getCancelStatus() == CancelStatusCodeType.CANCEL_COMPLETE) { // 如果用户在平台上已取消订单
-            orderInDb.setStatusId(OrderStatus.ID_YQX);
-        }
-
         // 已发货
         if (orderDownload.getShippedTime() != null
                 && orderDownload.getPaidTime() != null
                 && orderDownload.getCheckoutStatus().getStatus() == CompleteStatusCodeType.COMPLETE) {
             orderInDb.setStatusId(OrderStatus.ID_YFH);
-        }
 
-        // 已完成
-        if (orderDownload.getShippedTime() != null
-                && orderDownload.getPaidTime() != null
-                && orderDownload.getCheckoutStatus().getStatus() == CompleteStatusCodeType.COMPLETE
-                && orderDownload.getOrderStatus() == OrderStatusCodeType.COMPLETED) {
-            orderInDb.setStatusId(OrderStatus.ID_YWC);
+            // 已完成
+            if (orderDownload.getOrderStatus() == OrderStatusCodeType.COMPLETED) {
+                orderInDb.setStatusId(OrderStatus.ID_YWC);
+            }
+        } else {
+            // 在已发货和已完成之外处理已取消
+
+            // 最后处理 已取消 的订单的状态
+            /*
+                INVALID
+                NOT_APPLICABLE
+                CANCEL_REQUESTED
+                CANCEL_PENDING
+                CANCEL_REJECTED
+                CANCEL_CLOSED_NO_REFUND
+                CANCEL_CLOSED_WITH_REFUND
+                CANCEL_CLOSED_UNKNOWN_REFUND
+                CANCEL_CLOSED_FOR_COMMITMENT
+                CANCEL_COMPLETE
+                CANCEL_FAILED
+                CUSTOM_CODE
+             */
+
+
+            // 平台已取消的订单的处理
+            CancelStatusCodeType cancelStatus = orderDownload.getCancelStatus();
+            if (cancelStatus == CancelStatusCodeType.CANCEL_CLOSED_NO_REFUND ||
+                    cancelStatus == CancelStatusCodeType.CANCEL_CLOSED_WITH_REFUND ||
+                    cancelStatus == CancelStatusCodeType.CANCEL_CLOSED_UNKNOWN_REFUND ||
+                    cancelStatus == CancelStatusCodeType.CANCEL_CLOSED_FOR_COMMITMENT ||
+                    cancelStatus == CancelStatusCodeType.CANCEL_COMPLETE) {
+                orderInDb.setStatusId(OrderStatus.ID_YQX);
+            } else if (cancelStatus == CancelStatusCodeType.CANCEL_REJECTED ||
+                    cancelStatus == CancelStatusCodeType.CANCEL_FAILED) {
+                orderInDb.setStatusId(OrderStatus.ID_YZF);
+            }
         }
 
         if (orderNotExist) {

@@ -14,7 +14,7 @@ public class OrderShippingAddressRepository {
 
         AddressType shippingAddress = orderDownload.getShippingAddress();
 
-        if (shippingAddress != null && shippingAddress.getAddressID() != null && !shippingAddress.getAddressID().equals("")) {
+        if (shippingAddress != null) {
 
             OrderShippingAddressInfo shippingAddressInDb = (OrderShippingAddressInfo) session.createCriteria(OrderShippingAddressInfo.class)
                     .add(Restrictions.and(
