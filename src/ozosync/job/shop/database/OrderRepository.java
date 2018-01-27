@@ -163,9 +163,6 @@ public class OrderRepository {
                     cancelStatus == CancelStatusCodeType.CANCEL_CLOSED_FOR_COMMITMENT ||
                     cancelStatus == CancelStatusCodeType.CANCEL_COMPLETE) {
                 orderInDb.setStatusId(OrderStatus.ID_YQX);
-            } else if (cancelStatus == CancelStatusCodeType.CANCEL_REJECTED ||
-                    cancelStatus == CancelStatusCodeType.CANCEL_FAILED) {
-                orderInDb.setStatusId(OrderStatus.ID_YZF);
             }
         }
 
