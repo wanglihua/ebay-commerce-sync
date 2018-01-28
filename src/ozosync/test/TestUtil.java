@@ -48,12 +48,6 @@ public class TestUtil {
         */
 
         // x.warrior
-        /*
-         ***REMOVED***
-         ***REMOVED***
-         ***REMOVED***
-         ***REMOVED***
-         */
         ApiAccount apiAccount = new ApiAccount();
         apiAccount.setApplication("***REMOVED***");
         apiAccount.setCertificate("***REMOVED***");

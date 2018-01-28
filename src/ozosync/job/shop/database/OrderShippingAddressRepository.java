@@ -16,9 +16,14 @@ public class OrderShippingAddressRepository {
 
         if (shippingAddress != null) {
 
+            String addressOwner = "eBay";
+            if (shippingAddress.getAddressOwner() != null) {
+                addressOwner = shippingAddress.getAddressOwner().value();
+            }
+
             OrderShippingAddressInfo shippingAddressInDb = (OrderShippingAddressInfo) session.createCriteria(OrderShippingAddressInfo.class)
                     .add(Restrictions.and(
-                            Restrictions.eq(OrderShippingAddressSchema.addressOwner, shippingAddress.getAddressOwner().value()),
+                            Restrictions.eq(OrderShippingAddressSchema.addressOwner, addressOwner),
                             Restrictions.eq(OrderShippingAddressSchema.orderId, orderInfo.getId())
                     ))
                     .uniqueResult();
@@ -30,18 +35,24 @@ public class OrderShippingAddressRepository {
             }
 
             shippingAddressInDb.setOrderId(orderInfo.getId());
-            shippingAddressInDb.setName(shippingAddress.getName());
-            shippingAddressInDb.setStreet1(shippingAddress.getStreet1());
-            shippingAddressInDb.setStreet2(shippingAddress.getStreet2());
-            shippingAddressInDb.setPhone(normalizePhone(shippingAddress.getPhone()));
-            shippingAddressInDb.setCityName(shippingAddress.getCityName());
-            shippingAddressInDb.setProvince(shippingAddress.getStateOrProvince());
-            shippingAddressInDb.setCountry(shippingAddress.getCountry().value());
-            shippingAddressInDb.setCountryName(shippingAddress.getCountryName());
-            shippingAddressInDb.setPostalCode(shippingAddress.getPostalCode());
-            shippingAddressInDb.setAddressId(shippingAddress.getAddressID());
-            shippingAddressInDb.setAddressOwner(shippingAddress.getAddressOwner().value());
-            shippingAddressInDb.setExternalAddressId(shippingAddress.getExternalAddressID());
+            shippingAddressInDb.setName(nullToEmpty(shippingAddress.getName()));
+            shippingAddressInDb.setStreet1(nullToEmpty(shippingAddress.getStreet1()));
+            shippingAddressInDb.setStreet2(nullToEmpty(shippingAddress.getStreet2()));
+            shippingAddressInDb.setPhone(nullToEmpty(normalizePhone(shippingAddress.getPhone())));
+            shippingAddressInDb.setCityName(nullToEmpty(shippingAddress.getCityName()));
+            shippingAddressInDb.setProvince(nullToEmpty(shippingAddress.getStateOrProvince()));
+
+            if (shippingAddress.getCountry() != null) {
+                shippingAddressInDb.setCountry(nullToEmpty(shippingAddress.getCountry().value()));
+            } else {
+                shippingAddressInDb.setCountry("");
+            }
+
+            shippingAddressInDb.setCountryName(nullToEmpty(shippingAddress.getCountryName()));
+            shippingAddressInDb.setPostalCode(nullToEmpty(shippingAddress.getPostalCode()));
+            shippingAddressInDb.setAddressId(nullToEmpty(shippingAddress.getAddressID()));
+            shippingAddressInDb.setAddressOwner(nullToEmpty(shippingAddress.getAddressOwner().value()));
+            shippingAddressInDb.setExternalAddressId(nullToEmpty(shippingAddress.getExternalAddressID()));
 
             Long addressId = shippingAddressInDb.getId();
             if (orderHasShippingAddress) {
@@ -65,7 +76,7 @@ public class OrderShippingAddressRepository {
     }
 
     private String normalizePhone(String phone) {
-        if (phone != null && phone.equals("")) {
+        if (phone != null && (!phone.equals(""))) {
             phone = phone.replace(" ", "");
 
             if (phone.length() > 4) {
@@ -74,5 +85,13 @@ public class OrderShippingAddressRepository {
         }
 
         return phone;
+    }
+
+    private String nullToEmpty(String str) {
+        if (str == null) {
+            str = "";
+        }
+
+        return str;
     }
 }
