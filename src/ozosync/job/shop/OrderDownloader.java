@@ -25,6 +25,8 @@ public class OrderDownloader {
     private GetEBayApiConfigListExecuter getEBayApiConfigListExecuter;
     private OrderSaveExecuter orderSaveExecuter;
 
+    private final int NUMBER_OF_DAY = 2;
+
 
     public OrderDownloader(SessionFactory sessionFactory) {
         this.getEBayApiConfigListExecuter = new GetEBayApiConfigListExecuter(sessionFactory);
@@ -132,7 +134,7 @@ public class OrderDownloader {
         ApiContext apiContext = getApiContextByConfig(ebayApiConfigInfo);
 
         GetOrdersCall getOrdersCall = new GetOrdersCall(apiContext);
-        getOrdersCall.setNumberOfDays(1);
+        getOrdersCall.setNumberOfDays(NUMBER_OF_DAY);
         getOrdersCall.setOrderRole(TradingRoleCodeType.SELLER);
         getOrdersCall.setOrderStatus(OrderStatusCodeType.ALL);
         getOrdersCall.addDetailLevel(DetailLevelCodeType.RETURN_ALL);

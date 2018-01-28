@@ -51,7 +51,12 @@ public class OrderShippingAddressRepository {
             shippingAddressInDb.setCountryName(nullToEmpty(shippingAddress.getCountryName()));
             shippingAddressInDb.setPostalCode(nullToEmpty(shippingAddress.getPostalCode()));
             shippingAddressInDb.setAddressId(nullToEmpty(shippingAddress.getAddressID()));
-            shippingAddressInDb.setAddressOwner(nullToEmpty(shippingAddress.getAddressOwner().value()));
+
+            if (shippingAddress.getAddressOwner() != null) {
+                shippingAddressInDb.setAddressOwner(nullToEmpty(shippingAddress.getAddressOwner().value()));
+            } else {
+                shippingAddressInDb.setAddressOwner(nullToEmpty(""));
+            }
             shippingAddressInDb.setExternalAddressId(nullToEmpty(shippingAddress.getExternalAddressID()));
 
             Long addressId = shippingAddressInDb.getId();

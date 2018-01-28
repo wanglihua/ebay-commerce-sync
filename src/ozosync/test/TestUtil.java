@@ -48,6 +48,21 @@ public class TestUtil {
         */
 
         // x.warrior
+        /*
+        ApiAccount apiAccount = new ApiAccount();
+        apiAccount.setApplication("***REMOVED***");
+        apiAccount.setCertificate("***REMOVED***");
+        apiAccount.setDeveloper("***REMOVED***");
+        cred.seteBayToken("***REMOVED***");
+        apiContext.setApiServerUrl("https://api.ebay.com/wsapi");
+        */
+
+        // ***REMOVED***
+        // ***REMOVED***
+        // ***REMOVED***
+        // ***REMOVED***
+
+        // giantstarau
         ApiAccount apiAccount = new ApiAccount();
         apiAccount.setApplication("***REMOVED***");
         apiAccount.setCertificate("***REMOVED***");

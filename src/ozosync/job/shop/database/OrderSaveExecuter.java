@@ -37,14 +37,25 @@ public class OrderSaveExecuter extends DataBaseExecuter {
         OrderInfo orderInfo = null;
 
         try {
-            // order
-            orderInfo = orderRepository.saveOrder(session, orderDownload, apiConfigInfo);
+            try {
+                // order
+                orderInfo = orderRepository.saveOrder(session, orderDownload, apiConfigInfo);
 
-            // order entry
-            orderEntryRepository.saveOrderEntries(session, orderInfo, orderDownload);
+                // order entry
+                orderEntryRepository.saveOrderEntries(session, orderInfo, orderDownload);
+            } catch (Exception exp) {
+                log.fatal(exp);
+                log.fatal(Arrays.toString(exp.getStackTrace()).replace(",", "\r\n"));
+            }
 
-            // order shipping address
-            orderShippingAddressRepository.saveOrderShippingAddress(session, orderDownload, orderInfo);
+            // 这样可以在保存明细出错时，继续保存收货地址
+            try {
+                // order shipping address
+                orderShippingAddressRepository.saveOrderShippingAddress(session, orderDownload, orderInfo);
+            } catch (Exception exp) {
+                log.fatal(exp);
+                log.fatal(Arrays.toString(exp.getStackTrace()).replace(",", "\r\n"));
+            }
 
             return orderInfo;
         } catch (Exception exp) {
