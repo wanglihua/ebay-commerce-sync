@@ -10,6 +10,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import ozosync.domain.OrderInfo;
 import ozosync.domain.OrderItemInfo;
+import ozosync.domain.OrderStatus;
 import ozosync.domain.ProductInfo;
 import ozosync.domain.ProductStoreItemInfo;
 import ozosync.domain.schema.OrderItemSchema;
@@ -21,10 +22,19 @@ public class OrderEntryRepository {
     private ProductBindRespository productBindRespository = new ProductBindRespository();
 
     public void saveOrderEntries(Session session, OrderInfo orderInfo, OrderType orderDownload) throws Exception {
+
+        // 只同步已支付及之前的订单内容
+        Long statusId = orderInfo.getStatusId();
+        if (statusId > OrderStatus.ID_YZF) {
+            return;
+        }
+
         // 保存订单明细
         TransactionArrayType transactionArray = orderDownload.getTransactionArray();
 
-        if (transactionArray != null && transactionArray.getTransactionLength() > 0) {
+        if (transactionArray != null && transactionArray.getTransactionLength() > 0)
+
+        {
             int transactionLength = transactionArray.getTransactionLength();
             for (int index = 0; index < transactionLength; index++) {
                 TransactionType transaction = transactionArray.getTransaction(index);

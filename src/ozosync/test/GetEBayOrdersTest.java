@@ -118,12 +118,16 @@ public class GetEBayOrdersTest {
     public void getSingleOrder() throws Exception {
         ApiContext apiContext = TestUtil.getApiContext();
         GetOrdersCall getOrders = new GetOrdersCall(apiContext);
+        getOrders.setOrderRole(TradingRoleCodeType.SELLER);
+        getOrders.setOrderStatus(OrderStatusCodeType.ALL);
+        getOrders.addDetailLevel(DetailLevelCodeType.RETURN_ALL);
+        getOrders.setIncludeFinalValueFee(true);
 
         OrderIDArrayType orderIdArray = new OrderIDArrayType();
         // Convert ArrayList to String Array
         // String[] orderId = {"282625337606-1785863740018"};
 
-        String[] orderId = {"112484896215-1766390054001"};
+        String[] orderId = {"112504570655-1767730066001"};
 
         // Set it to the orderIdArrayType
         orderIdArray.setOrderID(orderId);
@@ -136,11 +140,17 @@ public class GetEBayOrdersTest {
 
         for (OrderType order : orders) {
             System.out.println(order.getOrderID());
-            System.out.println("order cancel status:" + order.getCancelStatus().name());
+            System.out.println("order cancel status: " + order.getCancelStatus().name());
+            System.out.println("order status: " + order.getOrderStatus().name());
             TransactionArrayType transactionArray = order.getTransactionArray();
             int transactionLength = transactionArray.getTransactionLength();
             for (int tranIndex = 0; tranIndex < transactionLength; tranIndex++) {
                 TransactionType transaction = transactionArray.getTransaction(tranIndex);
+                if (transaction.getFinalValueFee() != null) {
+                    System.out.println("final value fee is " + transaction.getFinalValueFee().getValue());
+                } else {
+                    System.out.println("final value fee is null");
+                }
             }
         }
     }

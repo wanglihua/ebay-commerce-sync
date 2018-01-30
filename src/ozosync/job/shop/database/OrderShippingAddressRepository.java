@@ -6,11 +6,17 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import ozosync.domain.OrderInfo;
 import ozosync.domain.OrderShippingAddressInfo;
+import ozosync.domain.OrderStatus;
 import ozosync.domain.schema.OrderShippingAddressSchema;
 
 public class OrderShippingAddressRepository {
 
     public void saveOrderShippingAddress(Session session, OrderType orderDownload, OrderInfo orderInfo) {
+        // 只同步已支付及之前的订单内容
+        Long statusId = orderInfo.getStatusId();
+        if (statusId > OrderStatus.ID_YZF) {
+            return;
+        }
 
         AddressType shippingAddress = orderDownload.getShippingAddress();
 
@@ -32,6 +38,10 @@ public class OrderShippingAddressRepository {
 
             if (shippingAddressInDb == null) {
                 shippingAddressInDb = new OrderShippingAddressInfo();
+            }
+
+            if (shippingAddressInDb.getModified() != 0) {
+                return;
             }
 
             shippingAddressInDb.setOrderId(orderInfo.getId());

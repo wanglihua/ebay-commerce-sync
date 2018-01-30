@@ -40,105 +40,108 @@ public class OrderRepository {
             orderInDb = new OrderInfo();
         }
 
-        orderInDb.setCode(orderCode);
-        orderInDb.setShopId(apiConfigInfo.getShopId());
-        orderInDb.setTranId(orderDownload.getShippingDetails().getSellingManagerSalesRecordNumber().toString());
-
-        ShopAccountInfo shopAccountInfo = (ShopAccountInfo) session.get(ShopAccountInfo.class, apiConfigInfo.getShopId());
-        orderInDb.setFullTranId(shopAccountInfo.getCode() + orderDownload.getShippingDetails().getSellingManagerSalesRecordNumber());
-
-        // SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-        orderInDb.setCreatedTime(orderDownload.getCreatedTime().getTime());
-        orderInDb.setModifiedTime(orderDownload.getCheckoutStatus().getLastModifiedTime().getTime());
-
-        if (orderDownload.getPaidTime() != null) {
-            orderInDb.setPaidTime(orderDownload.getPaidTime().getTime());
-        }
-
-        if (orderDownload.getShippedTime() != null) {
-            orderInDb.setShippedTime(orderDownload.getShippedTime().getTime());
-        }
-
-        ExchangeRateInfo exchangeRateInfo = exchangeRateRespository.getAudExchangeRate(session);
-
-        orderInDb.setExchangeRate(new BigDecimal(exchangeRateInfo.getRate(), MathContext.DECIMAL64));
-
-        orderInDb.setAdjustmentAmountCurrency(orderDownload.getAdjustmentAmount().getCurrencyID().value());
-        orderInDb.setAdjustmentAmount(new BigDecimal(orderDownload.getAdjustmentAmount().getValue(), MathContext.DECIMAL64));
-        orderInDb.setAdjustmentAmountRmb(orderInDb.getAdjustmentAmount().multiply(new BigDecimal(exchangeRateInfo.getRate(), MathContext.DECIMAL64)));
-
-        orderInDb.setAmountPaidCurrency(orderDownload.getAmountPaid().getCurrencyID().value());
-        orderInDb.setAmountPaid(new BigDecimal(orderDownload.getAmountPaid().getValue(), MathContext.DECIMAL64));
-        orderInDb.setAmountPaidRmb(orderInDb.getAmountPaid().multiply(new BigDecimal(exchangeRateInfo.getRate(), MathContext.DECIMAL64)));
-
-        orderInDb.setAmountSavedCurrency(orderDownload.getAmountSaved().getCurrencyID().value());
-        orderInDb.setAmountSaved(new BigDecimal(orderDownload.getAmountSaved().getValue(), MathContext.DECIMAL64));
-        orderInDb.setAmountSavedRmb(orderInDb.getAmountSaved().multiply(new BigDecimal(exchangeRateInfo.getRate(), MathContext.DECIMAL64)));
-
-        orderInDb.setTotalAmountCurrency(orderDownload.getTotal().getCurrencyID().value());
-        orderInDb.setTotalAmount(new BigDecimal(orderDownload.getTotal().getValue(), MathContext.DECIMAL64));
-        orderInDb.setTotalAmountRmb(orderInDb.getTotalAmount().multiply(new BigDecimal(exchangeRateInfo.getRate(), MathContext.DECIMAL64)));
-
-        orderInDb.setSubtotalAmountCurrency(orderDownload.getSubtotal().getCurrencyID().value());
-        orderInDb.setSubtotalAmount(new BigDecimal(orderDownload.getSubtotal().getValue(), MathContext.DECIMAL64));
-        orderInDb.setSubtotalAmountRmb(orderInDb.getSubtotalAmount().multiply(new BigDecimal(exchangeRateInfo.getRate(), MathContext.DECIMAL64)));
-
-        orderInDb.setSellerEmail(orderDownload.getSellerEmail());
-        orderInDb.setSellerUserId(orderDownload.getSellerUserID());
-
-        orderInDb.setBuyerEmail(orderDownload.getTransactionArray().getTransaction(0).getBuyer().getEmail());
-        orderInDb.setBuyerUserId(orderDownload.getBuyerUserID());
-        orderInDb.setBuyerCheckoutMessage(orderDownload.getBuyerCheckoutMessage());
-
-        orderInDb.setPaymentMethods(orderDownload.getCheckoutStatus().getPaymentMethod().value());
-
-        orderInDb.setEBayStatus(orderDownload.getOrderStatus().value());
-
-        //2. shipping.ShippingServiceCost.Value;
-
-        ShippingServiceOptionsType shippingOptions = orderDownload
-                .getShippingServiceSelected();
-        if (shippingOptions == null) {
-            if (orderDownload.getCheckoutStatus().getStatus() == CompleteStatusCodeType.COMPLETE) {
-                shippingOptions = orderDownload.getShippingDetails()
-                        .getShippingServiceOptions(0);
-            } else {
-                shippingOptions = new ShippingServiceOptionsType();
-            }
-        }
-
-        if (shippingOptions.getShippingServiceCost() != null) {
-            orderInDb.setExpressFee(new BigDecimal(shippingOptions.getShippingServiceCost().getValue(), MathContext.DECIMAL64));
-        }
-
         Long statusId = orderInDb.getStatusId();
+        // 只同步已支付及之前的订单内容
+        if (statusId <= OrderStatus.ID_YZF) {
+            orderInDb.setCode(orderCode);
+            orderInDb.setShopId(apiConfigInfo.getShopId());
+            orderInDb.setTranId(orderDownload.getShippingDetails().getSellingManagerSalesRecordNumber().toString());
 
-        // 如果是新的订单，一般是新增的订单，系统数据库中还没有的订单
-        if (statusId < OrderStatus.ID_YCJ) { // statusId < OrderStatus.ID_YCJ 这个状态检查不能少，否则 待配货，已发货的状态可能会被覆盖 //  这个条件先不用 && orderDownload.getPaidTime() == null
-            orderInDb.setStatusId(OrderStatus.ID_YCJ); // 这个状态，有可能会被接下来的状态逻辑所修改，可能会，更进一步改成 “已支付”, “已完成”
-        }
+            ShopAccountInfo shopAccountInfo = (ShopAccountInfo) session.get(ShopAccountInfo.class, apiConfigInfo.getShopId());
+            orderInDb.setFullTranId(shopAccountInfo.getCode() + orderDownload.getShippingDetails().getSellingManagerSalesRecordNumber());
 
-        // 有可能是新增的订单（最有可能），或者是原来 已创建 的状态过来的。这时支付时间不为空
-        if (statusId < OrderStatus.ID_YZF
-                && orderDownload.getPaidTime() != null
-                && orderDownload.getCheckoutStatus().getStatus() == CompleteStatusCodeType.COMPLETE) { // statusId < OrderStatus.ORDER_STATUS_YZF 这个状态检查不能少，否则 待配货，已发货的状态可能会被覆盖
-            orderInDb.setStatusId(OrderStatus.ID_YZF); // 这个状态，有可能会被接下来的状态逻辑所修改，可能会，更进一步改成 “已完成”
-        }
+            // SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+            orderInDb.setCreatedTime(orderDownload.getCreatedTime().getTime());
+            orderInDb.setModifiedTime(orderDownload.getCheckoutStatus().getLastModifiedTime().getTime());
 
-        // 已发货
-        if (orderDownload.getShippedTime() != null
-                && orderDownload.getPaidTime() != null
-                && orderDownload.getCheckoutStatus().getStatus() == CompleteStatusCodeType.COMPLETE) {
-            orderInDb.setStatusId(OrderStatus.ID_YFH);
+            if (orderDownload.getPaidTime() != null) {
+                orderInDb.setPaidTime(orderDownload.getPaidTime().getTime());
+            }
 
-            // 已完成
-            if (orderDownload.getOrderStatus() == OrderStatusCodeType.COMPLETED) {
-                orderInDb.setStatusId(OrderStatus.ID_YWC);
+            if (orderDownload.getShippedTime() != null) {
+                orderInDb.setShippedTime(orderDownload.getShippedTime().getTime());
+            }
+
+            ExchangeRateInfo exchangeRateInfo = exchangeRateRespository.getAudExchangeRate(session);
+
+            orderInDb.setExchangeRate(new BigDecimal(exchangeRateInfo.getRate(), MathContext.DECIMAL64));
+
+            orderInDb.setAdjustmentAmountCurrency(orderDownload.getAdjustmentAmount().getCurrencyID().value());
+            orderInDb.setAdjustmentAmount(new BigDecimal(orderDownload.getAdjustmentAmount().getValue(), MathContext.DECIMAL64));
+            orderInDb.setAdjustmentAmountRmb(orderInDb.getAdjustmentAmount().multiply(new BigDecimal(exchangeRateInfo.getRate(), MathContext.DECIMAL64)));
+
+            orderInDb.setAmountPaidCurrency(orderDownload.getAmountPaid().getCurrencyID().value());
+            orderInDb.setAmountPaid(new BigDecimal(orderDownload.getAmountPaid().getValue(), MathContext.DECIMAL64));
+            orderInDb.setAmountPaidRmb(orderInDb.getAmountPaid().multiply(new BigDecimal(exchangeRateInfo.getRate(), MathContext.DECIMAL64)));
+
+            orderInDb.setAmountSavedCurrency(orderDownload.getAmountSaved().getCurrencyID().value());
+            orderInDb.setAmountSaved(new BigDecimal(orderDownload.getAmountSaved().getValue(), MathContext.DECIMAL64));
+            orderInDb.setAmountSavedRmb(orderInDb.getAmountSaved().multiply(new BigDecimal(exchangeRateInfo.getRate(), MathContext.DECIMAL64)));
+
+            orderInDb.setTotalAmountCurrency(orderDownload.getTotal().getCurrencyID().value());
+            orderInDb.setTotalAmount(new BigDecimal(orderDownload.getTotal().getValue(), MathContext.DECIMAL64));
+            orderInDb.setTotalAmountRmb(orderInDb.getTotalAmount().multiply(new BigDecimal(exchangeRateInfo.getRate(), MathContext.DECIMAL64)));
+
+            orderInDb.setSubtotalAmountCurrency(orderDownload.getSubtotal().getCurrencyID().value());
+            orderInDb.setSubtotalAmount(new BigDecimal(orderDownload.getSubtotal().getValue(), MathContext.DECIMAL64));
+            orderInDb.setSubtotalAmountRmb(orderInDb.getSubtotalAmount().multiply(new BigDecimal(exchangeRateInfo.getRate(), MathContext.DECIMAL64)));
+
+            orderInDb.setSellerEmail(orderDownload.getSellerEmail());
+            orderInDb.setSellerUserId(orderDownload.getSellerUserID());
+
+            orderInDb.setBuyerEmail(orderDownload.getTransactionArray().getTransaction(0).getBuyer().getEmail());
+            orderInDb.setBuyerUserId(orderDownload.getBuyerUserID());
+            orderInDb.setBuyerCheckoutMessage(orderDownload.getBuyerCheckoutMessage());
+
+            orderInDb.setPaymentMethods(orderDownload.getCheckoutStatus().getPaymentMethod().value());
+
+            orderInDb.setEBayStatus(orderDownload.getOrderStatus().value());
+
+            //2. shipping.ShippingServiceCost.Value;
+
+            ShippingServiceOptionsType shippingOptions = orderDownload
+                    .getShippingServiceSelected();
+            if (shippingOptions == null) {
+                if (orderDownload.getCheckoutStatus().getStatus() == CompleteStatusCodeType.COMPLETE) {
+                    shippingOptions = orderDownload.getShippingDetails()
+                            .getShippingServiceOptions(0);
+                } else {
+                    shippingOptions = new ShippingServiceOptionsType();
+                }
+            }
+
+            if (shippingOptions.getShippingServiceCost() != null) {
+                orderInDb.setExpressFee(new BigDecimal(shippingOptions.getShippingServiceCost().getValue(), MathContext.DECIMAL64));
+            }
+
+            // 如果是新的订单，一般是新增的订单，系统数据库中还没有的订单
+            if (statusId < OrderStatus.ID_YCJ) { // statusId < OrderStatus.ID_YCJ 这个状态检查不能少，否则 待配货，已发货的状态可能会被覆盖 //  这个条件先不用 && orderDownload.getPaidTime() == null
+                orderInDb.setStatusId(OrderStatus.ID_YCJ); // 这个状态，有可能会被接下来的状态逻辑所修改，可能会，更进一步改成 “已支付”, “已完成”
+            }
+
+            // 有可能是新增的订单（最有可能），或者是原来 已创建 的状态过来的。这时支付时间不为空
+            if (statusId < OrderStatus.ID_YZF
+                    && orderDownload.getPaidTime() != null
+                    && orderDownload.getCheckoutStatus().getStatus() == CompleteStatusCodeType.COMPLETE) { // statusId < OrderStatus.ORDER_STATUS_YZF 这个状态检查不能少，否则 待配货，已发货的状态可能会被覆盖
+                orderInDb.setStatusId(OrderStatus.ID_YZF); // 这个状态，有可能会被接下来的状态逻辑所修改，可能会，更进一步改成 “已完成”
             }
         } else {
-            // 在已发货和已完成之外处理已取消
+            // 只同步已支付之后的订单的状态
 
-            // 最后处理 已取消 的订单的状态
+            // 已发货
+            if (orderDownload.getShippedTime() != null
+                    && orderDownload.getPaidTime() != null
+                    && orderDownload.getCheckoutStatus().getStatus() == CompleteStatusCodeType.COMPLETE) {
+                orderInDb.setStatusId(OrderStatus.ID_YFH);
+
+                // 已完成
+                if (orderDownload.getOrderStatus() == OrderStatusCodeType.COMPLETED) {
+                    orderInDb.setStatusId(OrderStatus.ID_YWC);
+                }
+            } else {
+                // 在已发货和已完成之外处理已取消
+
+                // 最后处理 已取消 的订单的状态
             /*
                 INVALID
                 NOT_APPLICABLE
@@ -155,14 +158,15 @@ public class OrderRepository {
              */
 
 
-            // 平台已取消的订单的处理
-            CancelStatusCodeType cancelStatus = orderDownload.getCancelStatus();
-            if (cancelStatus == CancelStatusCodeType.CANCEL_CLOSED_NO_REFUND ||
-                    cancelStatus == CancelStatusCodeType.CANCEL_CLOSED_WITH_REFUND ||
-                    cancelStatus == CancelStatusCodeType.CANCEL_CLOSED_UNKNOWN_REFUND ||
-                    cancelStatus == CancelStatusCodeType.CANCEL_CLOSED_FOR_COMMITMENT ||
-                    cancelStatus == CancelStatusCodeType.CANCEL_COMPLETE) {
-                orderInDb.setStatusId(OrderStatus.ID_YQX);
+                // 平台已取消的订单的处理
+                CancelStatusCodeType cancelStatus = orderDownload.getCancelStatus();
+                if (cancelStatus == CancelStatusCodeType.CANCEL_CLOSED_NO_REFUND ||
+                        cancelStatus == CancelStatusCodeType.CANCEL_CLOSED_WITH_REFUND ||
+                        cancelStatus == CancelStatusCodeType.CANCEL_CLOSED_UNKNOWN_REFUND ||
+                        cancelStatus == CancelStatusCodeType.CANCEL_CLOSED_FOR_COMMITMENT ||
+                        cancelStatus == CancelStatusCodeType.CANCEL_COMPLETE) {
+                    orderInDb.setStatusId(OrderStatus.ID_YQX);
+                }
             }
         }
 
