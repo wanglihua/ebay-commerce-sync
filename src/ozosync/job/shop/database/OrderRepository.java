@@ -158,14 +158,16 @@ public class OrderRepository {
              */
 
 
-                // 平台已取消的订单的处理
-                CancelStatusCodeType cancelStatus = orderDownload.getCancelStatus();
-                if (cancelStatus == CancelStatusCodeType.CANCEL_CLOSED_NO_REFUND ||
-                        cancelStatus == CancelStatusCodeType.CANCEL_CLOSED_WITH_REFUND ||
-                        cancelStatus == CancelStatusCodeType.CANCEL_CLOSED_UNKNOWN_REFUND ||
-                        cancelStatus == CancelStatusCodeType.CANCEL_CLOSED_FOR_COMMITMENT ||
-                        cancelStatus == CancelStatusCodeType.CANCEL_COMPLETE) {
-                    orderInDb.setStatusId(OrderStatus.ID_YQX);
+                if (statusId != OrderStatus.ID_YFH && statusId != OrderStatus.ID_YWC) { // 冗余判断吧
+                    // 平台已取消的订单的处理
+                    CancelStatusCodeType cancelStatus = orderDownload.getCancelStatus();
+                    if (cancelStatus == CancelStatusCodeType.CANCEL_CLOSED_NO_REFUND ||
+                            cancelStatus == CancelStatusCodeType.CANCEL_CLOSED_WITH_REFUND ||
+                            cancelStatus == CancelStatusCodeType.CANCEL_CLOSED_UNKNOWN_REFUND ||
+                            cancelStatus == CancelStatusCodeType.CANCEL_CLOSED_FOR_COMMITMENT ||
+                            cancelStatus == CancelStatusCodeType.CANCEL_COMPLETE) {
+                        orderInDb.setStatusId(OrderStatus.ID_YQX);
+                    }
                 }
             }
         }
