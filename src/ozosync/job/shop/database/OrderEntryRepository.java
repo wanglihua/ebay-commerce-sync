@@ -32,9 +32,7 @@ public class OrderEntryRepository {
         // 保存订单明细
         TransactionArrayType transactionArray = orderDownload.getTransactionArray();
 
-        if (transactionArray != null && transactionArray.getTransactionLength() > 0)
-
-        {
+        if (transactionArray != null && transactionArray.getTransactionLength() > 0) {
             int transactionLength = transactionArray.getTransactionLength();
             for (int index = 0; index < transactionLength; index++) {
                 TransactionType transaction = transactionArray.getTransaction(index);

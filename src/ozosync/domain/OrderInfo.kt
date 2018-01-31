@@ -215,6 +215,14 @@ data class OrderInfo(
     @VerboseName("利润RMB")
     var profitRmb: BigDecimal = BigDecimal.ZERO
 
+    @Column(name = "ptfy")
+    @VerboseName("平台费用")
+    var ptfy: BigDecimal = BigDecimal.ZERO
+
+    @Column(name = "jyfy")
+    @VerboseName("交易费用")
+    var jyfy: BigDecimal = BigDecimal.ZERO
+
     @Column(name = "cancel_status_id")
     @VerboseName("利润RMB")
     var cancelStatusId: Long = 0

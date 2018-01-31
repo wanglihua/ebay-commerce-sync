@@ -2,9 +2,12 @@ package ozosync.job.shop.database;
 
 import com.ebay.soap.eBLBaseComponents.CancelStatusCodeType;
 import com.ebay.soap.eBLBaseComponents.CompleteStatusCodeType;
+import com.ebay.soap.eBLBaseComponents.ExternalTransactionType;
 import com.ebay.soap.eBLBaseComponents.OrderStatusCodeType;
 import com.ebay.soap.eBLBaseComponents.OrderType;
 import com.ebay.soap.eBLBaseComponents.ShippingServiceOptionsType;
+import com.ebay.soap.eBLBaseComponents.TransactionArrayType;
+import com.ebay.soap.eBLBaseComponents.TransactionType;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.Date;
@@ -113,6 +116,38 @@ public class OrderRepository {
             if (shippingOptions.getShippingServiceCost() != null) {
                 orderInDb.setExpressFee(new BigDecimal(shippingOptions.getShippingServiceCost().getValue(), MathContext.DECIMAL64));
             }
+
+            // 平台交易费 和 付款交易费
+
+            // 平台交易费
+            double ptfy = 0;
+            TransactionArrayType transactionArray = orderDownload.getTransactionArray();
+            if (transactionArray != null && transactionArray.getTransactionLength() > 0) {
+                int transactionLength = transactionArray.getTransactionLength();
+                for (int index = 0; index < transactionLength; index++) {
+                    TransactionType transaction = transactionArray.getTransaction(index);
+                    if (transaction != null && transaction.getFinalValueFee() != null) {
+                        ptfy = ptfy + transaction.getFinalValueFee().getValue();
+                    }
+                }
+            }
+
+            orderInDb.setPtfy(new BigDecimal(ptfy, MathContext.DECIMAL64));
+
+            // 付款交易费
+            double jyfy = 0;
+            ExternalTransactionType[] externalTransactionList = orderDownload.getExternalTransaction();
+            int externalTransactionLength = orderDownload.getExternalTransactionLength();
+            if (externalTransactionList != null && externalTransactionLength != 0) {
+                for (int index = 0; index < externalTransactionLength; index++) {
+                    ExternalTransactionType externalTransaction = orderDownload.getExternalTransaction(index);
+                    if (externalTransaction != null && externalTransaction.getFeeOrCreditAmount() != null) {
+                        jyfy = jyfy + externalTransaction.getFeeOrCreditAmount().getValue();
+                    }
+                }
+            }
+
+            orderInDb.setJyfy(new BigDecimal(jyfy, MathContext.DECIMAL64));
 
             // 如果是新的订单，一般是新增的订单，系统数据库中还没有的订单
             if (statusId < OrderStatus.ID_YCJ) { // statusId < OrderStatus.ID_YCJ 这个状态检查不能少，否则 待配货，已发货的状态可能会被覆盖 //  这个条件先不用 && orderDownload.getPaidTime() == null
