@@ -2,6 +2,7 @@ package ozosync.test;
 
 
 import java.util.Arrays;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Test;
@@ -31,4 +32,12 @@ public class StringTest {
         }
     }
 
+    @Test
+    public void htmlEscape() {
+        String str = StringEscapeUtils.unescapeXml("abcdef &#39;");
+        System.out.println("abcdef &#39; => " + str);
+
+        str = StringEscapeUtils.unescapeXml("你好 abc 134 &#39;");
+        System.out.println("你好 abc 134 &#39; => " + str);
+    }
 }

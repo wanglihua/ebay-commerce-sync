@@ -11,6 +11,7 @@ import com.ebay.soap.eBLBaseComponents.TransactionType;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.Date;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import ozosync.domain.EBayApiConfigInfo;
@@ -93,8 +94,8 @@ public class OrderRepository {
             orderInDb.setSellerUserId(orderDownload.getSellerUserID());
 
             orderInDb.setBuyerEmail(orderDownload.getTransactionArray().getTransaction(0).getBuyer().getEmail());
-            orderInDb.setBuyerUserId(orderDownload.getBuyerUserID());
-            orderInDb.setBuyerCheckoutMessage(orderDownload.getBuyerCheckoutMessage());
+            orderInDb.setBuyerUserId(StringEscapeUtils.unescapeXml(orderDownload.getBuyerUserID()));
+            orderInDb.setBuyerCheckoutMessage(StringEscapeUtils.unescapeXml(orderDownload.getBuyerCheckoutMessage()));
 
             orderInDb.setPaymentMethods(orderDownload.getCheckoutStatus().getPaymentMethod().value());
 

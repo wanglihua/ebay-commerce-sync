@@ -2,6 +2,7 @@ package ozosync.job.shop.database;
 
 import com.ebay.soap.eBLBaseComponents.AddressType;
 import com.ebay.soap.eBLBaseComponents.OrderType;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import ozosync.domain.OrderInfo;
@@ -45,11 +46,11 @@ public class OrderShippingAddressRepository {
             }
 
             shippingAddressInDb.setOrderId(orderInfo.getId());
-            shippingAddressInDb.setName(nullToEmpty(shippingAddress.getName()));
-            shippingAddressInDb.setStreet1(nullToEmpty(shippingAddress.getStreet1()));
-            shippingAddressInDb.setStreet2(nullToEmpty(shippingAddress.getStreet2()));
+            shippingAddressInDb.setName(StringEscapeUtils.unescapeXml(nullToEmpty(shippingAddress.getName())));
+            shippingAddressInDb.setStreet1(StringEscapeUtils.unescapeXml(nullToEmpty(shippingAddress.getStreet1())));
+            shippingAddressInDb.setStreet2(StringEscapeUtils.unescapeXml(nullToEmpty(shippingAddress.getStreet2())));
             shippingAddressInDb.setPhone(nullToEmpty(normalizePhone(shippingAddress.getPhone())));
-            shippingAddressInDb.setCityName(nullToEmpty(shippingAddress.getCityName()));
+            shippingAddressInDb.setCityName(StringEscapeUtils.unescapeXml(nullToEmpty(shippingAddress.getCityName())));
             shippingAddressInDb.setProvince(nullToEmpty(shippingAddress.getStateOrProvince()));
 
             if (shippingAddress.getCountry() != null) {
