@@ -24,30 +24,31 @@
     <context:property-placeholder location="classpath:jdbc.properties"/>
 
     <!-- 配置c3p0数据源 -->
+    <!--
     <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
-        <!-- connection -->
         <property name="driverClass" value="${jdbc.driverClass}"/>
         <property name="jdbcUrl" value="${jdbc.jdbcUrl}"/>
         <property name="user" value="${jdbc.user}"/>
         <property name="password" value="${jdbc.password}"/>
-
-        <!-- c3p0 pool -->
         <property name="minPoolSize" value="${c3p0.pool.minPoolSize}"/>
-        <!-- 最小连接数 -->
         <property name="maxPoolSize" value="${c3p0.pool.maxPoolSize}"/>
-        <!-- 最大连接数 -->
         <property name="initialPoolSize" value="${c3p0.pool.initialPoolSize}"/>
-        <!-- 初始化连接池的大小 -->
         <property name="maxStatements" value="${c3p0.pool.maxStatements}"/>
-        <!-- 最大的PreparedStatement的数量 -->
         <property name="acquireIncrement" value="${c3p0.pool.acquireIncrement}"/>
-        <!-- 当连接池里面的连接用完的时候，C3P0获取的新的连接数 -->
         <property name="checkoutTimeout" value="${c3p0.pool.checkoutTimeout}"/>
-        <!-- 连接的超时时间 -->
         <property name="idleConnectionTestPeriod" value="${c3p0.pool.idleConnectionTestPeriod}"/>
-        <!-- 检查连接池里空闲连接时间 -->
         <property name="testConnectionOnCheckout" value="${c3p0.pool.testConnectionOnCheckout}"/>
-        <!-- 验证连接是否可用 -->
+    </bean>
+    -->
+
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+        <property name="driverClassName" value="${jdbc.driverClass}"/>
+        <property name="url" value="${jdbc.jdbcUrl}"/>
+        <property name="username" value="${jdbc.user}"/>
+        <property name="password" value="${jdbc.password}"/>
+        <property name="maxIdle" value="${dbcp.pool.maxIdle}"/>
+        <property name="maxActive" value="${dbcp.pool.maxActive}"/>
+        <property name="maxWait" value="${dpcp.pool.maxWait}"/>
     </bean>
 
     <!-- 配置sessionFactory实例工厂 -->

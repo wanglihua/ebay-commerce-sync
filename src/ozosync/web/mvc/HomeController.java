@@ -1,11 +1,14 @@
 package ozosync.web.mvc;
 
+import java.util.List;
 import org.apache.log4j.Logger;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import ozosync.domain.StatusInfo;
 
 @Controller
 public class HomeController {
@@ -16,18 +19,12 @@ public class HomeController {
     private SessionFactory sessionFactory;
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
+    @SuppressWarnings("unchecked")
     public String index() throws Exception {
 
-        /*
-        List<ProductInfo> productList = productDao.getProductList();
-        log.debug("product list found");
-
         Session session = sessionFactory.getCurrentSession();
-        Query query = session.createQuery("from UserInfo");
-        List<UserInfo> userList = query.list();
-        */
 
-        log.warn("Hello World haha!");
+        List<StatusInfo> statusList = session.createCriteria(StatusInfo.class).list();
 
         return "home";
     }
