@@ -161,7 +161,9 @@ public class OrderRepository {
                     && orderDownload.getCheckoutStatus().getStatus() == CompleteStatusCodeType.COMPLETE) { // statusId < OrderStatus.ORDER_STATUS_YZF 这个状态检查不能少，否则 待配货，已发货的状态可能会被覆盖
                 orderInDb.setStatusId(OrderStatus.ID_YZF); // 这个状态，有可能会被接下来的状态逻辑所修改，可能会，更进一步改成 “已完成”
             }
-        } else {
+        }
+        /*
+        else {
             // 只同步已支付之后的订单的状态
 
             // 已发货
@@ -178,21 +180,18 @@ public class OrderRepository {
                 // 在已发货和已完成之外处理已取消
 
                 // 最后处理 已取消 的订单的状态
-            /*
-                INVALID
-                NOT_APPLICABLE
-                CANCEL_REQUESTED
-                CANCEL_PENDING
-                CANCEL_REJECTED
-                CANCEL_CLOSED_NO_REFUND
-                CANCEL_CLOSED_WITH_REFUND
-                CANCEL_CLOSED_UNKNOWN_REFUND
-                CANCEL_CLOSED_FOR_COMMITMENT
-                CANCEL_COMPLETE
-                CANCEL_FAILED
-                CUSTOM_CODE
-             */
-
+                // INVALID
+                // NOT_APPLICABLE
+                // CANCEL_REQUESTED
+                // CANCEL_PENDING
+                // CANCEL_REJECTED
+                // CANCEL_CLOSED_NO_REFUND
+                // CANCEL_CLOSED_WITH_REFUND
+                // CANCEL_CLOSED_UNKNOWN_REFUND
+                // CANCEL_CLOSED_FOR_COMMITMENT
+                // CANCEL_COMPLETE
+                // CANCEL_FAILED
+                // CUSTOM_CODE
 
                 if (statusId != OrderStatus.ID_YFH && statusId != OrderStatus.ID_YWC) { // 冗余判断吧
                     // 平台已取消的订单的处理
@@ -207,6 +206,7 @@ public class OrderRepository {
                 }
             }
         }
+        */
 
         if (orderNotExist) {
             orderInDb.setTypeId(OrderTypeId.ZCDD);
