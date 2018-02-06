@@ -1,9 +1,7 @@
 package ozosync.job.shop.database;
 
-import com.ebay.soap.eBLBaseComponents.CancelStatusCodeType;
 import com.ebay.soap.eBLBaseComponents.CompleteStatusCodeType;
 import com.ebay.soap.eBLBaseComponents.ExternalTransactionType;
-import com.ebay.soap.eBLBaseComponents.OrderStatusCodeType;
 import com.ebay.soap.eBLBaseComponents.OrderType;
 import com.ebay.soap.eBLBaseComponents.ShippingServiceOptionsType;
 import com.ebay.soap.eBLBaseComponents.TransactionArrayType;

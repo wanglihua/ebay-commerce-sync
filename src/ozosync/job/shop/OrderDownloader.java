@@ -25,7 +25,7 @@ public class OrderDownloader {
     private GetEBayApiConfigListExecuter getEBayApiConfigListExecuter;
     private OrderSaveExecuter orderSaveExecuter;
 
-    private final int NUMBER_OF_DAY = 2;
+    private final int NUMBER_OF_DAY = 1;
 
 
     public OrderDownloader(SessionFactory sessionFactory) {
@@ -38,22 +38,23 @@ public class OrderDownloader {
         try {
             List<EBayApiConfigInfo> ebayApiConfigList = (List<EBayApiConfigInfo>) this.getEBayApiConfigListExecuter.execute();
             for (EBayApiConfigInfo ebayApiConfigInfo : ebayApiConfigList) {
-                GetOrdersCall getOrdersCall = createGetOrdersCall(ebayApiConfigInfo);
+                try {
+                    GetOrdersCall getOrdersCall = createGetOrdersCall(ebayApiConfigInfo);
 
-                int pageNumber = 0;
-                // int orderCount = 0;
+                    int pageNumber = 0;
+                    // int orderCount = 0;
 
-                do {
-                    getOrdersCall.getPagination().setPageNumber(++pageNumber);
-                    OrderType[] orderList = getOrdersCall.getOrders();
-                    if (getOrdersCall.getReturnedReturnedOrderCountActual() > 0) {
-                        for (OrderType order : orderList) {
-                            // System.out.println("order: " + ++orderCount);
-                            // System.out.println("order id: " + order.getOrderID());
-                            log.error("同步订单： order id: " + order.getOrderID());
+                    do {
+                        getOrdersCall.getPagination().setPageNumber(++pageNumber);
+                        OrderType[] orderList = getOrdersCall.getOrders();
+                        if (getOrdersCall.getReturnedReturnedOrderCountActual() > 0) {
+                            for (OrderType order : orderList) {
+                                // System.out.println("order: " + ++orderCount);
+                                // System.out.println("order id: " + order.getOrderID());
+                                log.error("同步订单： order id: " + order.getOrderID());
 
-                            // 保存订单信息，订单明细，订单邮寄地址等
-                            saveOrder(ebayApiConfigInfo, order);
+                                // 保存订单信息，订单明细，订单邮寄地址等
+                                saveOrder(ebayApiConfigInfo, order);
 
                             /*
 
@@ -97,10 +98,14 @@ public class OrderDownloader {
 
                             System.out.println();
                             */
+                            }
                         }
-                    }
 
-                } while (getOrdersCall.getReturnedHasMoreOrders());
+                    } while (getOrdersCall.getReturnedHasMoreOrders());
+                } catch (Exception exp) {
+                    log.fatal(exp);
+                    log.fatal(Arrays.toString(exp.getStackTrace()).replace(",", "\r\n"));
+                }
             }
         } catch (Exception exp) {
             log.fatal(exp);
