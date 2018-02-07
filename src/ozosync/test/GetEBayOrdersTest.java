@@ -127,7 +127,7 @@ public class GetEBayOrdersTest {
         // Convert ArrayList to String Array
         // String[] orderId = {"282625337606-1785863740018"};
 
-        String[] orderId = {"112504570655-1767730066001"};
+        String[] orderId = {"292197554394-1532682359019"};
 
         // Set it to the orderIdArrayType
         orderIdArray.setOrderID(orderId);
