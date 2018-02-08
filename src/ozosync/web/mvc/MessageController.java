@@ -1,17 +1,32 @@
 package ozosync.web.mvc;
 
+import com.ebay.sdk.ApiAccount;
+import com.ebay.sdk.ApiContext;
+import com.ebay.sdk.ApiCredential;
+import com.ebay.sdk.call.AddMemberMessageRTQCall;
+import com.ebay.soap.eBLBaseComponents.MemberMessageType;
+import com.ebay.soap.eBLBaseComponents.SiteCodeType;
+import java.util.HashMap;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.portlet.ModelAndView;
+import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
+import ozosync.domain.EBayApiConfigInfo;
+import ozosync.domain.MessageInfo;
 import ozosync.domain.StatusInfo;
 
 import java.util.List;
+import ozosync.domain.schema.EBayApiConfigSchema;
 
 @Controller
+@RequestMapping(value = "/message")
 public class MessageController {
 
     private Logger log = Logger.getLogger(MessageController.class);
@@ -21,18 +36,54 @@ public class MessageController {
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
     @SuppressWarnings("unchecked")
-    public String index() throws Exception {
+    public String index() {
 
         Session session = sessionFactory.getCurrentSession();
 
         List<StatusInfo> statusList = session.createCriteria(StatusInfo.class).list();
 
         return "home";
-
-
     }
 
-    private ApiContext getApiContextByConfig(EBayApiConfigInfo ebayApiConfigInfo) {
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/reply", method = RequestMethod.POST)
+    public ModelAndView reply(@RequestParam(value = "messageId") Long messageId) throws Exception {
+        Session session = sessionFactory.getCurrentSession();
+
+        session.createCriteria(MessageInfo.class).list();
+
+        MessageInfo messageInfo = (MessageInfo) session.get(MessageInfo.class, messageId);
+        ApiContext apiContext = getApiContextByShopId(messageInfo.getShopId());
+
+        AddMemberMessageRTQCall addMemberMessageRTQCall = new AddMemberMessageRTQCall(apiContext);
+        addMemberMessageRTQCall.setItemID(messageInfo.getItemId());
+
+        MemberMessageType memberMessage = new MemberMessageType();
+        memberMessage.setParentMessageID(messageInfo.getMessageId());
+        memberMessage.setRecipientID(new String[]{messageInfo.getSenderId()});
+        memberMessage.setSenderID(messageInfo.getRecipientId());
+        memberMessage.setDisplayToPublic(messageInfo.getDisplayToPublic() != 0);
+
+        memberMessage.setBody("这是回复消息的消息体");
+
+        addMemberMessageRTQCall.setMemberMessage(memberMessage);
+
+        addMemberMessageRTQCall.addMemberMessageRTQ();
+
+        return new ModelAndView(new MappingJackson2JsonView(), new HashMap<String, Object>() {{
+            put("success", true);
+            put("message", "hello world!");
+        }});
+    }
+
+    private ApiContext getApiContextByShopId(Long shopId) {
+        Session session = sessionFactory.getCurrentSession();
+
+        EBayApiConfigInfo ebayApiConfigInfo = (EBayApiConfigInfo) session.createCriteria(EBayApiConfigInfo.class)
+                .add(Restrictions.eq(EBayApiConfigSchema.shopId, shopId))
+                .setMaxResults(1)
+                .uniqueResult();
+
         ApiContext apiContext = new ApiContext();
 
         ApiCredential apiCredential = apiContext.getApiCredential();
