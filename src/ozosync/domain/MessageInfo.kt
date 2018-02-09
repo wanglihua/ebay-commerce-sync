@@ -1,5 +1,6 @@
 package ozosync.domain
 
+import org.apache.xpath.operations.Bool
 import org.hibernate.annotations.DynamicInsert
 import org.hibernate.annotations.DynamicUpdate
 import org.hibernate.annotations.Type
@@ -49,7 +50,7 @@ data class MessageInfo(
     var messageStatus: String = ""
 
     @Column(name = "display_to_public")
-    var displayToPublic: Short = 0
+    var displayToPublic: Boolean = false
 
     @Column(name = "message_type")
     var messageType: String = ""
@@ -70,6 +71,7 @@ data class MessageInfo(
     var subject: String = ""
 
     @Column(name = "body")
+    @Type(type = "text")
     var body: String = ""
 
     @Column(name = "status_id")

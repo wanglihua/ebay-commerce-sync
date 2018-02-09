@@ -47,11 +47,10 @@ public class MessageController {
 
     @SuppressWarnings("unchecked")
     @RequestMapping(value = "/reply", method = RequestMethod.POST)
-    public ModelAndView reply(@RequestParam(value = "messageId") Long messageId) throws Exception {
+    public ModelAndView reply(@RequestParam(value = "messageId") Long messageId, @RequestParam(value = "messageBody") String messageBody) throws Exception {
         Session session = sessionFactory.getCurrentSession();
 
-        session.createCriteria(MessageInfo.class).list();
-
+        /*
         MessageInfo messageInfo = (MessageInfo) session.get(MessageInfo.class, messageId);
         ApiContext apiContext = getApiContextByShopId(messageInfo.getShopId());
 
@@ -63,16 +62,15 @@ public class MessageController {
         memberMessage.setRecipientID(new String[]{messageInfo.getSenderId()});
         memberMessage.setSenderID(messageInfo.getRecipientId());
         memberMessage.setDisplayToPublic(messageInfo.getDisplayToPublic() != 0);
-
-        memberMessage.setBody("这是回复消息的消息体");
-
+        memberMessage.setBody(messageBody);
         addMemberMessageRTQCall.setMemberMessage(memberMessage);
 
         addMemberMessageRTQCall.addMemberMessageRTQ();
-
+        */
+        
         return new ModelAndView(new MappingJackson2JsonView(), new HashMap<String, Object>() {{
             put("success", true);
-            put("message", "hello world!");
+            put("message", "消息回复成功！");
         }});
     }
 
