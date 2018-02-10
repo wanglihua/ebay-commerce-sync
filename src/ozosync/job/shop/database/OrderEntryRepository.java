@@ -66,6 +66,7 @@ public class OrderEntryRepository {
                         OrderItemInfo orderItemInfo = (OrderItemInfo) session.createCriteria(OrderItemInfo.class)
                                 .add(Restrictions.eq(OrderItemSchema.orderId, orderInfo.getId()))
                                 .add(Restrictions.eq(OrderItemSchema.itemSku, productSku))
+                                .add(Restrictions.eq(OrderItemSchema.transactionId, transaction.getTransactionID()))
                                 .setMaxResults(1)
                                 .uniqueResult();
 
@@ -114,6 +115,7 @@ public class OrderEntryRepository {
                     OrderItemInfo orderItemInfo = (OrderItemInfo) session.createCriteria(OrderItemInfo.class)
                             .add(Restrictions.eq(OrderItemSchema.orderId, orderInfo.getId()))
                             .add(Restrictions.eq(OrderItemSchema.itemSku, itemSku))
+                            .add(Restrictions.eq(OrderItemSchema.transactionId, transaction.getTransactionID()))
                             .setMaxResults(1)
                             .uniqueResult();
 

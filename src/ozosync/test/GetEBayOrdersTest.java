@@ -127,7 +127,10 @@ public class GetEBayOrdersTest {
         // Convert ArrayList to String Array
         // String[] orderId = {"282625337606-1785863740018"};
 
-        String[] orderId = {"292197554394-1532682359019"};
+        // String[] orderId = {"263282741875-2165290522016"};
+
+        // 239569251013
+        String[] orderId = {"239569251013"};
 
         // Set it to the orderIdArrayType
         orderIdArray.setOrderID(orderId);
@@ -146,11 +149,12 @@ public class GetEBayOrdersTest {
             int transactionLength = transactionArray.getTransactionLength();
             for (int tranIndex = 0; tranIndex < transactionLength; tranIndex++) {
                 TransactionType transaction = transactionArray.getTransaction(tranIndex);
-                if (transaction.getFinalValueFee() != null) {
-                    System.out.println("final value fee is " + transaction.getFinalValueFee().getValue());
-                } else {
-                    System.out.println("final value fee is null");
-                }
+                System.out.println(transaction.getItem().getItemID());
+                System.out.println(transaction.getItem().getSKU());
+                System.out.println(transaction.getQuantityPurchased());
+                System.out.println(transaction.getOrderLineItemID());
+                System.out.println(transaction.getTransactionID());
+                System.out.println();
             }
         }
     }
