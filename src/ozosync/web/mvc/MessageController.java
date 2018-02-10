@@ -16,7 +16,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.portlet.ModelAndView;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 import ozosync.domain.EBayApiConfigInfo;
 import ozosync.domain.MessageInfo;
@@ -47,10 +47,10 @@ public class MessageController {
 
     @SuppressWarnings("unchecked")
     @RequestMapping(value = "/reply", method = RequestMethod.POST)
-    public ModelAndView reply(@RequestParam(value = "messageId") Long messageId, @RequestParam(value = "messageBody") String messageBody) throws Exception {
+    public ModelAndView reply(@RequestParam(value = "messageId") String messageId, @RequestParam(value = "messageBody") String messageBody) throws Exception {
         Session session = sessionFactory.getCurrentSession();
 
-        /*
+
         MessageInfo messageInfo = (MessageInfo) session.get(MessageInfo.class, messageId);
         ApiContext apiContext = getApiContextByShopId(messageInfo.getShopId());
 
@@ -61,13 +61,23 @@ public class MessageController {
         memberMessage.setParentMessageID(messageInfo.getMessageId());
         memberMessage.setRecipientID(new String[]{messageInfo.getSenderId()});
         memberMessage.setSenderID(messageInfo.getRecipientId());
-        memberMessage.setDisplayToPublic(messageInfo.getDisplayToPublic() != 0);
+        memberMessage.setDisplayToPublic(messageInfo.getDisplayToPublic());
         memberMessage.setBody(messageBody);
         addMemberMessageRTQCall.setMemberMessage(memberMessage);
 
         addMemberMessageRTQCall.addMemberMessageRTQ();
-        */
-        
+
+        return new ModelAndView(new MappingJackson2JsonView(), new HashMap<String, Object>() {{
+            put("success", true);
+            put("message", "消息回复成功！");
+        }});
+    }
+
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/test", method = RequestMethod.GET)
+    public ModelAndView test() throws Exception {
+        Session session = sessionFactory.getCurrentSession();
+
         return new ModelAndView(new MappingJackson2JsonView(), new HashMap<String, Object>() {{
             put("success", true);
             put("message", "消息回复成功！");

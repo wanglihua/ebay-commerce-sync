@@ -1,11 +1,9 @@
 package ozosync.domain
 
-import org.apache.xpath.operations.Bool
 import org.hibernate.annotations.DynamicInsert
 import org.hibernate.annotations.DynamicUpdate
 import org.hibernate.annotations.Type
 import ozosync.common.VerboseName
-import java.math.BigDecimal
 import java.util.*
 import javax.persistence.Column
 import javax.persistence.Entity
