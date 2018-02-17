@@ -73,17 +73,6 @@ public class MessageController {
         }});
     }
 
-    @SuppressWarnings("unchecked")
-    @RequestMapping(value = "/test", method = RequestMethod.GET)
-    public ModelAndView test() throws Exception {
-        Session session = sessionFactory.getCurrentSession();
-
-        return new ModelAndView(new MappingJackson2JsonView(), new HashMap<String, Object>() {{
-            put("success", true);
-            put("message", "消息回复成功！");
-        }});
-    }
-
     private ApiContext getApiContextByShopId(Long shopId) {
         Session session = sessionFactory.getCurrentSession();
 
