@@ -11,6 +11,7 @@ import com.ebay.soap.eBLBaseComponents.PaginationType;
 import com.ebay.soap.eBLBaseComponents.SiteCodeType;
 import com.ebay.soap.eBLBaseComponents.TradingRoleCodeType;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import org.apache.log4j.Logger;
 import org.hibernate.SessionFactory;
@@ -48,13 +49,21 @@ public class OrderDownloader {
                         getOrdersCall.getPagination().setPageNumber(++pageNumber);
                         OrderType[] orderList = getOrdersCall.getOrders();
                         if (getOrdersCall.getReturnedReturnedOrderCountActual() > 0) {
-                            for (OrderType order : orderList) {
+                            for (OrderType orderDownload : orderList) {
                                 // System.out.println("order: " + ++orderCount);
                                 // System.out.println("order id: " + order.getOrderID());
-                                log.error("同步订单： order id: " + order.getOrderID());
+                                log.error("同步订单： order id: " + orderDownload.getOrderID());
+
+                                if (orderDownload.getPaidTime() != null) {
+                                    long payDays = (new Date().getTime() - orderDownload.getPaidTime().getTime().getTime()) / (1000 * 24 * 3600);
+                                    if (payDays > 10) { // 支付时间超过了 10 天
+                                        log.error("忽略10天前支付的订单");
+                                        continue;
+                                    }
+                                }
 
                                 // 保存订单信息，订单明细，订单邮寄地址等
-                                saveOrder(ebayApiConfigInfo, order);
+                                saveOrder(ebayApiConfigInfo, orderDownload);
 
                             /*
 
