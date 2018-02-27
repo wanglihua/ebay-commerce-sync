@@ -15,6 +15,7 @@ public class TestUtil {
 
         // eBay ozo.estore
 
+        /*
         ApiAccount apiAccount = new ApiAccount();
         apiAccount.setApplication("***REMOVED***");
         apiAccount.setCertificate("***REMOVED***");
@@ -23,7 +24,7 @@ public class TestUtil {
         cred.setApiAccount(apiAccount);
         cred.seteBayToken("***REMOVED***");
         apiContext.setApiServerUrl("https://api.ebay.com/wsapi");
-
+        */
 
         // ozmart.living
         /*
@@ -38,14 +39,12 @@ public class TestUtil {
         */
 
         // ozo.online
-        /*
         ApiAccount apiAccount = new ApiAccount();
         apiAccount.setApplication("***REMOVED***");
         apiAccount.setCertificate("***REMOVED***");
         apiAccount.setDeveloper("***REMOVED***");
         cred.seteBayToken("***REMOVED***");
         apiContext.setApiServerUrl("https://api.ebay.com/wsapi");
-        */
 
         // x.warrior
         /*

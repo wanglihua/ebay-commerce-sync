@@ -155,7 +155,9 @@ public class OrderRepository {
 
             // 有可能是新增的订单（最有可能），或者是原来 已创建 的状态过来的。这时支付时间不为空
             if (statusId < OrderStatus.ID_YZF
-                    && orderDownload.getPaidTime() != null) {
+                    && orderDownload.getPaidTime() != null
+                    && orderDownload.getCheckoutStatus().getStatus() != CompleteStatusCodeType.INCOMPLETE
+                    && orderDownload.getCheckoutStatus().getStatus() != CompleteStatusCodeType.PENDING) {
                 // && orderDownload.getCheckoutStatus().getStatus() == CompleteStatusCodeType.COMPLETE) { // statusId < OrderStatus.ORDER_STATUS_YZF 这个状态检查不能少，否则 待配货，已发货的状态可能会被覆盖
                 orderInDb.setStatusId(OrderStatus.ID_YZF); // 这个状态，有可能会被接下来的状态逻辑所修改，可能会，更进一步改成 “已完成”
             }

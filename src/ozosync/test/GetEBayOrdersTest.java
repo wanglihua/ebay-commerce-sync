@@ -124,15 +124,8 @@ public class GetEBayOrdersTest {
         getOrders.setIncludeFinalValueFee(true);
 
         OrderIDArrayType orderIdArray = new OrderIDArrayType();
-        // Convert ArrayList to String Array
-        // String[] orderId = {"282625337606-1785863740018"};
 
-        // String[] orderId = {"263282741875-2165290522016"};
-
-        // 239569251013
-        String[] orderId = {"239569251013"};
-
-        // Set it to the orderIdArrayType
+        String[] orderId = {"292182434156-1538542877019"};
         orderIdArray.setOrderID(orderId);
 
         getOrders.setOrderIDArray(orderIdArray);
