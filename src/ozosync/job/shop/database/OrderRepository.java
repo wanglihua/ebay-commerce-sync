@@ -27,6 +27,7 @@ public class OrderRepository {
 
 
     public OrderInfo saveOrder(Session session, OrderType orderDownload, EBayApiConfigInfo apiConfigInfo) {
+        String ebayOrderId = orderDownload.getOrderID();
         String orderCode = orderDownload.getOrderID();
         String[] orderCodeSplitArray = orderCode.split("-");
         if (orderCodeSplitArray.length > 1 && orderCodeSplitArray[1].length() >= 13) {
@@ -46,6 +47,7 @@ public class OrderRepository {
         // 只同步已支付及之前的订单内容
         if (statusId <= OrderStatus.ID_YZF) {
             orderInDb.setCode(orderCode);
+            orderInDb.setEbayOrderId(ebayOrderId);
             orderInDb.setShopId(apiConfigInfo.getShopId());
             orderInDb.setTranId(orderDownload.getShippingDetails().getSellingManagerSalesRecordNumber().toString());
 

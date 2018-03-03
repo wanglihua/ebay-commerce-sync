@@ -24,6 +24,9 @@ data class OrderInfo(
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         var id: Long = 0) {
 
+    @Column(name = "ebay_order_id")
+    var ebayOrderId: String = ""
+
     @Column(name = "shop_id")
     var shopId: Long = 0
 
