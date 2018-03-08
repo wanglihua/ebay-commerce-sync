@@ -230,6 +230,9 @@ data class OrderInfo(
     @VerboseName("利润RMB")
     var cancelStatusId: Long = 0
 
+    @Column(name = "is_ebay_ship")
+    var ebayShip: Long = 0
+
     @Column(name = "create_time")
     @Type(type = "timestamp")
     @VerboseName("创建时间")

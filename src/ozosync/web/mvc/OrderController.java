@@ -4,6 +4,7 @@ import com.ebay.sdk.ApiContext;
 import com.ebay.sdk.call.CompleteSaleCall;
 import com.ebay.soap.eBLBaseComponents.ShipmentTrackingDetailsType;
 import com.ebay.soap.eBLBaseComponents.ShipmentType;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import org.apache.log4j.Logger;
@@ -69,27 +70,39 @@ public class OrderController {
         }
 
         for (OrderInfo orderInfo : orderInfoList) {
-			// 上传时进行捕获异常，如果一个失败了，可以进行下一个，设置订单的已上传标记
+            // 上传时进行捕获异常，如果一个失败了，可以进行下一个，设置订单的已上传标记
+            try {
 
-            LogisticsCompanyInfo logisticsCompanyInfo = (LogisticsCompanyInfo) session.get(LogisticsCompanyInfo.class, orderInfo.getCompanyId());
+                LogisticsCompanyInfo logisticsCompanyInfo = (LogisticsCompanyInfo) session.get(LogisticsCompanyInfo.class, orderInfo.getCompanyId());
 
-            ApiContext apiContext = apiContextService.getApiContextByShopId(orderInfo.getShopId());
+                ApiContext apiContext = apiContextService.getApiContextByShopId(orderInfo.getShopId());
 
-            CompleteSaleCall completeSaleCall = new CompleteSaleCall(apiContext);
+                CompleteSaleCall completeSaleCall = new CompleteSaleCall(apiContext);
 
-            completeSaleCall.setOrderID(orderInfo.getEbayOrderId());
-            completeSaleCall.setShipped(true);
+                completeSaleCall.setOrderID(orderInfo.getEbayOrderId());
+                completeSaleCall.setShipped(true);
 
-            ShipmentType shipmentType = new ShipmentType();
+                ShipmentType shipmentType = new ShipmentType();
 
-            ShipmentTrackingDetailsType shipmentTrackingDetailsType = new ShipmentTrackingDetailsType();
-            shipmentTrackingDetailsType.setShipmentTrackingNumber(orderInfo.getWaybillNumber());
-            shipmentTrackingDetailsType.setShippingCarrierUsed(logisticsCompanyInfo.getEbayName());
+                ShipmentTrackingDetailsType shipmentTrackingDetailsType = new ShipmentTrackingDetailsType();
+                shipmentTrackingDetailsType.setShipmentTrackingNumber(orderInfo.getWaybillNumber());
+                shipmentTrackingDetailsType.setShippingCarrierUsed(logisticsCompanyInfo.getEbayName());
 
-            shipmentType.setShipmentTrackingDetails(new ShipmentTrackingDetailsType[]{shipmentTrackingDetailsType});
+                shipmentType.setShipmentTrackingDetails(new ShipmentTrackingDetailsType[]{shipmentTrackingDetailsType});
 
-            completeSaleCall.setShipment(shipmentType);
+                completeSaleCall.setShipment(shipmentType);
+
+                orderInfo.setEbayShip(1);
+                session.update(orderInfo);
+                session.flush();
+
+            } catch (Exception exp) {
+                log.fatal(exp);
+                log.fatal(Arrays.toString(exp.getStackTrace()).replace(",", "\r\n"));
+            }
         }
+
+        session.flush();
 
         return new ModelAndView(new MappingJackson2JsonView(), new HashMap<String, Object>() {{
             put("success", true);
