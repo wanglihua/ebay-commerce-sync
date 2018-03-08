@@ -69,7 +69,7 @@ public class OrderController {
         }
 
         for (OrderInfo orderInfo : orderInfoList) {
-			// 上传时进行捕获异常，如果一个失败了，可以进行下一个
+			// 上传时进行捕获异常，如果一个失败了，可以进行下一个，设置订单的已上传标记
 
             LogisticsCompanyInfo logisticsCompanyInfo = (LogisticsCompanyInfo) session.get(LogisticsCompanyInfo.class, orderInfo.getCompanyId());
 
