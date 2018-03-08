@@ -69,6 +69,8 @@ public class OrderController {
         }
 
         for (OrderInfo orderInfo : orderInfoList) {
+			// 上传时进行捕获异常，如果一个失败了，可以进行下一个
+
             LogisticsCompanyInfo logisticsCompanyInfo = (LogisticsCompanyInfo) session.get(LogisticsCompanyInfo.class, orderInfo.getCompanyId());
 
             ApiContext apiContext = apiContextService.getApiContextByShopId(orderInfo.getShopId());
