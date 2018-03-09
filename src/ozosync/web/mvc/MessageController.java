@@ -31,7 +31,7 @@ public class MessageController {
 
     @SuppressWarnings("unchecked")
     @RequestMapping(value = "/reply", method = RequestMethod.POST)
-    public ModelAndView reply(@RequestParam(value = "messageId") String messageId, @RequestParam(value = "messageBody") String messageBody) throws Exception {
+    public ModelAndView reply(@RequestParam(value = "messageId") Long messageId, @RequestParam(value = "messageBody") String messageBody) throws Exception {
         Session session = sessionFactory.getCurrentSession();
 
 
