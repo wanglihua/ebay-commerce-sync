@@ -92,7 +92,7 @@ public class OrderController {
 
                 completeSaleCall.setShipment(shipmentType);
 
-                orderInfo.setEbayShip(1);
+                orderInfo.setEbayShip(1L);
                 session.update(orderInfo);
                 session.flush();
 

@@ -39,6 +39,15 @@ public class TestUtil {
         */
 
         // ozo.online
+
+        ApiAccount apiAccount = new ApiAccount();
+        apiAccount.setApplication("***REMOVED***");
+        apiAccount.setCertificate("***REMOVED***");
+        apiAccount.setDeveloper("***REMOVED***");
+        cred.seteBayToken("***REMOVED***");
+        apiContext.setApiServerUrl("https://api.ebay.com/wsapi");
+
+        // x.warrior
         /*
         ApiAccount apiAccount = new ApiAccount();
         apiAccount.setApplication("***REMOVED***");
@@ -47,14 +56,6 @@ public class TestUtil {
         cred.seteBayToken("***REMOVED***");
         apiContext.setApiServerUrl("https://api.ebay.com/wsapi");
         */
-
-        // x.warrior
-        ApiAccount apiAccount = new ApiAccount();
-        apiAccount.setApplication("***REMOVED***");
-        apiAccount.setCertificate("***REMOVED***");
-        apiAccount.setDeveloper("***REMOVED***");
-        cred.seteBayToken("***REMOVED***");
-        apiContext.setApiServerUrl("https://api.ebay.com/wsapi");
 
         // giantstarau
         /*

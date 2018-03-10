@@ -231,7 +231,7 @@ data class OrderInfo(
     var cancelStatusId: Long = 0
 
     @Column(name = "is_ebay_ship")
-    var ebayShip: Long = 0
+    var ebayShip: Long? = 0
 
     @Column(name = "create_time")
     @Type(type = "timestamp")
