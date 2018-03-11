@@ -1,9 +1,5 @@
 package ozosync.web.mvc;
 
-import com.ebay.sdk.ApiContext;
-import com.ebay.sdk.call.CompleteSaleCall;
-import com.ebay.soap.eBLBaseComponents.ShipmentTrackingDetailsType;
-import com.ebay.soap.eBLBaseComponents.ShipmentType;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +18,7 @@ import ozosync.domain.LogisticsCompanyInfo;
 import ozosync.domain.OrderInfo;
 import ozosync.domain.schema.OrderSchema;
 import ozosync.service.ApiContextService;
+import ozosync.service.OrderService;
 
 @Controller
 @RequestMapping(value = "/order")
@@ -34,6 +31,9 @@ public class OrderController {
 
     @Autowired
     private SessionFactory sessionFactory;
+
+    @Autowired
+    private OrderService orderService;
 
     @SuppressWarnings("unchecked")
     @RequestMapping(value = "/ship", method = RequestMethod.POST)
@@ -72,30 +72,7 @@ public class OrderController {
         for (OrderInfo orderInfo : orderInfoList) {
             // 上传时进行捕获异常，如果一个失败了，可以进行下一个，设置订单的已上传标记
             try {
-
-                LogisticsCompanyInfo logisticsCompanyInfo = (LogisticsCompanyInfo) session.get(LogisticsCompanyInfo.class, orderInfo.getCompanyId());
-
-                ApiContext apiContext = apiContextService.getApiContextByShopId(orderInfo.getShopId());
-
-                CompleteSaleCall completeSaleCall = new CompleteSaleCall(apiContext);
-
-                completeSaleCall.setOrderID(orderInfo.getEbayOrderId());
-                completeSaleCall.setShipped(true);
-
-                ShipmentType shipmentType = new ShipmentType();
-
-                ShipmentTrackingDetailsType shipmentTrackingDetailsType = new ShipmentTrackingDetailsType();
-                shipmentTrackingDetailsType.setShipmentTrackingNumber(orderInfo.getWaybillNumber());
-                shipmentTrackingDetailsType.setShippingCarrierUsed(logisticsCompanyInfo.getEbayName());
-
-                shipmentType.setShipmentTrackingDetails(new ShipmentTrackingDetailsType[]{shipmentTrackingDetailsType});
-
-                completeSaleCall.setShipment(shipmentType);
-
-                orderInfo.setEbayShip(1L);
-                session.update(orderInfo);
-                session.flush();
-
+                orderService.ship(orderInfo);
             } catch (Exception exp) {
                 log.fatal(exp);
                 log.fatal(Arrays.toString(exp.getStackTrace()).replace(",", "\r\n"));
