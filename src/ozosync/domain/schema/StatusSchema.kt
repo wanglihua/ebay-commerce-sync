@@ -4,7 +4,7 @@ object StatusSchema {
     const val name = "name"
     const val id = "id"
     const val type = "type"
-    const val desc = "desc"
     const val createTime = "createTime"
+    const val desc = "desc"
     const val updateTime = "updateTime"
 }

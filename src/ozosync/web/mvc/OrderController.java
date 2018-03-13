@@ -1,5 +1,6 @@
 package ozosync.web.mvc;
 
+import com.ebay.soap.eBLBaseComponents.OrderType;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -14,8 +15,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
+import ozosync.domain.CombineOrderInfo;
 import ozosync.domain.LogisticsCompanyInfo;
 import ozosync.domain.OrderInfo;
+import ozosync.domain.OrderTypeId;
+import ozosync.domain.schema.CombineOrderSchema;
 import ozosync.domain.schema.OrderSchema;
 import ozosync.service.ApiContextService;
 import ozosync.service.OrderService;
@@ -72,7 +76,18 @@ public class OrderController {
         for (OrderInfo orderInfo : orderInfoList) {
             // 上传时进行捕获异常，如果一个失败了，可以进行下一个，设置订单的已上传标记
             try {
-                orderService.ship(orderInfo);
+                if (orderInfo.getTypeId() == OrderTypeId.HBDD) { // 处理合并订单的状态上传
+                    List<CombineOrderInfo> combinedOrderInfoList = (List<CombineOrderInfo>) session.createCriteria(CombineOrderInfo.class)
+                            .add(Restrictions.eq(CombineOrderSchema.orderId, orderInfo.getId()))
+                            .list();
+
+                    for (CombineOrderInfo combineOrderInfo : combinedOrderInfoList) {
+                        OrderInfo combinedOrderInfo = (OrderInfo) session.get(OrderInfo.class, combineOrderInfo.getSubOrderId());
+                        orderService.ship(combinedOrderInfo);
+                    }
+                } else {
+                    orderService.ship(orderInfo);
+                }
             } catch (Exception exp) {
                 log.fatal(exp);
                 log.fatal(Arrays.toString(exp.getStackTrace()).replace(",", "\r\n"));

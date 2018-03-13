@@ -16,4 +16,7 @@ object OrderTypeId {
 
     // 导入订单
     const val DRDD: Long = 1050
+
+    // 被合并订单
+    const val BHDD: Long = 1070
 }
