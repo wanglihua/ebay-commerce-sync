@@ -1,6 +1,5 @@
 package ozosync.web.mvc;
 
-import com.ebay.soap.eBLBaseComponents.OrderType;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;

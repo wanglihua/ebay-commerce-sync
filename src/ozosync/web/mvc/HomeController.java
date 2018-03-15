@@ -24,6 +24,9 @@ public class HomeController {
     @SuppressWarnings("unchecked")
     public ModelAndView index() throws Exception {
 
+        log.debug("home debug info");
+        log.error("home error info");
+
         return new ModelAndView("home", new HashMap<String, Object>() {{
         }});
     }
