@@ -29,8 +29,6 @@ public class OrderService {
         try {
             Session session = sessionFactory.getCurrentSession();
 
-            LogisticsCompanyInfo logisticsCompanyInfo = (LogisticsCompanyInfo) session.get(LogisticsCompanyInfo.class, orderInfo.getCompanyId());
-
             ApiContext apiContext = apiContextService.getApiContextByShopId(orderInfo.getShopId());
 
             CompleteSaleCall completeSaleCall = new CompleteSaleCall(apiContext);
@@ -38,15 +36,19 @@ public class OrderService {
             completeSaleCall.setOrderID(orderInfo.getEbayOrderId());
             completeSaleCall.setShipped(true);
 
-            ShipmentType shipmentType = new ShipmentType();
+            if (orderInfo.getCompanyId() != 0) {
+                LogisticsCompanyInfo logisticsCompanyInfo = (LogisticsCompanyInfo) session.get(LogisticsCompanyInfo.class, orderInfo.getCompanyId());
 
-            ShipmentTrackingDetailsType shipmentTrackingDetailsType = new ShipmentTrackingDetailsType();
-            shipmentTrackingDetailsType.setShipmentTrackingNumber(orderInfo.getWaybillNumber());
-            shipmentTrackingDetailsType.setShippingCarrierUsed(logisticsCompanyInfo.getEbayName());
+                ShipmentType shipmentType = new ShipmentType();
 
-            shipmentType.setShipmentTrackingDetails(new ShipmentTrackingDetailsType[]{shipmentTrackingDetailsType});
+                ShipmentTrackingDetailsType shipmentTrackingDetailsType = new ShipmentTrackingDetailsType();
+                shipmentTrackingDetailsType.setShipmentTrackingNumber(orderInfo.getWaybillNumber());
+                shipmentTrackingDetailsType.setShippingCarrierUsed(logisticsCompanyInfo.getEbayName());
 
-            completeSaleCall.setShipment(shipmentType);
+                shipmentType.setShipmentTrackingDetails(new ShipmentTrackingDetailsType[]{shipmentTrackingDetailsType});
+
+                completeSaleCall.setShipment(shipmentType);
+            }
 
             completeSaleCall.completeSale();
 
