@@ -56,12 +56,24 @@ public class OrderController {
                 .list();
 
         for (OrderInfo orderInfo : orderInfoList) {
+            /* 改成物流公司和运单号为空的时候也可以
             if (orderInfo.getCompanyId() == 0 || orderInfo.getWaybillNumber() == null || orderInfo.getWaybillNumber().equals("")) {
                 return new ModelAndView(new MappingJackson2JsonView(), new HashMap<String, Object>() {{
                     put("success", false);
                     put("message", "订单货运公司或货运单号未设置！");
                 }});
             } else {
+                LogisticsCompanyInfo logisticsCompanyInfo = (LogisticsCompanyInfo) session.get(LogisticsCompanyInfo.class, orderInfo.getCompanyId());
+                if (logisticsCompanyInfo == null) {
+                    return new ModelAndView(new MappingJackson2JsonView(), new HashMap<String, Object>() {{
+                        put("success", false);
+                        put("message", "订单指定的货运公司不存在！");
+                    }});
+                }
+            }
+            */
+
+            if (orderInfo.getCompanyId() != 0) {
                 LogisticsCompanyInfo logisticsCompanyInfo = (LogisticsCompanyInfo) session.get(LogisticsCompanyInfo.class, orderInfo.getCompanyId());
                 if (logisticsCompanyInfo == null) {
                     return new ModelAndView(new MappingJackson2JsonView(), new HashMap<String, Object>() {{
