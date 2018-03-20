@@ -47,6 +47,7 @@ public class OrderService {
             shipmentType.setShipmentTrackingDetails(new ShipmentTrackingDetailsType[]{shipmentTrackingDetailsType});
 
             completeSaleCall.setShipment(shipmentType);
+
             completeSaleCall.completeSale();
 
             orderInfo.setEbayShip(1L);
