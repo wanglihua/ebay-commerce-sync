@@ -40,7 +40,7 @@ public class ApiContextService {
         apiCredential.seteBayToken(ebayApiConfigInfo.getToken());
         apiContext.setApiServerUrl("https://api.ebay.com/wsapi");
 
-        apiContext.getApiLogging().setLogSOAPMessages(true);
+        apiContext.getApiLogging().setLogSOAPMessages(false);
 
         apiContext.setSite(SiteCodeType.AUSTRALIA);
 

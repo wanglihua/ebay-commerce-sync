@@ -137,7 +137,7 @@ public class OrderDownloader {
         apiCredential.seteBayToken(ebayApiConfigInfo.getToken());
         apiContext.setApiServerUrl("https://api.ebay.com/wsapi");
 
-        apiContext.getApiLogging().setLogSOAPMessages(true);// This will log SOAP requests and responses
+        apiContext.getApiLogging().setLogSOAPMessages(false);// This will log SOAP requests and responses
 
         apiContext.setSite(SiteCodeType.AUSTRALIA);
 

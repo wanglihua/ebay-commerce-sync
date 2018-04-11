@@ -127,7 +127,7 @@ public class GetEBayOrdersTest {
 
         // String[] orderId = {"292357944459-1546222564019"};
         // 282629417143-1809437553018
-        String[] orderId = {"282629417143-1809437553018"};
+        String[] orderId = {"253133739802-2224901505015"};
         orderIdArray.setOrderID(orderId);
 
         getOrders.setOrderIDArray(orderIdArray);
