@@ -2,16 +2,10 @@ package ozosync.domain.schema
 
 object OrderItemSchema {
     const val id = "id"
-    const val orderId = "orderId"
-    const val createTime = "createTime"
-    const val desc = "desc"
-    const val updateTime = "updateTime"
-    const val itemId = "itemId"
     const val quantity = "quantity"
     const val transactionId = "transactionId"
     const val itemProductId = "itemProductId"
     const val itemSku = "itemSku"
-    const val orderLineItemId = "orderLineItemId"
     const val transactionPriceCurrency = "transactionPriceCurrency"
     const val transactionPrice = "transactionPrice"
     const val transactionPriceRmb = "transactionPriceRmb"
@@ -22,4 +16,10 @@ object OrderItemSchema {
     const val costPrice = "costPrice"
     const val grossProfit = "grossProfit"
     const val createdDate = "createdDate"
+    const val orderId = "orderId"
+    const val createTime = "createTime"
+    const val updateTime = "updateTime"
+    const val desc = "desc"
+    const val itemId = "itemId"
+    const val orderLineItemId = "orderLineItemId"
 }

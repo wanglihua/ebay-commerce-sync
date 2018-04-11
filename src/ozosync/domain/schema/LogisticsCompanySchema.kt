@@ -4,11 +4,11 @@ object LogisticsCompanySchema {
     const val name = "name"
     const val id = "id"
     const val createTime = "createTime"
-    const val desc = "desc"
     const val updateTime = "updateTime"
     const val statusId = "statusId"
+    const val addressSpecialWord = "addressSpecialWord"
+    const val desc = "desc"
     const val iconFile = "iconFile"
     const val ord = "ord"
     const val ebayName = "ebayName"
-    const val addressSpecialWord = "addressSpecialWord"
 }

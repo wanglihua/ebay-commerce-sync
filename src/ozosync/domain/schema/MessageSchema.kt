@@ -3,9 +3,11 @@ package ozosync.domain.schema
 object MessageSchema {
     const val id = "id"
     const val createTime = "createTime"
-    const val shopId = "shopId"
     const val updateTime = "updateTime"
     const val statusId = "statusId"
+    const val lastModifiedDate = "lastModifiedDate"
+    const val displayToPublic = "displayToPublic"
+    const val shopId = "shopId"
     const val messageId = "messageId"
     const val productId = "productId"
     const val itemId = "itemId"
@@ -19,6 +21,4 @@ object MessageSchema {
     const val senderId = "senderId"
     const val subject = "subject"
     const val body = "body"
-    const val lastModifiedDate = "lastModifiedDate"
-    const val displayToPublic = "displayToPublic"
 }
