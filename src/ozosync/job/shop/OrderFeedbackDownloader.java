@@ -3,8 +3,13 @@ package ozosync.job.shop;
 import com.ebay.sdk.ApiAccount;
 import com.ebay.sdk.ApiContext;
 import com.ebay.sdk.ApiCredential;
+import com.ebay.sdk.call.GetFeedbackCall;
+import com.ebay.soap.eBLBaseComponents.DetailLevelCodeType;
+import com.ebay.soap.eBLBaseComponents.FeedbackDetailType;
+import com.ebay.soap.eBLBaseComponents.FeedbackTypeCodeType;
 import com.ebay.soap.eBLBaseComponents.SiteCodeType;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import org.apache.log4j.Logger;
 import org.hibernate.FlushMode;
@@ -22,8 +27,6 @@ public class OrderFeedbackDownloader {
     private Logger log = Logger.getLogger(OrderFeedbackDownloader.class);
 
     private SessionFactory sessionFactory = null;
-
-    private final int NUMBER_OF_DAY = 1;
 
     public OrderFeedbackDownloader(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
@@ -88,11 +91,33 @@ WHERE o.seller_user_id <> ''
                 sb.append("      AND of.id IS NULL\n\r");
                 sb.append("      AND o.paid_time > DATE_ADD(now(), INTERVAL -30 DAY);\n\r");
 
-                String sql_get_order_item_list = sb.toString();
                 List item_list = session.createSQLQuery(sb.toString()).list();
                 for (Object item : item_list) {
                     Object[] itemArray = (Object[]) item;
                     Long orderId = (Long) itemArray[0];
+                    String appId = (String) itemArray[1];
+                    String certId = (String) itemArray[2];
+                    String devId = (String) itemArray[3];
+                    String token = (String) itemArray[4];
+                    String sellerUserId = (String) itemArray[5];
+                    String orderItemId = (String) itemArray[6];
+                    String orderLineItemId = (String) itemArray[7];
+
+                    ApiContext apiContext = getApiContextByConfig(appId, certId, devId, token);
+
+                    GetFeedbackCall getFeedbackCall = new GetFeedbackCall(apiContext);
+                    getFeedbackCall.setUserID(sellerUserId);
+                    getFeedbackCall.addDetailLevel(DetailLevelCodeType.RETURN_ALL);
+                    getFeedbackCall.setFeedbackType(FeedbackTypeCodeType.FEEDBACK_RECEIVED_AS_SELLER);
+                    getFeedbackCall.setOrderLineItemID(orderLineItemId);
+
+                    FeedbackDetailType[] feedbackDetailTypes = getFeedbackCall.getFeedback();
+
+                    if (feedbackDetailTypes != null && feedbackDetailTypes.length != 0) {
+                        FeedbackDetailType feedbackDetailType = feedbackDetailTypes[0];
+
+                        Date commentTime = feedbackDetailType.getCommentTime().getTime();
+                    }
                 }
 
             } catch (Exception ex) {
@@ -108,27 +133,25 @@ WHERE o.seller_user_id <> ''
                     TransactionSynchronizationManager.unbindResource(sessionFactory);
                 }
             }
-
-
         } catch (Exception exp) {
             log.fatal(exp);
             log.fatal(Arrays.toString(exp.getStackTrace()).replace(",", "\r\n"));
         }
     }
 
-    private ApiContext getApiContextByConfig(EBayApiConfigInfo ebayApiConfigInfo) {
+    private ApiContext getApiContextByConfig(String appId, String certId, String devId, String token) {
         ApiContext apiContext = new ApiContext();
 
         ApiCredential apiCredential = apiContext.getApiCredential();
 
         ApiAccount apiAccount = new ApiAccount();
-        apiAccount.setApplication(ebayApiConfigInfo.getAppId());
-        apiAccount.setCertificate(ebayApiConfigInfo.getCertId());
-        apiAccount.setDeveloper(ebayApiConfigInfo.getDevId());
+        apiAccount.setApplication(appId);
+        apiAccount.setCertificate(certId);
+        apiAccount.setDeveloper(devId);
 
         apiCredential.setApiAccount(apiAccount);
 
-        apiCredential.seteBayToken(ebayApiConfigInfo.getToken());
+        apiCredential.seteBayToken(token);
         apiContext.setApiServerUrl("https://api.ebay.com/wsapi");
 
         apiContext.getApiLogging().setLogSOAPMessages(false);// This will log SOAP requests and responses
