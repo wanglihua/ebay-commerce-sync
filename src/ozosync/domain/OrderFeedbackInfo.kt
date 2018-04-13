@@ -35,6 +35,9 @@ data class OrderFeedbackInfo(
     @Column(name = "comment_text")
     var commentText: String = ""
 
+    @Column(name = "comment_time")
+    var commentTime: Date = Date()
+
     @Column(name = "create_time")
     @Type(type = "timestamp")
     var createTime: Date = Date()

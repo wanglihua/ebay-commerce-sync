@@ -4,6 +4,7 @@ import com.ebay.sdk.ApiAccount;
 import com.ebay.sdk.ApiContext;
 import com.ebay.sdk.ApiCredential;
 import com.ebay.sdk.call.GetFeedbackCall;
+import com.ebay.soap.eBLBaseComponents.CommentTypeCodeType;
 import com.ebay.soap.eBLBaseComponents.DetailLevelCodeType;
 import com.ebay.soap.eBLBaseComponents.FeedbackDetailType;
 import com.ebay.soap.eBLBaseComponents.FeedbackTypeCodeType;
@@ -16,11 +17,16 @@ import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.orm.hibernate4.SessionFactoryUtils;
 import org.springframework.orm.hibernate4.SessionHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import ozosync.domain.EBayApiConfigInfo;
+import ozosync.domain.NowTimeInfo;
+import ozosync.domain.OrderFeedbackInfo;
+import ozosync.domain.schema.OrderFeedbackSchema;
 
 public class OrderFeedbackDownloader {
 
@@ -100,7 +106,7 @@ WHERE o.seller_user_id <> ''
                     String devId = (String) itemArray[3];
                     String token = (String) itemArray[4];
                     String sellerUserId = (String) itemArray[5];
-                    String orderItemId = (String) itemArray[6];
+                    Long orderItemId = (Long) itemArray[6];
                     String orderLineItemId = (String) itemArray[7];
 
                     ApiContext apiContext = getApiContextByConfig(appId, certId, devId, token);
@@ -116,7 +122,33 @@ WHERE o.seller_user_id <> ''
                     if (feedbackDetailTypes != null && feedbackDetailTypes.length != 0) {
                         FeedbackDetailType feedbackDetailType = feedbackDetailTypes[0];
 
-                        Date commentTime = feedbackDetailType.getCommentTime().getTime();
+                        OrderFeedbackInfo orderFeedbackInfo = (OrderFeedbackInfo) session.createCriteria(OrderFeedbackInfo.class)
+                                .add(Restrictions.eq(OrderFeedbackSchema.orderId, orderId))
+                                .add(Restrictions.eq(OrderFeedbackSchema.orderItemId, orderItemId))
+                                .uniqueResult();
+
+                        if (orderFeedbackInfo == null) {
+                            orderFeedbackInfo = new OrderFeedbackInfo();
+                        }
+
+                        orderFeedbackInfo.setOrderId(orderId);
+                        orderFeedbackInfo.setOrderItemId(orderItemId);
+
+                        CommentTypeCodeType commentTypeCodeType = feedbackDetailType.getCommentType();
+
+                        if (commentTypeCodeType == CommentTypeCodeType.NEGATIVE) {
+                            orderFeedbackInfo.setCommentType(1);
+                        } else if (commentTypeCodeType == CommentTypeCodeType.NEUTRAL) {
+                            orderFeedbackInfo.setCommentType(2);
+                        } else if (commentTypeCodeType == CommentTypeCodeType.POSITIVE) {
+                            orderFeedbackInfo.setCommentType(3);
+                        }
+
+                        orderFeedbackInfo.setCommentTime(feedbackDetailType.getCommentTime().getTime());
+                        orderFeedbackInfo.setUpdateTime(new Date());
+
+                        session.saveOrUpdate(orderFeedbackInfo);
+                        session.flush();
                     }
                 }
 
