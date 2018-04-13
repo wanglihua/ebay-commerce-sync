@@ -80,14 +80,14 @@ WHERE o.seller_user_id <> ''
 
                 StringBuilder sb = new StringBuilder();
                 sb.append("SELECT\n\r");
-                sb.append("    o.id                  AS order_id,\n\r");
-                sb.append("    eac.app_id            AS app_id,\n\r");
-                sb.append("    eac.cert_id           AS cert_id,\n\r");
-                sb.append("    eac.dev_id            AS dev_id,\n\r");
-                sb.append("    eac.token             AS token,\n\r");
-                sb.append("    o.seller_user_id      AS seller_user_id,\n\r");
-                sb.append("    oi.id                 AS order_item_id,\n\r");
-                sb.append("    oi.order_line_item_id AS order_line_item_id\n\r");
+                sb.append("    o.id                  AS order_id,\n\r"); // 0
+                sb.append("    eac.app_id            AS app_id,\n\r"); // 1
+                sb.append("    eac.cert_id           AS cert_id,\n\r"); //2
+                sb.append("    eac.dev_id            AS dev_id,\n\r"); // 3
+                sb.append("    eac.token             AS token,\n\r");  // 4
+                sb.append("    o.seller_user_id      AS seller_user_id,\n\r"); // 5
+                sb.append("    oi.id                 AS order_item_id,\n\r"); // 6
+                sb.append("    oi.order_line_item_id AS order_line_item_id\n\r"); // 7
                 sb.append("FROM erp_order o\n\r");
                 sb.append("    INNER JOIN erp_order_item oi ON oi.order_id = o.id\n\r");
                 sb.append("    INNER JOIN erp_ebay_api_config eac ON o.shop_id = eac.shop_id\n\r");
