@@ -152,24 +152,6 @@
 
     <!-- 定时任务 begin -->
 
-    <!-- Hello World 任务-->
-    <!--
-    <bean id="helloWorldJobDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
-        <property name="jobClass" value="ozosync.job.helloworld.HelloWorldJob"/>
-        <property name="durability" value="true"/>
-        <property name="jobDataAsMap">
-            <map>
-                <entry key="sessionFactory" value-ref="sessionFactory"/>
-            </map>
-        </property>
-    </bean>
-    <bean id="helloWorldJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
-        <property name="jobDetail" ref="helloWorldJobDetail"/>
-        <property name="cronExpression" value="*/2 * * * * ?"/>
-        <property name="startDelay" value="1000"/>
-    </bean>
-    -->
-
     <!-- 店铺 任务 -->
     <bean id="shopJobDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
         <property name="jobClass" value="ozosync.job.shop.ShopJob"/>
@@ -182,20 +164,31 @@
     </bean>
     <bean id="shopJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="shopJobDetail"/>
-        <!--<property name="cronExpression" value="0 0 0,4,8,12,16,20 * * ? "/>-->
-        <!--<property name="cronExpression" value="0 0/10 * * * ? *"/>-->
-        <!--<property name="cronExpression" value="0 15/59 * * * ? *"/>-->
         <property name="cronExpression" value="0 15 0/2 * * ? *"/>
+        <property name="startDelay" value="1000"/>
+    </bean>
+
+    <!-- 订单反馈 任务 -->
+    <bean id="orderFeedbackJobDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="jobClass" value="ozosync.job.shop.OrderFeedbackJob"/>
+        <property name="durability" value="true"/>
+        <property name="jobDataAsMap">
+            <map>
+                <entry key="sessionFactory" value-ref="sessionFactory"/>
+            </map>
+        </property>
+    </bean>
+    <bean id="orderFeedbackJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="orderFeedbackJobDetail"/>
+        <property name="cronExpression" value="0 0 0 * * ? "/>
         <property name="startDelay" value="1000"/>
     </bean>
 
     <bean id="schedulerFactoryBean" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
         <property name="triggers">
             <list>
-                <!--
-                <ref bean="helloWorldJobTrigger"/>
-                -->
                 <ref bean="shopJobTrigger"/>
+                <ref bean="orderFeedbackJobTrigger"/>
             </list>
         </property>
     </bean>
