@@ -163,8 +163,8 @@
     </bean>
 
     <!-- 店铺 任务 -->
-    <bean id="shopJobDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
-        <property name="jobClass" value="ozosync.job.shop.ShopJob"/>
+    <bean id="orderJobDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="jobClass" value="ozosync.job.order.OrderJob"/>
         <property name="durability" value="true"/>
         <property name="jobDataAsMap">
             <map>
@@ -173,14 +173,14 @@
         </property>
     </bean>
     <bean id="shopJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
-        <property name="jobDetail" ref="shopJobDetail"/>
+        <property name="jobDetail" ref="orderJobDetail"/>
         <property name="cronExpression" value="0 15 0/2 * * ? *"/>
         <property name="startDelay" value="1000"/>
     </bean>
 
     <!-- 订单反馈 任务 -->
     <bean id="orderFeedbackJobDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
-        <property name="jobClass" value="ozosync.job.shop.OrderFeedbackJob"/>
+        <property name="jobClass" value="ozosync.job.orderfeedback.OrderFeedbackJob"/>
         <property name="durability" value="true"/>
         <property name="jobDataAsMap">
             <map>

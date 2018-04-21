@@ -1,4 +1,4 @@
-package ozosync.job.shop;
+package ozosync.job.orderfeedback;
 
 import com.ebay.sdk.ApiContext;
 import com.ebay.sdk.call.GetFeedbackCall;
@@ -17,7 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ozosync.domain.OrderFeedbackInfo;
 import ozosync.domain.schema.OrderFeedbackSchema;
-import ozosync.service.ApiContextService;
+import ozosync.job.service.ApiContextService;
 
 @Service
 public class OrderFeedbackDownloader {

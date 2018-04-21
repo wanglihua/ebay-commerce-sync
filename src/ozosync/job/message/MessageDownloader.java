@@ -1,17 +1,17 @@
-package ozosync.job.shop;
+package ozosync.job.message;
 
 import org.apache.log4j.Logger;
 import org.hibernate.SessionFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+@Service
 public class MessageDownloader {
 
     private Logger log = Logger.getLogger(MessageDownloader.class);
 
-    private SessionFactory sessionFactory = null;
-
-    public MessageDownloader(SessionFactory sessionFactory) {
-        this.sessionFactory = sessionFactory;
-    }
+    @Autowired
+    private SessionFactory sessionFactory;
 
     @SuppressWarnings("unchecked")
     public void download() {

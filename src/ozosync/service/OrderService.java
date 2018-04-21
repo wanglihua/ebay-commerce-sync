@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ozosync.domain.LogisticsCompanyInfo;
 import ozosync.domain.OrderInfo;
+import ozosync.job.service.ApiContextService;
 
 @Service
 public class OrderService {

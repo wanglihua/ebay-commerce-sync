@@ -20,7 +20,7 @@ import ozosync.domain.OrderInfo;
 import ozosync.domain.OrderTypeId;
 import ozosync.domain.schema.CombineOrderSchema;
 import ozosync.domain.schema.OrderSchema;
-import ozosync.service.ApiContextService;
+import ozosync.job.service.ApiContextService;
 import ozosync.service.OrderService;
 
 @Controller

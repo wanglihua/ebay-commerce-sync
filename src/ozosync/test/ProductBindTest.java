@@ -16,7 +16,7 @@ import ozosync.common.SpringConfigLocation;
 import ozosync.domain.ProductBindInfo;
 import ozosync.domain.ProductBindStatus;
 import ozosync.domain.schema.ProductBindSchema;
-import ozosync.job.shop.database.ProductBindRespository;
+import ozosync.job.order.database.ProductBindRespository;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration

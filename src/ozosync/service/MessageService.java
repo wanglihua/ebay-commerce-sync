@@ -9,6 +9,7 @@ import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ozosync.domain.MessageInfo;
+import ozosync.job.service.ApiContextService;
 
 @Service
 public class MessageService {
