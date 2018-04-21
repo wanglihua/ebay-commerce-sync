@@ -17,14 +17,11 @@ import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.orm.hibernate4.SessionFactoryUtils;
 import org.springframework.orm.hibernate4.SessionHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-import ozosync.domain.EBayApiConfigInfo;
-import ozosync.domain.NowTimeInfo;
 import ozosync.domain.OrderFeedbackInfo;
 import ozosync.domain.schema.OrderFeedbackSchema;
 

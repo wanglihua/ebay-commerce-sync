@@ -152,6 +152,16 @@
 
     <!-- 定时任务 begin -->
 
+    <bean id="helloWorldJobDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="jobClass" value="ozosync.job.helloworld.HelloWorldJob"/>
+        <property name="durability" value="true"/>
+    </bean>
+    <bean id="helloWorldJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="helloWorldJobDetail"/>
+        <property name="cronExpression" value="*/2 * * * * ?"/>
+        <property name="startDelay" value="1000"/>
+    </bean>
+
     <!-- 店铺 任务 -->
     <bean id="shopJobDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
         <property name="jobClass" value="ozosync.job.shop.ShopJob"/>
@@ -184,11 +194,15 @@
         <property name="startDelay" value="1000"/>
     </bean>
 
+    <bean id="jobFactory" class="ozosync.job.JobFactory"/>
     <bean id="schedulerFactoryBean" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="jobFactory" ref="jobFactory"/>
+
         <property name="triggers">
             <list>
-                <ref bean="shopJobTrigger"/>
-                <ref bean="orderFeedbackJobTrigger"/>
+                <ref bean="helloWorldJobTrigger"/>
+                <!--<ref bean="shopJobTrigger"/>-->
+                <!--<ref bean="orderFeedbackJobTrigger"/>-->
             </list>
         </property>
     </bean>
