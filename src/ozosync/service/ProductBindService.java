@@ -1,17 +1,25 @@
-package ozosync.job.order.database;
+package ozosync.service;
 
 import java.util.HashMap;
 import java.util.Map;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import ozosync.domain.ProductBindInfo;
 import ozosync.domain.ProductBindStatus;
 import ozosync.domain.schema.ProductBindSchema;
 
-public class ProductBindRespository {
+@Service
+public class ProductBindService {
 
-    public boolean isProductBindSku(String productSku, Session session) {
+    @Autowired
+    private SessionFactory sessionFactory;
+
+    public boolean isProductBindSku(String productSku) {
+        Session session = sessionFactory.getCurrentSession();
 
         Long count = (Long) session.createCriteria(ProductBindInfo.class)
                 .add(Restrictions.eq(ProductBindSchema.code, productSku))
@@ -22,7 +30,8 @@ public class ProductBindRespository {
         return count != 0;
     }
 
-    public Map<String, Integer> getProductBindSkuList(String productBindCode, Session session) {
+    public Map<String, Integer> getProductBindSkuList(String productBindCode) {
+        Session session = sessionFactory.getCurrentSession();
 
         ProductBindInfo productBind = (ProductBindInfo) session.createCriteria(ProductBindInfo.class)
                 .add(Restrictions.eq(ProductBindSchema.code, productBindCode))

@@ -1,18 +1,27 @@
-package ozosync.job.order.database;
+package ozosync.job.order.service;
 
 import com.ebay.soap.eBLBaseComponents.AddressType;
 import com.ebay.soap.eBLBaseComponents.OrderType;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import ozosync.domain.OrderInfo;
 import ozosync.domain.OrderShippingAddressInfo;
 import ozosync.domain.OrderStatus;
 import ozosync.domain.schema.OrderShippingAddressSchema;
 
-public class OrderShippingAddressRepository {
+@Service
+public class OrderDownloadShippingAddressService {
 
-    public void saveOrderShippingAddress(Session session, OrderType orderDownload, OrderInfo orderInfo) {
+    @Autowired
+    private SessionFactory sessionFactory;
+
+    public void saveOrderShippingAddress(OrderType orderDownload, OrderInfo orderInfo) {
+        Session session = sessionFactory.getCurrentSession();
+
         // 只同步已支付及之前的订单内容
         Long statusId = orderInfo.getStatusId();
         if (statusId > OrderStatus.ID_YZF) {

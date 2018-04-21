@@ -16,7 +16,7 @@ import ozosync.common.SpringConfigLocation;
 import ozosync.domain.ProductBindInfo;
 import ozosync.domain.ProductBindStatus;
 import ozosync.domain.schema.ProductBindSchema;
-import ozosync.job.order.database.ProductBindRespository;
+import ozosync.service.ProductBindService;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
@@ -26,7 +26,8 @@ public class ProductBindTest {
     @Autowired
     private SessionFactory sessionFactory;
 
-    private ProductBindRespository productBindRespository = new ProductBindRespository();
+    @Autowired
+    private ProductBindService productBindService;
 
     @Test
     @Transactional
@@ -47,10 +48,10 @@ public class ProductBindTest {
         Session session = sessionFactory.getCurrentSession();
 
         String code = "HBZ1001BR8AUx1+HBZ0651008AUx1";
-        boolean isBindSku = productBindRespository.isProductBindSku(code, session);
+        boolean isBindSku = productBindService.isProductBindSku(code);
         System.out.println("isBindSku: " + isBindSku);
 
-        Map<String, Integer> skuNumList = productBindRespository.getProductBindSkuList(code, session);
+        Map<String, Integer> skuNumList = productBindService.getProductBindSkuList(code);
         for (Map.Entry entry : skuNumList.entrySet()) {
             System.out.println(entry.getKey());
             System.out.println(entry.getValue());

@@ -19,12 +19,13 @@ import ozosync.domain.ProductStoreItemInfo;
 import ozosync.domain.schema.OrderItemSchema;
 import ozosync.domain.schema.ProductSchema;
 import ozosync.domain.schema.ProductStoreItemSchema;
-import ozosync.job.order.database.ProductBindRespository;
+import ozosync.service.ProductBindService;
 
 @Service
 public class OrderDownloadEntryService {
 
-    private ProductBindRespository productBindRespository = new ProductBindRespository();
+    @Autowired
+    private ProductBindService productBindService;
 
     @Autowired
     private SessionFactory sessionFactory;
@@ -55,9 +56,9 @@ public class OrderDownloadEntryService {
                     itemSku = itemSku.substring(0, itemSku.indexOf("AU-") + 2); // 123489AU-DG => 123489AU
                 }
 
-                if (productBindRespository.isProductBindSku(itemSku, session)) {
+                if (productBindService.isProductBindSku(itemSku)) {
 
-                    Map<String, Integer> productBindSkuList = productBindRespository.getProductBindSkuList(itemSku, session);
+                    Map<String, Integer> productBindSkuList = productBindService.getProductBindSkuList(itemSku);
 
                     Integer totalQty = 0;
                     for (Map.Entry<String, Integer> productBindSku : productBindSkuList.entrySet()) {
