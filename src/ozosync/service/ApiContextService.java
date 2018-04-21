@@ -18,7 +18,7 @@ public class ApiContextService {
     @Autowired
     private SessionFactory sessionFactory;
 
-    public ApiContext getApiContextByShopId(Long shopId) {
+    public ApiContext getApiContextByShopId(Long shopId) throws Exception {
         Session session = sessionFactory.getCurrentSession();
 
         EBayApiConfigInfo ebayApiConfigInfo = (EBayApiConfigInfo) session.createCriteria(EBayApiConfigInfo.class)
@@ -26,21 +26,29 @@ public class ApiContextService {
                 .setMaxResults(1)
                 .uniqueResult();
 
+        if (ebayApiConfigInfo == null) {
+            throw new Exception(String.format("指定的 shop 不存在, shopId: %d", shopId));
+        }
+
+        return getApiContextByConfig(ebayApiConfigInfo.getAppId(), ebayApiConfigInfo.getCertId(), ebayApiConfigInfo.getDevId(), ebayApiConfigInfo.getToken());
+    }
+
+    public ApiContext getApiContextByConfig(String appId, String certId, String devId, String token) {
         ApiContext apiContext = new ApiContext();
 
         ApiCredential apiCredential = apiContext.getApiCredential();
 
         ApiAccount apiAccount = new ApiAccount();
-        apiAccount.setApplication(ebayApiConfigInfo.getAppId());
-        apiAccount.setCertificate(ebayApiConfigInfo.getCertId());
-        apiAccount.setDeveloper(ebayApiConfigInfo.getDevId());
+        apiAccount.setApplication(appId);
+        apiAccount.setCertificate(certId);
+        apiAccount.setDeveloper(devId);
 
         apiCredential.setApiAccount(apiAccount);
 
-        apiCredential.seteBayToken(ebayApiConfigInfo.getToken());
+        apiCredential.seteBayToken(token);
         apiContext.setApiServerUrl("https://api.ebay.com/wsapi");
 
-        apiContext.getApiLogging().setLogSOAPMessages(false);
+        apiContext.getApiLogging().setLogSOAPMessages(false);// This will log SOAP requests and responses
 
         apiContext.setSite(SiteCodeType.AUSTRALIA);
 

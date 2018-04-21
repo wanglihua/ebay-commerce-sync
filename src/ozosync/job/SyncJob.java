@@ -19,7 +19,7 @@ public class SyncJob implements Job {
     private Logger log = Logger.getLogger(SyncJob.class);
 
     @Autowired
-    private SessionFactory sessionFactory;
+    protected SessionFactory sessionFactory;
 
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
