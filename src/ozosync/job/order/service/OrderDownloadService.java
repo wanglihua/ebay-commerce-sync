@@ -22,17 +22,20 @@ import ozosync.domain.OrderStatus;
 import ozosync.domain.OrderTypeId;
 import ozosync.domain.ShopAccountInfo;
 import ozosync.domain.schema.OrderSchema;
-import ozosync.job.order.database.ExchangeRateRespository;
-import ozosync.job.order.database.OrderHistoryRepository;
+import ozosync.service.ExchangeRateService;
+import ozosync.service.OrderHistoryService;
 
 @Service
 public class OrderDownloadService {
 
-    private OrderHistoryRepository orderHistoryRepository = new OrderHistoryRepository();
-    private ExchangeRateRespository exchangeRateRespository = new ExchangeRateRespository();
-
     @Autowired
     private SessionFactory sessionFactory;
+
+    @Autowired
+    private ExchangeRateService exchangeRateService;
+
+    @Autowired
+    private OrderHistoryService orderHistoryService;
 
 
     public OrderInfo saveOrder(OrderType orderDownload, EBayApiConfigInfo apiConfigInfo) {
@@ -77,7 +80,7 @@ public class OrderDownloadService {
                 orderInDb.setShippedTime(orderDownload.getShippedTime().getTime());
             }
 
-            ExchangeRateInfo exchangeRateInfo = exchangeRateRespository.getAudExchangeRate(session);
+            ExchangeRateInfo exchangeRateInfo = exchangeRateService.getAudExchangeRate();
 
             orderInDb.setExchangeRate(new BigDecimal(exchangeRateInfo.getRate(), MathContext.DECIMAL64));
 
@@ -226,14 +229,14 @@ public class OrderDownloadService {
             session.save(orderInDb);
             session.flush();
 
-            orderHistoryRepository.insertOrderHistory(session, orderInDb, "订单下载新增订单");
+            orderHistoryService.insertOrderHistory(orderInDb, "订单下载新增订单");
         } else {
             orderInDb.setUpdateTime(new Date());
             session.update(orderInDb);
             session.flush();
 
             if (statusId != orderInDb.getStatusId()) {
-                orderHistoryRepository.insertOrderHistory(session, orderInDb, "订单下载状态更新");
+                orderHistoryService.insertOrderHistory(orderInDb, "订单下载状态更新");
             }
         }
 
