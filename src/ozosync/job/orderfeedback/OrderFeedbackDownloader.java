@@ -50,10 +50,11 @@ FROM erp_order o
     INNER JOIN erp_order_item oi ON oi.order_id = o.id
     INNER JOIN erp_ebay_api_config eac ON o.shop_id = eac.shop_id
     LEFT JOIN erp_order_feedback of ON of.order_item_id = oi.id
-WHERE o.seller_user_id <> ''
+WHERE (o.status_id = 4200 OR o.status_id = 4300)
+      AND o.seller_user_id <> ''
       AND oi.order_line_item_id <> ''
       AND of.id IS NULL
-      AND o.paid_time > DATE_ADD(now(), INTERVAL -30 DAY);
+      AND o.shipped_time > DATE_ADD(now(), INTERVAL -10 DAY);
                  */
 
             StringBuilder sb = new StringBuilder();
@@ -70,10 +71,11 @@ WHERE o.seller_user_id <> ''
             sb.append("    INNER JOIN erp_order_item oi ON oi.order_id = o.id\n\r");
             sb.append("    INNER JOIN erp_ebay_api_config eac ON o.shop_id = eac.shop_id\n\r");
             sb.append("    LEFT JOIN erp_order_feedback of ON of.order_item_id = oi.id\n\r");
-            sb.append("WHERE o.seller_user_id <> ''\n\r");
+            sb.append("WHERE (o.status_id = 4200 OR o.status_id = 4300)\n\r");
+            sb.append("      AND o.seller_user_id <> ''\n\r");
             sb.append("      AND oi.order_line_item_id <> ''\n\r");
             sb.append("      AND of.id IS NULL\n\r");
-            sb.append("      AND o.paid_time > DATE_ADD(now(), INTERVAL -30 DAY);\n\r");
+            sb.append("      AND o.shipped_time > DATE_ADD(now(), INTERVAL -10 DAY);\n\r");
 
             List item_list = session.createSQLQuery(sb.toString()).list();
             for (Object item : item_list) {
