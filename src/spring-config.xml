@@ -190,7 +190,7 @@
     </bean>
     <bean id="orderFeedbackJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="orderFeedbackJobDetail"/>
-        <property name="cronExpression" value="0 0 22 * * ? "/>
+        <property name="cronExpression" value="0 0 23 * * ? "/>
         <property name="startDelay" value="1000"/>
     </bean>
 
