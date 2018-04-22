@@ -172,9 +172,9 @@
             </map>
         </property>
     </bean>
-    <bean id="shopJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+    <bean id="orderJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="orderJobDetail"/>
-        <property name="cronExpression" value="0 15 0/2 * * ? *"/>
+        <property name="cronExpression" value="0 15 0/4 * * ? *"/>
         <property name="startDelay" value="1000"/>
     </bean>
 
@@ -190,7 +190,7 @@
     </bean>
     <bean id="orderFeedbackJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="orderFeedbackJobDetail"/>
-        <property name="cronExpression" value="0 0 0 * * ? "/>
+        <property name="cronExpression" value="0 0 22 * * ? "/>
         <property name="startDelay" value="1000"/>
     </bean>
 
@@ -200,9 +200,9 @@
 
         <property name="triggers">
             <list>
-                <ref bean="helloWorldJobTrigger"/>
-                <!--<ref bean="shopJobTrigger"/>-->
-                <!--<ref bean="orderFeedbackJobTrigger"/>-->
+                <!--<ref bean="helloWorldJobTrigger"/>-->
+                <ref bean="orderJobTrigger"/>
+                <ref bean="orderFeedbackJobTrigger"/>
             </list>
         </property>
     </bean>

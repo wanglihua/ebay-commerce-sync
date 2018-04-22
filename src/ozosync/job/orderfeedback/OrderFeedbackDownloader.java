@@ -80,13 +80,13 @@ WHERE (o.status_id = 4200 OR o.status_id = 4300)
             List item_list = session.createSQLQuery(sb.toString()).list();
             for (Object item : item_list) {
                 Object[] itemArray = (Object[]) item;
-                Long orderId = (Long) itemArray[0];
+                Long orderId = ((java.math.BigInteger) itemArray[0]).longValue();
                 String appId = (String) itemArray[1];
                 String certId = (String) itemArray[2];
                 String devId = (String) itemArray[3];
                 String token = (String) itemArray[4];
                 String sellerUserId = (String) itemArray[5];
-                Long orderItemId = (Long) itemArray[6];
+                Long orderItemId = ((java.math.BigInteger) itemArray[6]).longValue();
                 String orderLineItemId = (String) itemArray[7];
 
                 ApiContext apiContext = apiContextService.getApiContextByConfig(appId, certId, devId, token);
