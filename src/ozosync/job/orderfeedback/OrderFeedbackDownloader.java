@@ -78,58 +78,65 @@ WHERE (o.status_id = 4200 OR o.status_id = 4300)
             sb.append("      AND o.shipped_time > DATE_ADD(now(), INTERVAL -10 DAY);\n\r");
 
             List item_list = session.createSQLQuery(sb.toString()).list();
-            for (Object item : item_list) {
-                Object[] itemArray = (Object[]) item;
-                Long orderId = ((java.math.BigInteger) itemArray[0]).longValue();
-                String appId = (String) itemArray[1];
-                String certId = (String) itemArray[2];
-                String devId = (String) itemArray[3];
-                String token = (String) itemArray[4];
-                String sellerUserId = (String) itemArray[5];
-                Long orderItemId = ((java.math.BigInteger) itemArray[6]).longValue();
-                String orderLineItemId = (String) itemArray[7];
+            if (item_list != null) {
+                log.error("start download order item feedback, count:" + item_list.size());
 
-                ApiContext apiContext = apiContextService.getApiContextByConfig(appId, certId, devId, token);
+                for (Object item : item_list) {
+                    Object[] itemArray = (Object[]) item;
+                    Long orderId = ((java.math.BigInteger) itemArray[0]).longValue();
+                    String appId = (String) itemArray[1];
+                    String certId = (String) itemArray[2];
+                    String devId = (String) itemArray[3];
+                    String token = (String) itemArray[4];
+                    String sellerUserId = (String) itemArray[5];
+                    Long orderItemId = ((java.math.BigInteger) itemArray[6]).longValue();
+                    String orderLineItemId = (String) itemArray[7];
 
-                GetFeedbackCall getFeedbackCall = new GetFeedbackCall(apiContext);
-                getFeedbackCall.setUserID(sellerUserId);
-                getFeedbackCall.addDetailLevel(DetailLevelCodeType.RETURN_ALL);
-                getFeedbackCall.setFeedbackType(FeedbackTypeCodeType.FEEDBACK_RECEIVED_AS_SELLER);
-                getFeedbackCall.setOrderLineItemID(orderLineItemId);
+                    ApiContext apiContext = apiContextService.getApiContextByConfig(appId, certId, devId, token);
 
-                FeedbackDetailType[] feedbackDetailTypes = getFeedbackCall.getFeedback();
+                    GetFeedbackCall getFeedbackCall = new GetFeedbackCall(apiContext);
+                    getFeedbackCall.setUserID(sellerUserId);
+                    getFeedbackCall.addDetailLevel(DetailLevelCodeType.RETURN_ALL);
+                    getFeedbackCall.setFeedbackType(FeedbackTypeCodeType.FEEDBACK_RECEIVED_AS_SELLER);
+                    getFeedbackCall.setOrderLineItemID(orderLineItemId);
 
-                if (feedbackDetailTypes != null && feedbackDetailTypes.length != 0) {
-                    FeedbackDetailType feedbackDetailType = feedbackDetailTypes[0];
+                    FeedbackDetailType[] feedbackDetailTypes = getFeedbackCall.getFeedback();
+                    log.error("downloaded order item feedback, order item id:" + orderItemId);
 
-                    OrderFeedbackInfo orderFeedbackInfo = (OrderFeedbackInfo) session.createCriteria(OrderFeedbackInfo.class)
-                            .add(Restrictions.eq(OrderFeedbackSchema.orderId, orderId))
-                            .add(Restrictions.eq(OrderFeedbackSchema.orderItemId, orderItemId))
-                            .uniqueResult();
+                    if (feedbackDetailTypes != null && feedbackDetailTypes.length != 0) {
+                        FeedbackDetailType feedbackDetailType = feedbackDetailTypes[0];
 
-                    if (orderFeedbackInfo == null) {
-                        orderFeedbackInfo = new OrderFeedbackInfo();
+                        OrderFeedbackInfo orderFeedbackInfo = (OrderFeedbackInfo) session.createCriteria(OrderFeedbackInfo.class)
+                                .add(Restrictions.eq(OrderFeedbackSchema.orderId, orderId))
+                                .add(Restrictions.eq(OrderFeedbackSchema.orderItemId, orderItemId))
+                                .uniqueResult();
+
+                        if (orderFeedbackInfo == null) {
+                            orderFeedbackInfo = new OrderFeedbackInfo();
+                        }
+
+                        orderFeedbackInfo.setOrderId(orderId);
+                        orderFeedbackInfo.setOrderItemId(orderItemId);
+
+                        CommentTypeCodeType commentTypeCodeType = feedbackDetailType.getCommentType();
+
+                        if (commentTypeCodeType == CommentTypeCodeType.NEGATIVE) {
+                            orderFeedbackInfo.setCommentType(1);
+                        } else if (commentTypeCodeType == CommentTypeCodeType.NEUTRAL) {
+                            orderFeedbackInfo.setCommentType(2);
+                        } else if (commentTypeCodeType == CommentTypeCodeType.POSITIVE) {
+                            orderFeedbackInfo.setCommentType(3);
+                        }
+
+                        orderFeedbackInfo.setCommentTime(feedbackDetailType.getCommentTime().getTime());
+                        orderFeedbackInfo.setUpdateTime(new Date());
+
+                        session.saveOrUpdate(orderFeedbackInfo);
+                        session.flush();
                     }
-
-                    orderFeedbackInfo.setOrderId(orderId);
-                    orderFeedbackInfo.setOrderItemId(orderItemId);
-
-                    CommentTypeCodeType commentTypeCodeType = feedbackDetailType.getCommentType();
-
-                    if (commentTypeCodeType == CommentTypeCodeType.NEGATIVE) {
-                        orderFeedbackInfo.setCommentType(1);
-                    } else if (commentTypeCodeType == CommentTypeCodeType.NEUTRAL) {
-                        orderFeedbackInfo.setCommentType(2);
-                    } else if (commentTypeCodeType == CommentTypeCodeType.POSITIVE) {
-                        orderFeedbackInfo.setCommentType(3);
-                    }
-
-                    orderFeedbackInfo.setCommentTime(feedbackDetailType.getCommentTime().getTime());
-                    orderFeedbackInfo.setUpdateTime(new Date());
-
-                    session.saveOrUpdate(orderFeedbackInfo);
-                    session.flush();
                 }
+            } else {
+                log.error("no order item to download feedback");
             }
         } catch (Exception exp) {
             log.fatal(exp);
