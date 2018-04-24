@@ -54,7 +54,7 @@ WHERE (o.status_id = 4200 OR o.status_id = 4300)
       AND o.seller_user_id <> ''
       AND oi.order_line_item_id <> ''
       AND of.id IS NULL
-      AND o.shipped_time > DATE_ADD(now(), INTERVAL -10 DAY);
+      AND o.shipped_time > DATE_ADD(now(), INTERVAL -60 DAY);
                  */
 
             StringBuilder sb = new StringBuilder();
@@ -75,7 +75,7 @@ WHERE (o.status_id = 4200 OR o.status_id = 4300)
             sb.append("      AND o.seller_user_id <> ''\n\r");
             sb.append("      AND oi.order_line_item_id <> ''\n\r");
             sb.append("      AND of.id IS NULL\n\r");
-            sb.append("      AND o.shipped_time > DATE_ADD(now(), INTERVAL -10 DAY);\n\r");
+            sb.append("      AND o.shipped_time > DATE_ADD(now(), INTERVAL -60 DAY);\n\r");
 
             List item_list = session.createSQLQuery(sb.toString()).list();
             if (item_list != null) {

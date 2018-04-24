@@ -2,6 +2,8 @@ package ozosync.job.message;
 
 import com.ebay.sdk.ApiContext;
 import com.ebay.sdk.call.GetMyMessagesCall;
+import com.ebay.soap.eBLBaseComponents.DetailLevelCodeType;
+import com.ebay.soap.eBLBaseComponents.MyMessagesMessageType;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.log4j.Logger;
@@ -32,8 +34,27 @@ public class MessageDownloader {
             List<EBayApiConfigInfo> ebayApiConfigList = eBayApiConfigService.getConifglist();
             for (EBayApiConfigInfo ebayApiConfigInfo : ebayApiConfigList) {
                 try {
+                    // headers
                     GetMyMessagesCall getMyMessagesCall = createGetMyMessagesCall(ebayApiConfigInfo);
+                    DetailLevelCodeType[] detailLevels = new DetailLevelCodeType[]{
+                            DetailLevelCodeType.RETURN_HEADERS
+                    };
+                    getMyMessagesCall.setDetailLevel(detailLevels);
+                    getMyMessagesCall.getMyMessages();
+                    MyMessagesMessageType[] msgs = getMyMessagesCall.getReturnedMyMessages();
 
+                    // If there are Messages
+                    if (msgs != null) {
+                        int page = 1, totalPages = 0;
+                        //  retrieve ten messages at a time ( a page)
+                        if (msgs.length % 10 != 0) {
+                            totalPages = msgs.length / 10 + 1;
+                        } else {
+                            totalPages = msgs.length;
+                        }
+                        // make second GetMyMessages call
+                        //agmm.retrieveMessages(apiCall, page, totalPages, msgs);
+                    }
 
                 } catch (Exception exp) {
                     log.fatal(exp);
@@ -48,9 +69,41 @@ public class MessageDownloader {
 
     private GetMyMessagesCall createGetMyMessagesCall(EBayApiConfigInfo ebayApiConfigInfo) {
         ApiContext apiContext = apiContextService.getApiContextByConfig(ebayApiConfigInfo);
-        GetMyMessagesCall getMyMessagesCall = new GetMyMessagesCall(apiContext);
+        return new GetMyMessagesCall(apiContext);
+    }
 
-        return getMyMessagesCall;
+    private void retrieveMessages(GetMyMessagesCall api, int page, int totalPages, MyMessagesMessageType[] msgs) throws Exception {
+        String[] messageIds = null;
+        int start = 0, end = 0;
+
+        start = (page - 1) * 10;
+        if (totalPages == 1 || page == totalPages) {
+            end = msgs.length;
+        } else end = (page * 10);
+        messageIds = new String[end - start];
+
+        for (int i = start; i < end; i++) {
+            if (msgs[i] != null) {
+                for (int j = 0; j < (end - start); j++) {
+                    messageIds[j] = msgs[i].getMessageID();
+                }
+            }
+        }
+
+        DetailLevelCodeType[] detailLevel = new DetailLevelCodeType[]{
+                DetailLevelCodeType.RETURN_MESSAGES,
+        };
+
+        api.setDetailLevel(detailLevel);
+        api.setMessageIDs(messageIds);
+        api.getMyMessages();
+
+        // todo 处理消息
+
+        // make another GetMyMessage call when there are more than ten messages
+        if (page < totalPages) {
+            retrieveMessages(api, ++page, totalPages, msgs);
+        }
     }
 }
 
