@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.log4j.Logger;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ozosync.domain.EBayApiConfigInfo;
@@ -25,9 +27,14 @@ public class MyMessageDownloader {
     @Autowired
     private EBayApiConfigService eBayApiConfigService;
 
+    @Autowired
+    private SessionFactory sessionFactory;
+
     @SuppressWarnings("unchecked")
     public void download() {
         try {
+            Session session = sessionFactory.getCurrentSession();
+
             List<EBayApiConfigInfo> ebayApiConfigList = eBayApiConfigService.getConifglist();
             for (EBayApiConfigInfo ebayApiConfigInfo : ebayApiConfigList) {
                 try {
