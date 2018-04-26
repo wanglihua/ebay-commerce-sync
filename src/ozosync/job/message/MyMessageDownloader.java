@@ -10,9 +10,13 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ozosync.domain.EBayApiConfigInfo;
+import ozosync.domain.MessageInfo;
+import ozosync.domain.schema.MessageSchema;
 import ozosync.job.service.ApiContextService;
 import ozosync.service.EBayApiConfigService;
 
@@ -41,12 +45,22 @@ public class MyMessageDownloader {
                     // headers
                     MyMessagesMessageType[] messageHeaders = retrieveMessageHeaders(ebayApiConfigInfo);
 
-                    // todo 过滤掉 message id 数据库中已存在的
+                    // 过滤掉 message id 数据库中已存在的
                     List<MyMessagesMessageType> newMessageHeaderList = new ArrayList<>();
+                    for (MyMessagesMessageType messageHeader : messageHeaders) {
+                        String messageId = messageHeader.getMessageID();
+                        Long count = (Long) session.createCriteria(MessageInfo.class)
+                                .add(Restrictions.eq(MessageSchema.messageId, messageId))
+                                .setProjection(Projections.rowCount())
+                                .uniqueResult();
 
+                        if (count == 0) {
+                            newMessageHeaderList.add(messageHeader);
+                        }
+                    }
 
                     // If there are Messages
-                    if (messageHeaders != null) {
+                    if (newMessageHeaderList.size() != 0) {
                         int page = 1, totalPages = 0;
                         //  retrieve ten messages at a time ( a page)
                         if (messageHeaders.length % 10 != 0) {
@@ -55,7 +69,7 @@ public class MyMessageDownloader {
                             totalPages = messageHeaders.length;
                         }
                         // make second GetMyMessages call
-                        retrieveMessages(ebayApiConfigInfo, page, totalPages, messageHeaders);
+                        retrieveMessages(ebayApiConfigInfo, page, totalPages, newMessageHeaderList);
                     }
 
                 } catch (Exception exp) {
@@ -86,7 +100,7 @@ public class MyMessageDownloader {
         return getMyMessagesCall.getReturnedMyMessages();
     }
 
-    private void retrieveMessages(EBayApiConfigInfo ebayApiConfigInfo, int page, int totalPages, MyMessagesMessageType[] messageHeaders) throws Exception {
+    private void retrieveMessages(EBayApiConfigInfo ebayApiConfigInfo, int page, int totalPages, List<MyMessagesMessageType> messageHeaderList) throws Exception {
         GetMyMessagesCall getMyMessagesCall = createGetMyMessagesCall(ebayApiConfigInfo);
 
         String[] messageIds = null;
@@ -95,7 +109,7 @@ public class MyMessageDownloader {
         start = (page - 1) * 10;
 
         if (totalPages == 1 || page == totalPages) {
-            end = messageHeaders.length;
+            end = messageHeaderList.size();
         } else {
             end = (page * 10);
         }
@@ -103,9 +117,9 @@ public class MyMessageDownloader {
         messageIds = new String[end - start];
 
         for (int i = start; i < end; i++) {
-            if (messageHeaders[i] != null) {
+            if (messageHeaderList.get(i) != null) {
                 for (int j = 0; j < (end - start); j++) {
-                    messageIds[j] = messageHeaders[i].getMessageID();
+                    messageIds[j] = messageHeaderList.get(i).getMessageID();
                 }
             }
         }
@@ -120,13 +134,15 @@ public class MyMessageDownloader {
 
         // todo 处理消息
         MyMessagesMessageType[] messages = getMyMessagesCall.getReturnedMyMessages();
-        for (MyMessagesMessageType message : messages) {
-            System.out.println(message.getText());
+        if (messages != null) {
+            for (MyMessagesMessageType message : messages) {
+                System.out.println(message.getText());
+            }
         }
 
         // make another GetMyMessage call when there are more than ten messages
         if (page < totalPages) {
-            retrieveMessages(ebayApiConfigInfo, ++page, totalPages, messageHeaders);
+            retrieveMessages(ebayApiConfigInfo, ++page, totalPages, messageHeaderList);
         }
     }
 }
