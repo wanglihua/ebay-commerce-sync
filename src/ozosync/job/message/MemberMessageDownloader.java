@@ -1,5 +1,8 @@
 package ozosync.job.message;
 
+import com.ebay.sdk.ApiContext;
+import com.ebay.sdk.call.GetMemberMessagesCall;
+import com.ebay.soap.eBLBaseComponents.MemberMessageExchangeType;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.log4j.Logger;
@@ -33,7 +36,20 @@ public class MemberMessageDownloader {
             List<EBayApiConfigInfo> ebayApiConfigList = eBayApiConfigService.getConifglist();
             for (EBayApiConfigInfo ebayApiConfigInfo : ebayApiConfigList) {
                 try {
+                    GetMemberMessagesCall getMemberMessagesCall = createGetMemberMessagesCall(ebayApiConfigInfo);
 
+                    int pageNumber = 0;
+
+                    do {
+                        getMemberMessagesCall.getPagination().setPageNumber(++pageNumber);
+                        MemberMessageExchangeType[] memberMessageExchangeTypes = getMemberMessagesCall.getMemberMessages();
+
+                        if (memberMessageExchangeTypes != null && memberMessageExchangeTypes.length != 0) {
+                            for (MemberMessageExchangeType memberMessageExchangeType : memberMessageExchangeTypes) {
+                                //
+                            }
+                        }
+                    } while (getMemberMessagesCall.getHasMoreItems());
 
                 } catch (Exception exp) {
                     log.fatal(exp);
@@ -44,6 +60,13 @@ public class MemberMessageDownloader {
             log.fatal(exp);
             log.fatal(Arrays.toString(exp.getStackTrace()).replace(",", "\r\n"));
         }
+    }
+
+    private GetMemberMessagesCall createGetMemberMessagesCall(EBayApiConfigInfo ebayApiConfigInfo) {
+        ApiContext apiContext = apiContextService.getApiContextByConfig(ebayApiConfigInfo);
+        GetMemberMessagesCall getMemberMessagesCall = new GetMemberMessagesCall(apiContext);
+
+        return getMemberMessagesCall;
     }
 
 }
