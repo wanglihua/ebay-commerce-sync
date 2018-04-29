@@ -8,19 +8,19 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 import ozosync.common.SpringConfigLocation;
-import ozosync.job.message.MyMessageDownloader;
+import ozosync.job.message.MemberMessageDownloader;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
 @ContextConfiguration(locations = {SpringConfigLocation.configLocation})
-public class MessageDownloaderTest {
+public class MemberMessageDownloaderTest {
 
     @Autowired
-    private MyMessageDownloader myMessageDownloader;
+    private MemberMessageDownloader memberMessageDownloader;
 
     @Test
     @Transactional
     public void myMessageDownload() {
-        myMessageDownloader.download();
+        memberMessageDownloader.download();
     }
 }

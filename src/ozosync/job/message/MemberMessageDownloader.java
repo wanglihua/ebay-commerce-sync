@@ -6,6 +6,7 @@ import com.ebay.soap.eBLBaseComponents.MemberMessageExchangeType;
 import com.ebay.soap.eBLBaseComponents.MemberMessageType;
 import com.ebay.soap.eBLBaseComponents.MessageStatusTypeCodeType;
 import com.ebay.soap.eBLBaseComponents.MessageTypeCodeType;
+import com.ebay.soap.eBLBaseComponents.PaginationType;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
@@ -77,27 +78,37 @@ public class MemberMessageDownloader {
                                 messageInfo.setMessageId(messageId);
                                 messageInfo.setShopId(ebayApiConfigInfo.getShopId());
 
-                                String itemId = memberMessageExchangeType.getItem().getItemID();
+                                if (memberMessageExchangeType.getItem() != null) {
+                                    messageInfo.setItemId("");
+                                    messageInfo.setProductId(0L);
+                                    messageInfo.setSku("");
+                                } else {
+                                    String itemId = memberMessageExchangeType.getItem().getItemID();
 
-                                messageInfo.setItemId(itemId);
+                                    messageInfo.setItemId(itemId);
 
-                                ProductStoreItemInfo productStoreItemInfo = (ProductStoreItemInfo) session.createCriteria(ProductStoreItemInfo.class)
-                                        .add(Restrictions.eq(ProductStoreItemSchema.itemId, itemId))
-                                        .setMaxResults(1)
-                                        .uniqueResult();
+                                    ProductStoreItemInfo productStoreItemInfo = (ProductStoreItemInfo) session.createCriteria(ProductStoreItemInfo.class)
+                                            .add(Restrictions.eq(ProductStoreItemSchema.itemId, itemId))
+                                            .setMaxResults(1)
+                                            .uniqueResult();
 
-                                if (productStoreItemInfo == null) {
-                                    throw new Exception("商品店铺 item id 不存在！");
+                                    if (productStoreItemInfo == null) {
+                                        // throw new Exception("商品店铺 item id 不存在！");
+                                        messageInfo.setProductId(0L);
+                                        messageInfo.setSku("");
+                                    } else {
+                                        Long productId = productStoreItemInfo.getProductId();
+                                        messageInfo.setProductId(productId);
+
+                                        ProductInfo productInfo = (ProductInfo) session.get(ProductInfo.class, productId);
+                                        if (productInfo == null) {
+                                            // throw new Exception(String.format("指定的商品 id:%d 不存在！", productId));
+                                            messageInfo.setSku("");
+                                        } else {
+                                            messageInfo.setSku(productInfo.getSku());
+                                        }
+                                    }
                                 }
-
-                                Long productId = productStoreItemInfo.getProductId();
-                                messageInfo.setProductId(productId);
-
-                                ProductInfo productInfo = (ProductInfo) session.get(ProductInfo.class, productId);
-                                if (productInfo == null) {
-                                    throw new Exception(String.format("指定的商品 id:%d 不存在！", productId));
-                                }
-                                messageInfo.setSku(productInfo.getSku());
 
                                 messageInfo.setCreateTime(memberMessageExchangeType.getCreationDate().getTime());
                                 messageInfo.setLastModifiedDate(memberMessageExchangeType.getLastModifiedDate().getTime());
@@ -142,13 +153,16 @@ public class MemberMessageDownloader {
         GetMemberMessagesCall getMemberMessagesCall = new GetMemberMessagesCall(apiContext);
         getMemberMessagesCall.setMailMessageType(MessageTypeCodeType.ALL);
 
-        Calendar createTime = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
-        getMemberMessagesCall.setEndCreationTime(createTime);
+        Calendar startCreateTime = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+        startCreateTime.add(Calendar.DATE, -number_of_day);
+        getMemberMessagesCall.setStartCreationTime(startCreateTime);
 
-        createTime.add(Calendar.DATE, -number_of_day);
-        getMemberMessagesCall.setStartCreationTime(createTime);
+        Calendar endCreateTime = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+        getMemberMessagesCall.setEndCreationTime(endCreateTime);
 
-        getMemberMessagesCall.getPagination().setEntriesPerPage(200);
+        PaginationType pagination = new PaginationType();
+        pagination.setEntriesPerPage(200);
+        getMemberMessagesCall.setPagination(pagination);
 
         return getMemberMessagesCall;
     }
