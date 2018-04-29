@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import ozosync.domain.EBayApiConfigInfo;
 import ozosync.domain.MessageInfo;
 import ozosync.domain.MessageStatus;
+import ozosync.domain.ProductInfo;
 import ozosync.domain.ProductStoreItemInfo;
 import ozosync.domain.schema.MessageSchema;
 import ozosync.domain.schema.ProductStoreItemSchema;
@@ -80,37 +81,27 @@ public class MemberMessageDownloader {
 
                                 messageInfo.setItemId(itemId);
 
-                                ProductStoreItemInfo productStoreItem = (ProductStoreItemInfo) session.createCriteria(ProductStoreItemInfo.class)
+                                ProductStoreItemInfo productStoreItemInfo = (ProductStoreItemInfo) session.createCriteria(ProductStoreItemInfo.class)
                                         .add(Restrictions.eq(ProductStoreItemSchema.itemId, itemId))
                                         .setMaxResults(1)
                                         .uniqueResult();
 
-                                if (productStoreItem == null) {
+                                if (productStoreItemInfo == null) {
                                     throw new Exception("商品店铺 item id 不存在！");
                                 }
 
-                                Long productId = productStoreItem.getProductId();
+                                Long productId = productStoreItemInfo.getProductId();
                                 messageInfo.setProductId(productId);
 
+                                ProductInfo productInfo = (ProductInfo) session.get(ProductInfo.class, productId);
+                                if (productInfo == null) {
+                                    throw new Exception(String.format("指定的商品 id:%d 不存在！", productId));
+                                }
+                                messageInfo.setSku(productInfo.getSku());
 
-                                /*
-				message_in_db.ProductId = product_id
-				message_in_db.Sku = product_sku
+                                messageInfo.setCreateTime(memberMessageExchangeType.getCreationDate().getTime());
+                                messageInfo.setLastModifiedDate(memberMessageExchangeType.getLastModifiedDate().getTime());
 
-				if message_download.CreationDate != "" {
-					creation_date, err := time.ParseInLocation("2006-01-02T15:04:05.000Z", message_download.CreationDate, time.UTC)
-					core.HandleError(err)
-					creation_date = creation_date.Local()
-					message_in_db.CreationDate = core.MakeNullLongTime(creation_date, true)
-				}
-
-				if message_download.LastModifiedDate != "" {
-					last_modified_date, err := time.ParseInLocation("2006-01-02T15:04:05.000Z", message_download.LastModifiedDate, time.UTC)
-					core.HandleError(err)
-					last_modified_date = last_modified_date.Local()
-					message_in_db.LastModifiedDate = core.MakeNullLongTime(last_modified_date, true)
-				}
-                                 */
                                 if (memberMessageExchangeType.getMessageStatus() == MessageStatusTypeCodeType.ANSWERED) {
                                     messageInfo.setStatusId(MessageStatus.ANSWERED);
                                 } else if (memberMessageExchangeType.getMessageStatus() == MessageStatusTypeCodeType.UNANSWERED) {
@@ -125,9 +116,14 @@ public class MemberMessageDownloader {
                                 messageInfo.setSenderId(memberMessageType.getSenderID());
                                 messageInfo.setSubject(memberMessageType.getSubject());
                                 messageInfo.setBody(memberMessageType.getBody());
+
+                                session.saveOrUpdate(messageInfo);
+                                session.flush();
                             }
                         }
                     } while (getMemberMessagesCall.getHasMoreItems());
+
+                    session.flush();
 
                 } catch (Exception exp) {
                     log.fatal(exp);
