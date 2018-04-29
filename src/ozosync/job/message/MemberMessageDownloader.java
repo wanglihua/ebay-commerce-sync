@@ -3,19 +3,32 @@ package ozosync.job.message;
 import com.ebay.sdk.ApiContext;
 import com.ebay.sdk.call.GetMemberMessagesCall;
 import com.ebay.soap.eBLBaseComponents.MemberMessageExchangeType;
+import com.ebay.soap.eBLBaseComponents.MemberMessageType;
+import com.ebay.soap.eBLBaseComponents.MessageStatusTypeCodeType;
+import com.ebay.soap.eBLBaseComponents.MessageTypeCodeType;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
+import java.util.TimeZone;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ozosync.domain.EBayApiConfigInfo;
+import ozosync.domain.MessageInfo;
+import ozosync.domain.MessageStatus;
+import ozosync.domain.ProductStoreItemInfo;
+import ozosync.domain.schema.MessageSchema;
+import ozosync.domain.schema.ProductStoreItemSchema;
 import ozosync.job.service.ApiContextService;
 import ozosync.service.EBayApiConfigService;
 
 @Service
 public class MemberMessageDownloader {
+
+    private static final int number_of_day = 1;
 
     private Logger log = Logger.getLogger(MemberMessageDownloader.class);
 
@@ -46,7 +59,72 @@ public class MemberMessageDownloader {
 
                         if (memberMessageExchangeTypes != null && memberMessageExchangeTypes.length != 0) {
                             for (MemberMessageExchangeType memberMessageExchangeType : memberMessageExchangeTypes) {
-                                //
+
+                                MemberMessageType memberMessageType = memberMessageExchangeType.getQuestion();
+
+                                String messageId = memberMessageType.getMessageID();
+
+                                MessageInfo messageInfo = (MessageInfo) session.createCriteria(MessageInfo.class)
+                                        .add(Restrictions.eq(MessageSchema.messageId, messageId))
+                                        .setMaxResults(1)
+                                        .uniqueResult();
+
+                                if (messageInfo == null) {
+                                    messageInfo = new MessageInfo();
+                                }
+
+                                messageInfo.setMessageId(messageId);
+                                messageInfo.setShopId(ebayApiConfigInfo.getShopId());
+
+                                String itemId = memberMessageExchangeType.getItem().getItemID();
+
+                                messageInfo.setItemId(itemId);
+
+                                ProductStoreItemInfo productStoreItem = (ProductStoreItemInfo) session.createCriteria(ProductStoreItemInfo.class)
+                                        .add(Restrictions.eq(ProductStoreItemSchema.itemId, itemId))
+                                        .setMaxResults(1)
+                                        .uniqueResult();
+
+                                if (productStoreItem == null) {
+                                    throw new Exception("商品店铺 item id 不存在！");
+                                }
+
+                                Long productId = productStoreItem.getProductId();
+                                messageInfo.setProductId(productId);
+
+
+                                /*
+				message_in_db.ProductId = product_id
+				message_in_db.Sku = product_sku
+
+				if message_download.CreationDate != "" {
+					creation_date, err := time.ParseInLocation("2006-01-02T15:04:05.000Z", message_download.CreationDate, time.UTC)
+					core.HandleError(err)
+					creation_date = creation_date.Local()
+					message_in_db.CreationDate = core.MakeNullLongTime(creation_date, true)
+				}
+
+				if message_download.LastModifiedDate != "" {
+					last_modified_date, err := time.ParseInLocation("2006-01-02T15:04:05.000Z", message_download.LastModifiedDate, time.UTC)
+					core.HandleError(err)
+					last_modified_date = last_modified_date.Local()
+					message_in_db.LastModifiedDate = core.MakeNullLongTime(last_modified_date, true)
+				}
+                                 */
+                                if (memberMessageExchangeType.getMessageStatus() == MessageStatusTypeCodeType.ANSWERED) {
+                                    messageInfo.setStatusId(MessageStatus.ANSWERED);
+                                } else if (memberMessageExchangeType.getMessageStatus() == MessageStatusTypeCodeType.UNANSWERED) {
+                                    messageInfo.setStatusId(MessageStatus.UNANSWERED);
+                                }
+
+                                messageInfo.setDisplayToPublic(memberMessageType.isDisplayToPublic());
+                                messageInfo.setMessageType(memberMessageType.getMessageType().value());
+                                messageInfo.setQuestionType(memberMessageType.getQuestionType().value());
+                                messageInfo.setRecipientId(memberMessageType.getRecipientID(0));
+                                messageInfo.setSenderEmail(memberMessageType.getSenderEmail());
+                                messageInfo.setSenderId(memberMessageType.getSenderID());
+                                messageInfo.setSubject(memberMessageType.getSubject());
+                                messageInfo.setBody(memberMessageType.getBody());
                             }
                         }
                     } while (getMemberMessagesCall.getHasMoreItems());
@@ -64,9 +142,18 @@ public class MemberMessageDownloader {
 
     private GetMemberMessagesCall createGetMemberMessagesCall(EBayApiConfigInfo ebayApiConfigInfo) {
         ApiContext apiContext = apiContextService.getApiContextByConfig(ebayApiConfigInfo);
+
         GetMemberMessagesCall getMemberMessagesCall = new GetMemberMessagesCall(apiContext);
+        getMemberMessagesCall.setMailMessageType(MessageTypeCodeType.ALL);
+
+        Calendar createTime = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+        getMemberMessagesCall.setEndCreationTime(createTime);
+
+        createTime.add(Calendar.DATE, -number_of_day);
+        getMemberMessagesCall.setStartCreationTime(createTime);
+
+        getMemberMessagesCall.getPagination().setEntriesPerPage(200);
 
         return getMemberMessagesCall;
     }
-
 }
