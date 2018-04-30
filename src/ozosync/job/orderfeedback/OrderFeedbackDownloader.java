@@ -17,7 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ozosync.domain.OrderFeedbackInfo;
 import ozosync.domain.schema.OrderFeedbackSchema;
-import ozosync.job.service.ApiContextService;
+import ozosync.job.service.EbayApiContextService;
 
 @Service
 public class OrderFeedbackDownloader {
@@ -28,7 +28,7 @@ public class OrderFeedbackDownloader {
     private SessionFactory sessionFactory;
 
     @Autowired
-    private ApiContextService apiContextService;
+    private EbayApiContextService ebayApiContextService;
 
     @SuppressWarnings("unchecked")
     public void download() {
@@ -92,7 +92,7 @@ WHERE (o.status_id = 4200 OR o.status_id = 4300)
                     Long orderItemId = ((java.math.BigInteger) itemArray[6]).longValue();
                     String orderLineItemId = (String) itemArray[7];
 
-                    ApiContext apiContext = apiContextService.getApiContextByConfig(appId, certId, devId, token);
+                    ApiContext apiContext = ebayApiContextService.getApiContextByConfig(appId, certId, devId, token);
 
                     GetFeedbackCall getFeedbackCall = new GetFeedbackCall(apiContext);
                     getFeedbackCall.setUserID(sellerUserId);

@@ -9,7 +9,7 @@ import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ozosync.domain.MessageInfo;
-import ozosync.job.service.ApiContextService;
+import ozosync.job.service.EbayApiContextService;
 
 @Service
 public class MessageService {
@@ -20,13 +20,13 @@ public class MessageService {
     private SessionFactory sessionFactory;
 
     @Autowired
-    private ApiContextService apiContextService;
+    private EbayApiContextService ebayApiContextService;
 
     public void reply(Long messageId, String messageBody) throws Exception {
         Session session = sessionFactory.getCurrentSession();
 
         MessageInfo messageInfo = (MessageInfo) session.get(MessageInfo.class, messageId);
-        ApiContext apiContext = apiContextService.getApiContextByShopId(messageInfo.getShopId());
+        ApiContext apiContext = ebayApiContextService.getApiContextByShopId(messageInfo.getShopId());
 
         AddMemberMessageRTQCall addMemberMessageRTQCall = new AddMemberMessageRTQCall(apiContext);
         addMemberMessageRTQCall.setItemID(messageInfo.getItemId());

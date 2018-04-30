@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 import ozosync.domain.EBayApiConfigInfo;
 import ozosync.domain.MessageInfo;
 import ozosync.domain.schema.MessageSchema;
-import ozosync.job.service.ApiContextService;
+import ozosync.job.service.EbayApiContextService;
 import ozosync.service.EBayApiConfigService;
 
 @Service
@@ -26,7 +26,7 @@ public class MyMessageDownloader {
     private Logger log = Logger.getLogger(MyMessageDownloader.class);
 
     @Autowired
-    private ApiContextService apiContextService;
+    private EbayApiContextService ebayApiContextService;
 
     @Autowired
     private EBayApiConfigService eBayApiConfigService;
@@ -84,7 +84,7 @@ public class MyMessageDownloader {
     }
 
     private GetMyMessagesCall createGetMyMessagesCall(EBayApiConfigInfo ebayApiConfigInfo) {
-        ApiContext apiContext = apiContextService.getApiContextByConfig(ebayApiConfigInfo);
+        ApiContext apiContext = ebayApiContextService.getApiContextByConfig(ebayApiConfigInfo);
         return new GetMyMessagesCall(apiContext);
     }
 

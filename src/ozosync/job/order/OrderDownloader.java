@@ -14,7 +14,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ozosync.domain.EBayApiConfigInfo;
-import ozosync.job.service.ApiContextService;
+import ozosync.job.service.EbayApiContextService;
 import ozosync.service.EBayApiConfigService;
 import ozosync.job.order.service.OrderDownloadFacadeService;
 
@@ -24,7 +24,7 @@ public class OrderDownloader {
     private Logger log = Logger.getLogger(OrderDownloader.class);
 
     @Autowired
-    private ApiContextService apiContextService;
+    private EbayApiContextService ebayApiContextService;
 
     @Autowired
     private EBayApiConfigService eBayApiConfigService;
@@ -81,7 +81,7 @@ public class OrderDownloader {
 
 
     private GetOrdersCall createGetOrdersCall(EBayApiConfigInfo ebayApiConfigInfo) {
-        ApiContext apiContext = apiContextService.getApiContextByConfig(ebayApiConfigInfo);
+        ApiContext apiContext = ebayApiContextService.getApiContextByConfig(ebayApiConfigInfo);
 
         GetOrdersCall getOrdersCall = new GetOrdersCall(apiContext);
         getOrdersCall.setNumberOfDays(NUMBER_OF_DAY);

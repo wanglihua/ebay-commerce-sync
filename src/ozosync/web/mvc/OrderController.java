@@ -20,7 +20,7 @@ import ozosync.domain.OrderInfo;
 import ozosync.domain.OrderTypeId;
 import ozosync.domain.schema.CombineOrderSchema;
 import ozosync.domain.schema.OrderSchema;
-import ozosync.job.service.ApiContextService;
+import ozosync.job.service.EbayApiContextService;
 import ozosync.service.OrderService;
 
 @Controller
@@ -30,7 +30,7 @@ public class OrderController {
     private Logger log = Logger.getLogger(OrderController.class);
 
     @Autowired
-    private ApiContextService apiContextService;
+    private EbayApiContextService ebayApiContextService;
 
     @Autowired
     private SessionFactory sessionFactory;

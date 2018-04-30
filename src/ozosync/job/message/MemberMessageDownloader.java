@@ -24,7 +24,7 @@ import ozosync.domain.ProductInfo;
 import ozosync.domain.ProductStoreItemInfo;
 import ozosync.domain.schema.MessageSchema;
 import ozosync.domain.schema.ProductStoreItemSchema;
-import ozosync.job.service.ApiContextService;
+import ozosync.job.service.EbayApiContextService;
 import ozosync.service.EBayApiConfigService;
 
 @Service
@@ -35,7 +35,7 @@ public class MemberMessageDownloader {
     private Logger log = Logger.getLogger(MemberMessageDownloader.class);
 
     @Autowired
-    private ApiContextService apiContextService;
+    private EbayApiContextService ebayApiContextService;
 
     @Autowired
     private EBayApiConfigService eBayApiConfigService;
@@ -148,7 +148,7 @@ public class MemberMessageDownloader {
     }
 
     private GetMemberMessagesCall createGetMemberMessagesCall(EBayApiConfigInfo ebayApiConfigInfo) {
-        ApiContext apiContext = apiContextService.getApiContextByConfig(ebayApiConfigInfo);
+        ApiContext apiContext = ebayApiContextService.getApiContextByConfig(ebayApiConfigInfo);
 
         GetMemberMessagesCall getMemberMessagesCall = new GetMemberMessagesCall(apiContext);
         getMemberMessagesCall.setMailMessageType(MessageTypeCodeType.ALL);

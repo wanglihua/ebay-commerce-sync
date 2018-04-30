@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ozosync.domain.LogisticsCompanyInfo;
 import ozosync.domain.OrderInfo;
-import ozosync.job.service.ApiContextService;
+import ozosync.job.service.EbayApiContextService;
 
 @Service
 public class OrderService {
@@ -20,7 +20,7 @@ public class OrderService {
     private Logger log = Logger.getLogger(OrderService.class);
 
     @Autowired
-    private ApiContextService apiContextService;
+    private EbayApiContextService ebayApiContextService;
 
     @Autowired
     private SessionFactory sessionFactory;
@@ -30,7 +30,7 @@ public class OrderService {
         try {
             Session session = sessionFactory.getCurrentSession();
 
-            ApiContext apiContext = apiContextService.getApiContextByShopId(orderInfo.getShopId());
+            ApiContext apiContext = ebayApiContextService.getApiContextByShopId(orderInfo.getShopId());
 
             CompleteSaleCall completeSaleCall = new CompleteSaleCall(apiContext);
 

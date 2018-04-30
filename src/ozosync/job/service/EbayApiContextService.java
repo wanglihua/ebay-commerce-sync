@@ -13,7 +13,7 @@ import ozosync.domain.EBayApiConfigInfo;
 import ozosync.domain.schema.EBayApiConfigSchema;
 
 @Service
-public class ApiContextService {
+public class EbayApiContextService {
 
     @Autowired
     private SessionFactory sessionFactory;
