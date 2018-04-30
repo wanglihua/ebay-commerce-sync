@@ -30,7 +30,7 @@ import ozosync.service.EBayApiConfigService;
 @Service
 public class MemberMessageDownloader {
 
-    private static final int number_of_day = 1;
+    private static final int NUMBER_OF_DAY = 1;
 
     private Logger log = Logger.getLogger(MemberMessageDownloader.class);
 
@@ -154,7 +154,7 @@ public class MemberMessageDownloader {
         getMemberMessagesCall.setMailMessageType(MessageTypeCodeType.ALL);
 
         Calendar startCreateTime = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
-        startCreateTime.add(Calendar.DATE, -number_of_day);
+        startCreateTime.add(Calendar.DATE, -NUMBER_OF_DAY);
         getMemberMessagesCall.setStartCreationTime(startCreateTime);
 
         Calendar endCreateTime = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
