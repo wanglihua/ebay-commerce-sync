@@ -37,7 +37,7 @@ public class OrderDownloader {
     @SuppressWarnings("unchecked")
     public void download() {
         try {
-            List<EBayApiConfigInfo> ebayApiConfigList = eBayApiConfigService.getConifglist();
+            List<EBayApiConfigInfo> ebayApiConfigList = eBayApiConfigService.getConfiglist();
             for (EBayApiConfigInfo ebayApiConfigInfo : ebayApiConfigList) {
                 try {
                     GetOrdersCall getOrdersCall = createGetOrdersCall(ebayApiConfigInfo);

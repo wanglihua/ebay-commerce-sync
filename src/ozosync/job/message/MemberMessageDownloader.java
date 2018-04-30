@@ -48,7 +48,7 @@ public class MemberMessageDownloader {
         try {
             Session session = sessionFactory.getCurrentSession();
 
-            List<EBayApiConfigInfo> ebayApiConfigList = eBayApiConfigService.getConifglist();
+            List<EBayApiConfigInfo> ebayApiConfigList = eBayApiConfigService.getConfiglist();
             for (EBayApiConfigInfo ebayApiConfigInfo : ebayApiConfigList) {
                 try {
                     GetMemberMessagesCall getMemberMessagesCall = createGetMemberMessagesCall(ebayApiConfigInfo);

@@ -1,11 +1,12 @@
 package ozosync.service;
 
-import java.util.List;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ozosync.domain.EBayApiConfigInfo;
+
+import java.util.List;
 
 @Service
 public class EBayApiConfigService {
@@ -14,7 +15,7 @@ public class EBayApiConfigService {
     private SessionFactory sessionFactory;
 
     @SuppressWarnings("unchecked")
-    public List<EBayApiConfigInfo> getConifglist() {
+    public List<EBayApiConfigInfo> getConfiglist() {
         Session session = sessionFactory.getCurrentSession();
         return session.createCriteria(EBayApiConfigInfo.class).list();
     }

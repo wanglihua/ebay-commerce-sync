@@ -39,7 +39,7 @@ public class MyMessageDownloader {
         try {
             Session session = sessionFactory.getCurrentSession();
 
-            List<EBayApiConfigInfo> ebayApiConfigList = eBayApiConfigService.getConifglist();
+            List<EBayApiConfigInfo> ebayApiConfigList = eBayApiConfigService.getConfiglist();
             for (EBayApiConfigInfo ebayApiConfigInfo : ebayApiConfigList) {
                 try {
                     // headers
