@@ -78,7 +78,7 @@ public class MemberMessageDownloader {
                                 messageInfo.setMessageId(messageId);
                                 messageInfo.setShopId(ebayApiConfigInfo.getShopId());
 
-                                if (memberMessageExchangeType.getItem() != null) {
+                                if (memberMessageExchangeType.getItem() == null) {
                                     messageInfo.setItemId("");
                                     messageInfo.setProductId(0L);
                                     messageInfo.setSku("");

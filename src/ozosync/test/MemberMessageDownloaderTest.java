@@ -20,7 +20,7 @@ public class MemberMessageDownloaderTest {
 
     @Test
     @Transactional
-    public void myMessageDownload() {
+    public void memberMessageDownload() {
         memberMessageDownloader.download();
     }
 }
