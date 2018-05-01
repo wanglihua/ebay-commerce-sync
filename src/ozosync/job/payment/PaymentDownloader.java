@@ -62,6 +62,7 @@ public class PaymentDownloader {
                     PaymentHistory paymentHistory = null;
                     do {
                         containerMap.put("start_index", Integer.toString(startIndex));
+                        startIndex = startIndex + count;
 
                         paymentHistory = Payment.list(apiContext, containerMap);
 
