@@ -27,7 +27,7 @@ public class WebExceptionResolver implements HandlerExceptionResolver {
         ModelAndView modelAndView = new ModelAndView();
 
         //将错误信息传到页面
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         modelAndView.addObject("message", String.format("%s，系统出现错误，请联系管理员！", simpleDateFormat.format(curDateTime)));
 
         if (isAjaxRequest(request)) {

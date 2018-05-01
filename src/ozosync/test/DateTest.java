@@ -83,4 +83,28 @@ public class DateTest {
         Integer i = new Integer(1);
         System.out.println(i.toString());
     }
+
+    @Test
+    public void format() {
+        Map<String, String> containerMap = new HashMap<>();
+
+        Calendar startTime = Calendar.getInstance();
+        startTime.add(Calendar.DATE, -1);
+        containerMap.put("start_time", getTimeString(startTime.getTime()));
+
+        Calendar endTime = Calendar.getInstance();
+        containerMap.put("end_time", getTimeString(endTime.getTime()));
+
+        System.out.println(containerMap);
+    }
+
+
+    private String getTimeString(Date time) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
+        timeFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+
+        return String.format("%sT%sZ", dateFormat.format(time), timeFormat.format(time));
+    }
 }

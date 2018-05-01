@@ -10,7 +10,6 @@ import com.ebay.soap.eBLBaseComponents.PaginationType;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
-import java.util.TimeZone;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -153,11 +152,11 @@ public class MemberMessageDownloader {
         GetMemberMessagesCall getMemberMessagesCall = new GetMemberMessagesCall(apiContext);
         getMemberMessagesCall.setMailMessageType(MessageTypeCodeType.ALL);
 
-        Calendar startCreateTime = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+        Calendar startCreateTime = Calendar.getInstance();
         startCreateTime.add(Calendar.DATE, -NUMBER_OF_DAY);
         getMemberMessagesCall.setStartCreationTime(startCreateTime);
 
-        Calendar endCreateTime = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+        Calendar endCreateTime = Calendar.getInstance();
         getMemberMessagesCall.setEndCreationTime(endCreateTime);
 
         PaginationType pagination = new PaginationType();
