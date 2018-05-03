@@ -36,9 +36,6 @@ data class PaypalAccountInfo(
     @Column(name = "secret")
     var secret: String = ""
 
-    @Column(name = "balance")
-    var balance: BigDecimal = BigDecimal.ZERO
-
     @Column(name = "status_id")
     var statusId: Long = 0
 
