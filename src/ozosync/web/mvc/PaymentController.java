@@ -24,7 +24,7 @@ public class PaymentController {
     private SessionFactory sessionFactory;
 
     @SuppressWarnings("unchecked")
-    @RequestMapping(value = "/ship", method = RequestMethod.POST)
+    @RequestMapping(value = "/refund", method = RequestMethod.POST)
     public ModelAndView refund(@RequestParam(value = "paymentId") Long paymentId, @RequestParam(value = "amount") BigDecimal amount) {
 
         Session session = sessionFactory.getCurrentSession();
