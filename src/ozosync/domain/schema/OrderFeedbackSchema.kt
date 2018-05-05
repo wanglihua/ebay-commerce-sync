@@ -8,4 +8,5 @@ object OrderFeedbackSchema {
     const val orderItemId = "orderItemId"
     const val commentType = "commentType"
     const val commentText = "commentText"
+    const val commentTime = "commentTime"
 }

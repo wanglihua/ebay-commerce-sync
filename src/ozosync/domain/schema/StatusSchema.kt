@@ -5,6 +5,6 @@ object StatusSchema {
     const val id = "id"
     const val type = "type"
     const val createTime = "createTime"
-    const val updateTime = "updateTime"
     const val desc = "desc"
+    const val updateTime = "updateTime"
 }
