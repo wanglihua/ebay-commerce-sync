@@ -1,19 +1,6 @@
 package ozosync.job.payment;
 
-import org.apache.log4j.Logger;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import ozosync.domain.PaypalAccountInfo;
-import ozosync.service.PaypalApiConfigService;
-import urn.ebay.api.PayPalAPI.PayPalAPIInterfaceServiceService;
-import urn.ebay.api.PayPalAPI.TransactionSearchReq;
-import urn.ebay.api.PayPalAPI.TransactionSearchRequestType;
-import urn.ebay.api.PayPalAPI.TransactionSearchResponseType;
-import urn.ebay.apis.eBLBaseComponents.ErrorType;
-import urn.ebay.apis.eBLBaseComponents.PaymentTransactionSearchResultType;
-
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -22,12 +9,30 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import org.apache.log4j.Logger;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Restrictions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import ozosync.domain.PaypalAccountInfo;
+import ozosync.domain.PaypalPaymentInfo;
+import ozosync.domain.schema.PaypalPaymentSchema;
+import ozosync.service.PaypalApiConfigService;
+import urn.ebay.api.PayPalAPI.PayPalAPIInterfaceServiceService;
+import urn.ebay.api.PayPalAPI.TransactionSearchReq;
+import urn.ebay.api.PayPalAPI.TransactionSearchRequestType;
+import urn.ebay.api.PayPalAPI.TransactionSearchResponseType;
+import urn.ebay.apis.eBLBaseComponents.AckCodeType;
+import urn.ebay.apis.eBLBaseComponents.ErrorType;
+import urn.ebay.apis.eBLBaseComponents.PaymentTransactionSearchResultType;
 
 
 @Service
 public class PaymentDownloader {
 
     private static final int NUMBER_OF_DAY = 1;
+    private static final int MAX_FETCH_COUNT = 100;
 
     private Logger log = Logger.getLogger(PaymentDownloader.class);
 
@@ -59,16 +64,7 @@ public class PaymentDownloader {
 
     public void downloadAccountPaymentList(String apiUserName, String apiPassword, String signature) throws Exception {
 
-        // TransactionSearchRequestType
-        TransactionSearchRequestType requestType = new TransactionSearchRequestType();
-
-        Calendar startTime = Calendar.getInstance();
-        startTime.add(Calendar.DATE, -NUMBER_OF_DAY);
-
-        Calendar endTime = Calendar.getInstance();
-
-        requestType.setStartDate(getTimeString(startTime.getTime()));
-        requestType.setEndDate(getTimeString(endTime.getTime()));
+        Session session = sessionFactory.getCurrentSession();
 
         // PayPalAPIInterfaceServiceService
         Map<String, String> configMap = new HashMap<>();
@@ -79,25 +75,78 @@ public class PaymentDownloader {
 
         PayPalAPIInterfaceServiceService service = new PayPalAPIInterfaceServiceService(configMap);
 
-        // TransactionSearchReq
-        TransactionSearchReq transactionSearchReq = new TransactionSearchReq();
-        transactionSearchReq.setTransactionSearchRequest(requestType);
+        // TransactionSearchRequestType
+        TransactionSearchRequestType requestType = new TransactionSearchRequestType();
 
-        // TransactionSearchResponseType
-        TransactionSearchResponseType response = service.transactionSearch(transactionSearchReq);
+        Calendar startTime = Calendar.getInstance();
+        startTime.add(Calendar.DATE, -NUMBER_OF_DAY);
+        requestType.setStartDate(getTimeString(startTime.getTime()));
 
-        List<PaymentTransactionSearchResultType> paymentTransactionSearchResultTypeList = response.getPaymentTransactions();
+        Calendar endTime = Calendar.getInstance();
+        String endTimeStr = getTimeString(endTime.getTime());
 
-        System.out.println("Payment Transaction Search Result Count: ");
-        System.out.println(paymentTransactionSearchResultTypeList.size());
+        int resultCount = 0;
 
-        List<ErrorType> errorList = response.getErrors();
-        for (ErrorType errorType : errorList) {
-            System.out.println(errorType.getLongMessage());
-        }
+        do {
+            requestType.setEndDate(endTimeStr);
 
+            // TransactionSearchReq
+            TransactionSearchReq transactionSearchReq = new TransactionSearchReq();
+            transactionSearchReq.setTransactionSearchRequest(requestType);
 
-        int i = 1 + 3;
+            // TransactionSearchResponseType
+            TransactionSearchResponseType response = service.transactionSearch(transactionSearchReq);
+
+            List<PaymentTransactionSearchResultType> paymentTransactionSearchResultTypeList = response.getPaymentTransactions();
+
+            resultCount = paymentTransactionSearchResultTypeList.size();
+
+            if (resultCount > 0) {
+
+                for (PaymentTransactionSearchResultType searchResultType : paymentTransactionSearchResultTypeList) {
+
+                    String transactionId = searchResultType.getTransactionID();
+
+                    PaypalPaymentInfo paypalPaymentInfo = (PaypalPaymentInfo) session.createCriteria(PaypalPaymentInfo.class)
+                            .add(Restrictions.eq(PaypalPaymentSchema.transactionId, transactionId))
+                            .setMaxResults(1)
+                            .uniqueResult();
+
+                    if (paypalPaymentInfo == null) {
+                        paypalPaymentInfo = new PaypalPaymentInfo();
+
+                        paypalPaymentInfo.setTransactionId(transactionId);
+                        paypalPaymentInfo.setType(searchResultType.getType());
+                        paypalPaymentInfo.setPayer(searchResultType.getPayer());
+                        paypalPaymentInfo.setPayerDisplayName(searchResultType.getPayerDisplayName());
+                        paypalPaymentInfo.setCurrency(searchResultType.getGrossAmount().getCurrencyID().getValue());
+                        paypalPaymentInfo.setGrossAmount(new BigDecimal(searchResultType.getGrossAmount().getValue()));
+                        paypalPaymentInfo.setFeeAmount(new BigDecimal(searchResultType.getFeeAmount().getValue()));
+                        paypalPaymentInfo.setNetAmount(new BigDecimal(searchResultType.getNetAmount().getValue()));
+                        paypalPaymentInfo.setStatus(searchResultType.getStatus());
+
+                        SimpleDateFormat payTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                        String payTimeStr = searchResultType.getTimestamp().replace("T", " ").replace("Z", "");
+                        paypalPaymentInfo.setPayTime(payTimeFormat.parse(payTimeStr));
+
+                        paypalPaymentInfo.setCreateTime(new Date());
+                        paypalPaymentInfo.setUpdateTime(new Date());
+
+                        session.save(paypalPaymentInfo);
+                    }
+                }
+
+                endTimeStr = paymentTransactionSearchResultTypeList.get(0).getTimestamp();
+            }
+
+            if (response.getAck() == AckCodeType.FAILURE) {
+                List<ErrorType> errorList = response.getErrors();
+                for (ErrorType errorType : errorList) {
+                    log.fatal(errorType.getShortMessage());
+                    log.fatal(errorType.getLongMessage());
+                }
+            }
+        } while (resultCount > 0 && resultCount < MAX_FETCH_COUNT);
 
         /*
         GetTransactionDetailsReq getDetailsReq = new GetTransactionDetailsReq();
