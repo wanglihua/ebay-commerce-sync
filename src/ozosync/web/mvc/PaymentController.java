@@ -1,5 +1,7 @@
 package ozosync.web.mvc;
 
+import java.math.BigDecimal;
+import java.util.HashMap;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -10,9 +12,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
-
-import java.math.BigDecimal;
-import java.util.HashMap;
 
 @Controller
 @RequestMapping(value = "/payment")

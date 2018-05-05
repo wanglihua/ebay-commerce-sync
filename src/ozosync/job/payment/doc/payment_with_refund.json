@@ -1,0 +1,98 @@
+{
+  "id": "PAY-ABCDEFGHIJKLMNO1234567890",
+  "create_time": "2013-09-20T15:44:04Z",
+  "update_time": "2013-09-20T16:10:05Z",
+  "state": "approved",
+  "intent": "sale",
+  "payer": {
+    "payment_method": "paypal",
+    "payer_info": {
+      "email": "bob-facilitator@example.com",
+      "first_name": "Bob",
+      "last_name": "Example",
+      "payer_id": "ABCDEFG123456"
+    }
+  },
+  "transactions": [
+    {
+      "amount": {
+        "total": "1.00",
+        "currency": "USD",
+        "details": {
+          "subtotal": "1.00"
+        }
+      },
+      "description": "example description",
+      "related_resources": [
+        {
+          "sale": {
+            "id": "ABCDEFGH123456789",
+            "create_time": "2013-09-20T15:44:04Z",
+            "update_time": "2013-09-20T16:10:05Z",
+            "state": "refunded",
+            "amount": {
+              "total": "1.00",
+              "currency": "USD"
+            },
+            "parent_payment": "PAY-ABCDEFGHIJKLMNO1234567890",
+            "links": [
+              {
+                "href": "https://api.sandbox.paypal.com/v1/payments/sale/12345678ABCDEFGIJ",
+                "rel": "self",
+                "method": "GET"
+              },
+              {
+                "href": "https://api.sandbox.paypal.com/v1/payments/sale/12345678ABCDEFGIJ/refund",
+                "rel": "refund",
+                "method": "POST"
+              },
+              {
+                "href": "https://api.sandbox.paypal.com/v1/payments/payment/PAY-ABCDEFGHIJKLMNO1234567890",
+                "rel": "parent_payment",
+                "method": "GET"
+              }
+            ]
+          }
+        },
+        {
+          "refund": {
+            "id": "ABCDEFGH123456789",
+            "create_time": "2013-09-20T16:10:05Z",
+            "update_time": "2013-09-20T16:10:05Z",
+            "state": "completed",
+            "amount": {
+              "total": "1.00",
+              "currency": "USD"
+            },
+            "sale_id": "12345678ABCDEFGIJ",
+            "parent_payment": "PAY-57E15446PJ712294VKI6G2RA",
+            "links": [
+              {
+                "href": "https://api.sandbox.paypal.com/v1/payments/refund/ABCDEFGH123456789",
+                "rel": "self",
+                "method": "GET"
+              },
+              {
+                "href": "https://api.sandbox.paypal.com/v1/payments/payment/PAY-ABCDEFGHIJKLMNO1234567890",
+                "rel": "parent_payment",
+                "method": "GET"
+              },
+              {
+                "href": "https://api.sandbox.paypal.com/v1/payments/sale/12345678ABCDEFGIJ",
+                "rel": "sale",
+                "method": "GET"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "href": "https://api.sandbox.paypal.com/v1/payments/payment/PAY-ABCDEFGHIJKLMNO1234567890",
+      "rel": "self",
+      "method": "GET"
+    }
+  ]
+}
