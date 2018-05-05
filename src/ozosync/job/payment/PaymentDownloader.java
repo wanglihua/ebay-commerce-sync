@@ -35,7 +35,7 @@ import urn.ebay.api.PayPalAPI.TransactionSearchResponseType;
 @Service
 public class PaymentDownloader {
 
-    private static final int NUMBER_OF_DAY = 10;
+    private static final int NUMBER_OF_DAY = 1;
 
     private Logger log = Logger.getLogger(PaymentDownloader.class);
 
@@ -81,9 +81,15 @@ public class PaymentDownloader {
         // PayPalAPIInterfaceServiceService
         Map<String, String> configMap = new HashMap<>();
         configMap.put("mode", "live");
-        configMap.put("acct1.UserName", "live");
-        configMap.put("acct1.Password", "live");
-        configMap.put("acct1.Signature", "live");
+        configMap.put("acct1.UserName", "support_api1.ozoestore.com.au");
+        configMap.put("acct1.Password", "4VZZNR4CK3GG9GHW");
+        configMap.put("acct1.Signature", "AB0YTf4hFkAG5QvPtq2A-oOChxRNATZl570inmmXuRssw4HDbkR5w-8i");
+
+        /*
+API username：support_api1.ozoestore.com.au
+API password：4VZZNR4CK3GG9GHW
+Signature：AB0YTf4hFkAG5QvPtq2A-oOChxRNATZl570inmmXuRssw4HDbkR5w-8i
+         */
 
         PayPalAPIInterfaceServiceService service = new PayPalAPIInterfaceServiceService(configMap);
 
