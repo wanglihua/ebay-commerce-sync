@@ -117,8 +117,19 @@ public class PaymentDownloader {
 
                         paypalPaymentInfo.setTransactionId(transactionId);
                         paypalPaymentInfo.setType(searchResultType.getType());
-                        paypalPaymentInfo.setPayer(searchResultType.getPayer());
-                        paypalPaymentInfo.setPayerDisplayName(searchResultType.getPayerDisplayName());
+
+                        String payer = searchResultType.getPayer();
+                        if (payer == null) {
+                            payer = "";
+                        }
+                        paypalPaymentInfo.setPayer(payer);
+
+                        String payerDisplayName = searchResultType.getPayerDisplayName();
+                        if (payerDisplayName == null) {
+                            payerDisplayName = "";
+                        }
+                        paypalPaymentInfo.setPayerDisplayName(payerDisplayName);
+
                         paypalPaymentInfo.setCurrency(searchResultType.getGrossAmount().getCurrencyID().getValue());
                         paypalPaymentInfo.setGrossAmount(new BigDecimal(searchResultType.getGrossAmount().getValue()));
                         paypalPaymentInfo.setFeeAmount(new BigDecimal(searchResultType.getFeeAmount().getValue()));
