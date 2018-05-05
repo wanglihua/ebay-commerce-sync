@@ -1,8 +1,5 @@
 package ozosync.job.payment;
 
-import com.paypal.api.payments.Payment;
-import com.paypal.api.payments.PaymentHistory;
-import com.paypal.base.rest.APIContext;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -10,6 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ozosync.domain.PaypalAccountInfo;
 import ozosync.service.PaypalApiConfigService;
+import urn.ebay.api.PayPalAPI.PayPalAPIInterfaceServiceService;
+import urn.ebay.api.PayPalAPI.TransactionSearchReq;
+import urn.ebay.api.PayPalAPI.TransactionSearchRequestType;
+import urn.ebay.api.PayPalAPI.TransactionSearchResponseType;
+import urn.ebay.apis.eBLBaseComponents.ErrorType;
+import urn.ebay.apis.eBLBaseComponents.PaymentTransactionSearchResultType;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -19,6 +22,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+
+/*
+import urn.ebay.api.PayPalAPI.GetTransactionDetailsReq;
+import urn.ebay.api.PayPalAPI.GetTransactionDetailsRequestType;
+import urn.ebay.api.PayPalAPI.GetTransactionDetailsResponseType;
+import urn.ebay.api.PayPalAPI.TransactionSearchReq;
+import urn.ebay.api.PayPalAPI.TransactionSearchRequestType;
+import urn.ebay.api.PayPalAPI.TransactionSearchResponseType;
+*/
 
 @Service
 public class PaymentDownloader {
@@ -54,37 +66,56 @@ public class PaymentDownloader {
     }
 
     public void downloadAccountPaymentList(String clientId, String secret) throws Exception {
-        APIContext apiContext = new APIContext(clientId, secret, "live");
 
-        // count={0}&start_id={1}&start_index={2}&start_time={3}&end_time={4}&payee_id={5}&sort_by={6}&sort_order={7}
-        // count={0}&start_index={2}&start_time={3}&end_time={4}
-
-        Map<String, String> containerMap = new HashMap<>();
+        // TransactionSearchRequestType
+        TransactionSearchRequestType requestType = new TransactionSearchRequestType();
 
         Calendar startTime = Calendar.getInstance();
         startTime.add(Calendar.DATE, -NUMBER_OF_DAY);
-        containerMap.put("start_time", getTimeString(startTime.getTime()));
 
         Calendar endTime = Calendar.getInstance();
-        containerMap.put("end_time", getTimeString(endTime.getTime()));
 
-        int count = 200;
-        containerMap.put("count", Integer.toString(count));
+        requestType.setStartDate(getTimeString(startTime.getTime()));
+        requestType.setEndDate(getTimeString(endTime.getTime()));
 
-        int startIndex = 0;
+        // PayPalAPIInterfaceServiceService
+        Map<String, String> configMap = new HashMap<>();
+        configMap.put("mode", "live");
+        configMap.put("acct1.UserName", "live");
+        configMap.put("acct1.Password", "live");
+        configMap.put("acct1.Signature", "live");
 
-        PaymentHistory paymentHistory = null;
-        do {
-            containerMap.put("start_index", Integer.toString(startIndex));
+        PayPalAPIInterfaceServiceService service = new PayPalAPIInterfaceServiceService(configMap);
 
-            paymentHistory = Payment.list(apiContext, containerMap);
+        // TransactionSearchReq
+        TransactionSearchReq transactionSearchReq = new TransactionSearchReq();
+        transactionSearchReq.setTransactionSearchRequest(requestType);
 
-            // todo 处理
-            System.out.println(paymentHistory.getCount());
+        // TransactionSearchResponseType
+        TransactionSearchResponseType response = service.transactionSearch(transactionSearchReq);
 
-            startIndex = startIndex + count;
+        List<PaymentTransactionSearchResultType> paymentTransactionSearchResultTypeList = response.getPaymentTransactions();
 
-        } while (paymentHistory != null && paymentHistory.getCount() >= count); // 一般 > 是不会成立的
+        System.out.println("Payment Transaction Search Result Count: ");
+        System.out.println(paymentTransactionSearchResultTypeList.size());
+
+        List<ErrorType> errorList = response.getErrors();
+        for (ErrorType errorType : errorList) {
+            System.out.println(errorType.getLongMessage());
+        }
+
+
+        int i = 1 + 3;
+
+        /*
+        GetTransactionDetailsReq getDetailsReq = new GetTransactionDetailsReq();
+        GetTransactionDetailsRequestType getDetailsReqType = new GetTransactionDetailsRequestType();
+        getDetailsReqType.setTransactionID(id);
+        getDetailsReq.setGetTransactionDetailsRequest(getDetailsReqType);
+
+        GetTransactionDetailsResponseType getDetailsResp = null;
+        getDetailsResp = service.getTransactionDetails(getDetailsReq);
+        */
     }
 
     private String getTimeString(Date time) {
@@ -93,6 +124,6 @@ public class PaymentDownloader {
         SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
         timeFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
 
-        return String.format("%sT%sZ", dateFormat.format(time), timeFormat.format(time));
+        return String.format("%sT%s.000Z", dateFormat.format(time), timeFormat.format(time));
     }
 }
