@@ -4,7 +4,6 @@ import org.hibernate.annotations.DynamicInsert
 import org.hibernate.annotations.DynamicUpdate
 import org.hibernate.annotations.Type
 import ozosync.common.VerboseName
-import java.math.BigDecimal
 import java.util.*
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -30,11 +29,14 @@ data class PaypalAccountInfo(
     @Column(name = "`desc`")
     var desc: String = ""
 
-    @Column(name = "client_id")
-    var clientId: String = ""
+    @Column(name = "api_username")
+    var apiUserName: String = ""
 
-    @Column(name = "secret")
-    var secret: String = ""
+    @Column(name = "api_password")
+    var apiPassword: String = ""
+
+    @Column(name = "signature")
+    var signature: String = ""
 
     @Column(name = "status_id")
     var statusId: Long = 0

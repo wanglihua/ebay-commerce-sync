@@ -23,14 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
-/*
-import urn.ebay.api.PayPalAPI.GetTransactionDetailsReq;
-import urn.ebay.api.PayPalAPI.GetTransactionDetailsRequestType;
-import urn.ebay.api.PayPalAPI.GetTransactionDetailsResponseType;
-import urn.ebay.api.PayPalAPI.TransactionSearchReq;
-import urn.ebay.api.PayPalAPI.TransactionSearchRequestType;
-import urn.ebay.api.PayPalAPI.TransactionSearchResponseType;
-*/
 
 @Service
 public class PaymentDownloader {
@@ -53,7 +45,7 @@ public class PaymentDownloader {
             List<PaypalAccountInfo> paypalAccountInfoList = paypalApiConfigService.getConfiglist();
             for (PaypalAccountInfo paypalAccountInfo : paypalAccountInfoList) {
                 try {
-                    downloadAccountPaymentList(paypalAccountInfo.getClientId(), paypalAccountInfo.getSecret());
+                    downloadAccountPaymentList(paypalAccountInfo.getApiUserName(), paypalAccountInfo.getApiPassword(), paypalAccountInfo.getSignature());
                 } catch (Exception exp) {
                     log.fatal(exp);
                     log.fatal(Arrays.toString(exp.getStackTrace()).replace(",", "\r\n"));
@@ -65,7 +57,7 @@ public class PaymentDownloader {
         }
     }
 
-    public void downloadAccountPaymentList(String clientId, String secret) throws Exception {
+    public void downloadAccountPaymentList(String apiUserName, String apiPassword, String signature) throws Exception {
 
         // TransactionSearchRequestType
         TransactionSearchRequestType requestType = new TransactionSearchRequestType();
@@ -81,15 +73,9 @@ public class PaymentDownloader {
         // PayPalAPIInterfaceServiceService
         Map<String, String> configMap = new HashMap<>();
         configMap.put("mode", "live");
-        configMap.put("acct1.UserName", "support_api1.ozoestore.com.au");
-        configMap.put("acct1.Password", "4VZZNR4CK3GG9GHW");
-        configMap.put("acct1.Signature", "AB0YTf4hFkAG5QvPtq2A-oOChxRNATZl570inmmXuRssw4HDbkR5w-8i");
-
-        /*
-API username：support_api1.ozoestore.com.au
-API password：4VZZNR4CK3GG9GHW
-Signature：AB0YTf4hFkAG5QvPtq2A-oOChxRNATZl570inmmXuRssw4HDbkR5w-8i
-         */
+        configMap.put("acct1.UserName", apiUserName);
+        configMap.put("acct1.Password", apiPassword);
+        configMap.put("acct1.Signature", signature);
 
         PayPalAPIInterfaceServiceService service = new PayPalAPIInterfaceServiceService(configMap);
 

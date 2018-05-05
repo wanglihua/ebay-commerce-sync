@@ -28,18 +28,15 @@ public class PaymentDownloaderTest {
     @Transactional
     public void accountPaymentListDownload() throws Exception {
         /*
-ebay.au168@gmail.com
-ASQYgv1ltlY5F5B1DxBqD4uoRplytCXNrmYj9GS7AFX0zxTIwGwh9E3NMu3jGFptVPzWjVKkVLylqk6g
-EE4Vf1Xq-oD3_0IhayJ2n5mMhOlf-fdmAFdWiR6kb5Xyci1YgAq2YdkAxUhRaQVPR7lYhLO1b-Y07_HT
-
-support@ozoestore.com.au
-AYCCYjJ50pKm27CNgQCsNHEYpoiNS9FW6gYpHKF7KR0PmXKyMvV127ld0t0hUlvJtXCMhwKsDiW0x6rw
-EDw7YOVHVzvMjxxR3UgFCYPyChKE3LVh69CnsqtsI07bPsIOtltvsBeAkolvDRTFP4_zOZuEGaU5VWtY
+API username：support_api1.ozoestore.com.au
+API password：4VZZNR4CK3GG9GHW
+Signature：AB0YTf4hFkAG5QvPtq2A-oOChxRNATZl570inmmXuRssw4HDbkR5w-8i
          */
 
-        String clientId = "AYCCYjJ50pKm27CNgQCsNHEYpoiNS9FW6gYpHKF7KR0PmXKyMvV127ld0t0hUlvJtXCMhwKsDiW0x6rw";
-        String secret = "EDw7YOVHVzvMjxxR3UgFCYPyChKE3LVh69CnsqtsI07bPsIOtltvsBeAkolvDRTFP4_zOZuEGaU5VWtY";
+        String api_username = "support_api1.ozoestore.com.au";
+        String api_password = "4VZZNR4CK3GG9GHW";
+        String signature = "AB0YTf4hFkAG5QvPtq2A-oOChxRNATZl570inmmXuRssw4HDbkR5w-8i";
 
-        paymentDownloader.downloadAccountPaymentList(clientId, secret);
+        paymentDownloader.downloadAccountPaymentList(api_username, api_password, signature);
     }
 }
