@@ -105,49 +105,53 @@ public class PaymentDownloader {
             if (resultCount > 0) {
 
                 for (PaymentTransactionSearchResultType searchResultType : paymentTransactionSearchResultTypeList) {
+                    try {
+                        String transactionId = searchResultType.getTransactionID();
 
-                    String transactionId = searchResultType.getTransactionID();
+                        PaypalPaymentInfo paypalPaymentInfo = (PaypalPaymentInfo) session.createCriteria(PaypalPaymentInfo.class)
+                                .add(Restrictions.eq(PaypalPaymentSchema.transactionId, transactionId))
+                                .setMaxResults(1)
+                                .uniqueResult();
 
-                    PaypalPaymentInfo paypalPaymentInfo = (PaypalPaymentInfo) session.createCriteria(PaypalPaymentInfo.class)
-                            .add(Restrictions.eq(PaypalPaymentSchema.transactionId, transactionId))
-                            .setMaxResults(1)
-                            .uniqueResult();
+                        if (paypalPaymentInfo == null) {
+                            paypalPaymentInfo = new PaypalPaymentInfo();
 
-                    if (paypalPaymentInfo == null) {
-                        paypalPaymentInfo = new PaypalPaymentInfo();
+                            paypalPaymentInfo.setAccountId(paypalAccountInfo.getId());
+                            paypalPaymentInfo.setPaypalAccount(paypalAccountInfo.getPaypalAccount());
 
-                        paypalPaymentInfo.setAccountId(paypalAccountInfo.getId());
-                        paypalPaymentInfo.setPaypalAccount(paypalAccountInfo.getPaypalAccount());
+                            paypalPaymentInfo.setTransactionId(transactionId);
+                            paypalPaymentInfo.setType(searchResultType.getType());
 
-                        paypalPaymentInfo.setTransactionId(transactionId);
-                        paypalPaymentInfo.setType(searchResultType.getType());
+                            String payer = searchResultType.getPayer();
+                            if (payer == null) {
+                                payer = "";
+                            }
+                            paypalPaymentInfo.setPayer(payer);
 
-                        String payer = searchResultType.getPayer();
-                        if (payer == null) {
-                            payer = "";
+                            String payerDisplayName = searchResultType.getPayerDisplayName();
+                            if (payerDisplayName == null) {
+                                payerDisplayName = "";
+                            }
+                            paypalPaymentInfo.setPayerDisplayName(payerDisplayName);
+
+                            paypalPaymentInfo.setCurrency(searchResultType.getGrossAmount().getCurrencyID().getValue());
+                            paypalPaymentInfo.setGrossAmount(new BigDecimal(searchResultType.getGrossAmount().getValue()));
+                            paypalPaymentInfo.setFeeAmount(new BigDecimal(searchResultType.getFeeAmount().getValue()));
+                            paypalPaymentInfo.setNetAmount(new BigDecimal(searchResultType.getNetAmount().getValue()));
+                            paypalPaymentInfo.setStatus(searchResultType.getStatus());
+
+                            SimpleDateFormat payTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                            String payTimeStr = searchResultType.getTimestamp().replace("T", " ").replace("Z", "");
+                            paypalPaymentInfo.setPayTime(payTimeFormat.parse(payTimeStr));
+
+                            paypalPaymentInfo.setCreateTime(new Date());
+                            paypalPaymentInfo.setUpdateTime(new Date());
+
+                            session.save(paypalPaymentInfo);
                         }
-                        paypalPaymentInfo.setPayer(payer);
-
-                        String payerDisplayName = searchResultType.getPayerDisplayName();
-                        if (payerDisplayName == null) {
-                            payerDisplayName = "";
-                        }
-                        paypalPaymentInfo.setPayerDisplayName(payerDisplayName);
-
-                        paypalPaymentInfo.setCurrency(searchResultType.getGrossAmount().getCurrencyID().getValue());
-                        paypalPaymentInfo.setGrossAmount(new BigDecimal(searchResultType.getGrossAmount().getValue()));
-                        paypalPaymentInfo.setFeeAmount(new BigDecimal(searchResultType.getFeeAmount().getValue()));
-                        paypalPaymentInfo.setNetAmount(new BigDecimal(searchResultType.getNetAmount().getValue()));
-                        paypalPaymentInfo.setStatus(searchResultType.getStatus());
-
-                        SimpleDateFormat payTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                        String payTimeStr = searchResultType.getTimestamp().replace("T", " ").replace("Z", "");
-                        paypalPaymentInfo.setPayTime(payTimeFormat.parse(payTimeStr));
-
-                        paypalPaymentInfo.setCreateTime(new Date());
-                        paypalPaymentInfo.setUpdateTime(new Date());
-
-                        session.save(paypalPaymentInfo);
+                    } catch (Exception exp) {
+                        log.fatal(exp);
+                        log.fatal(Arrays.toString(exp.getStackTrace()).replace(",", "\r\n"));
                     }
                 }
 
