@@ -23,6 +23,12 @@ data class PaypalPaymentInfo(
         var id: Long = 0
 ) {
 
+    @Column(name = "account_id")
+    var accountId: Long = 0
+
+    @Column(name = "paypal_account")
+    var paypalAccount: String = ""
+
     @Column(name = "transaction_id")
     var transactionId: String = ""
 

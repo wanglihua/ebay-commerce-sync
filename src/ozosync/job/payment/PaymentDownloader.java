@@ -116,6 +116,9 @@ public class PaymentDownloader {
                     if (paypalPaymentInfo == null) {
                         paypalPaymentInfo = new PaypalPaymentInfo();
 
+                        paypalPaymentInfo.setAccountId(paypalAccountInfo.getId());
+                        paypalPaymentInfo.setPaypalAccount(paypalAccountInfo.getPaypalAccount());
+
                         paypalPaymentInfo.setTransactionId(transactionId);
                         paypalPaymentInfo.setType(searchResultType.getType());
 
