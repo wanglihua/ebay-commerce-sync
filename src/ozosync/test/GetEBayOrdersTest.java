@@ -3,6 +3,7 @@ package ozosync.test;
 import com.ebay.sdk.ApiContext;
 import com.ebay.sdk.ApiException;
 import com.ebay.sdk.SdkException;
+import com.ebay.sdk.call.GetItemTransactionsCall;
 import com.ebay.sdk.call.GetOrdersCall;
 import com.ebay.soap.eBLBaseComponents.DetailLevelCodeType;
 import com.ebay.soap.eBLBaseComponents.OrderIDArrayType;
@@ -127,7 +128,10 @@ public class GetEBayOrdersTest {
 
         // String[] orderId = {"292357944459-1546222564019"};
         // 282629417143-1809437553018
-        String[] orderId = {"253133739802-2224901505015"};
+
+        //
+        // 252408032595-2239582413015
+        String[] orderId = {"252408032595-2239582413015"};
         orderIdArray.setOrderID(orderId);
 
         getOrders.setOrderIDArray(orderIdArray);
@@ -144,6 +148,12 @@ public class GetEBayOrdersTest {
             int transactionLength = transactionArray.getTransactionLength();
             for (int tranIndex = 0; tranIndex < transactionLength; tranIndex++) {
                 TransactionType transaction = transactionArray.getTransaction(tranIndex);
+
+                GetItemTransactionsCall getItemTransactionsCall = new GetItemTransactionsCall(apiContext);
+                getItemTransactionsCall.setItemID(transaction.getTransactionID());
+                getItemTransactionsCall.setDetailLevel(new DetailLevelCodeType[]{DetailLevelCodeType.RETURN_ALL});
+                TransactionType[] itemTransactionTypeList = getItemTransactionsCall.getItemTransactions();
+
                 System.out.println(transaction.getItem().getItemID());
                 System.out.println(transaction.getItem().getSKU());
                 System.out.println(transaction.getQuantityPurchased());
