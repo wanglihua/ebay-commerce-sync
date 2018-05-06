@@ -1,14 +1,5 @@
 package ozosync.job.payment;
 
-import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -26,6 +17,16 @@ import urn.ebay.api.PayPalAPI.TransactionSearchResponseType;
 import urn.ebay.apis.eBLBaseComponents.AckCodeType;
 import urn.ebay.apis.eBLBaseComponents.ErrorType;
 import urn.ebay.apis.eBLBaseComponents.PaymentTransactionSearchResultType;
+
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
 
 
 @Service
@@ -157,7 +158,7 @@ public class PaymentDownloader {
                     log.fatal(errorType.getLongMessage());
                 }
             }
-        } while (resultCount > 0 && resultCount < MAX_FETCH_COUNT);
+        } while (resultCount > 0 && resultCount >= MAX_FETCH_COUNT); // >= 中的 > 号是不成立的
 
         /*
         GetTransactionDetailsReq getDetailsReq = new GetTransactionDetailsReq();

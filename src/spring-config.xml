@@ -207,7 +207,7 @@
     <bean id="paymentJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="paymentJobDetail"/>
         <!--<property name="cronExpression" value="0 0 23 * * ? "/>-->
-        <property name="cronExpression" value="0 51 0/1 * * ? *"/>
+        <property name="cronExpression" value="0 07 0/1 * * ? *"/>
         <property name="startDelay" value="1000"/>
     </bean>
 
