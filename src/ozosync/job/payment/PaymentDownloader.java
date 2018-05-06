@@ -51,7 +51,7 @@ public class PaymentDownloader {
             List<PaypalAccountInfo> paypalAccountInfoList = paypalApiConfigService.getConfiglist();
             for (PaypalAccountInfo paypalAccountInfo : paypalAccountInfoList) {
                 try {
-                    downloadAccountPaymentList(paypalAccountInfo.getApiUserName(), paypalAccountInfo.getApiPassword(), paypalAccountInfo.getSignature());
+                    downloadAccountPaymentList(paypalAccountInfo);
                 } catch (Exception exp) {
                     log.fatal(exp);
                     log.fatal(Arrays.toString(exp.getStackTrace()).replace(",", "\r\n"));
@@ -63,16 +63,16 @@ public class PaymentDownloader {
         }
     }
 
-    public void downloadAccountPaymentList(String apiUserName, String apiPassword, String signature) throws Exception {
+    public void downloadAccountPaymentList(PaypalAccountInfo paypalAccountInfo) throws Exception {
 
         Session session = sessionFactory.getCurrentSession();
 
         // PayPalAPIInterfaceServiceService
         Map<String, String> configMap = new HashMap<>();
         configMap.put("mode", "live");
-        configMap.put("acct1.UserName", apiUserName);
-        configMap.put("acct1.Password", apiPassword);
-        configMap.put("acct1.Signature", signature);
+        configMap.put("acct1.UserName", paypalAccountInfo.getApiUserName());
+        configMap.put("acct1.Password", paypalAccountInfo.getApiPassword());
+        configMap.put("acct1.Signature", paypalAccountInfo.getSignature());
 
         PayPalAPIInterfaceServiceService service = new PayPalAPIInterfaceServiceService(configMap);
 
