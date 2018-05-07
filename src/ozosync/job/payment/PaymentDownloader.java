@@ -92,10 +92,11 @@ public class PaymentDownloader {
         int totalCallCount = 0;
 
         do {
+            requestType.setEndDate(endTimeStr);
+
             System.out.println("startTime: " + getTimeString(startTime.getTime()));
             System.out.println("endTime: " + endTimeStr);
 
-            requestType.setEndDate(endTimeStr);
 
             // TransactionSearchReq
             TransactionSearchReq transactionSearchReq = new TransactionSearchReq();
@@ -155,7 +156,9 @@ public class PaymentDownloader {
 
                             session.save(paypalPaymentInfo);
 
-                            System.out.println("timestamp: " + searchResultType.getTimestamp());
+                            if (endTimeStr.compareTo(searchResultType.getTimestamp()) > 0) {
+                                endTimeStr = searchResultType.getTimestamp();
+                            }
                         }
                     } catch (Exception exp) {
                         log.fatal(exp);
