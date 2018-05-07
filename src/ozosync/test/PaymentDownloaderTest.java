@@ -1,6 +1,7 @@
 package ozosync.test;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,6 +17,14 @@ import urn.ebay.api.PayPalAPI.GetTransactionDetailsReq;
 import urn.ebay.api.PayPalAPI.GetTransactionDetailsRequestType;
 import urn.ebay.api.PayPalAPI.GetTransactionDetailsResponseType;
 import urn.ebay.api.PayPalAPI.PayPalAPIInterfaceServiceService;
+import urn.ebay.api.PayPalAPI.RefundTransactionReq;
+import urn.ebay.api.PayPalAPI.RefundTransactionRequestType;
+import urn.ebay.api.PayPalAPI.RefundTransactionResponseType;
+import urn.ebay.apis.CoreComponentTypes.BasicAmountType;
+import urn.ebay.apis.eBLBaseComponents.AckCodeType;
+import urn.ebay.apis.eBLBaseComponents.CurrencyCodeType;
+import urn.ebay.apis.eBLBaseComponents.ErrorType;
+import urn.ebay.apis.eBLBaseComponents.RefundType;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
@@ -76,7 +85,48 @@ Signature：AB0YTf4hFkAG5QvPtq2A-oOChxRNATZl570inmmXuRssw4HDbkR5w-8i
         getTransactionDetailsReq.setGetTransactionDetailsRequest(requestType);
         GetTransactionDetailsResponseType responseType = service.getTransactionDetails(getTransactionDetailsReq);
 
-        int i = 1 + 1;
+    }
 
+    @Test
+    @Transactional
+    public void refund() throws Exception {
+
+        String api_username = "support_api1.ozoestore.com.au";
+        String api_password = "4VZZNR4CK3GG9GHW";
+        String signature = "AB0YTf4hFkAG5QvPtq2A-oOChxRNATZl570inmmXuRssw4HDbkR5w-8i";
+
+        // PayPalAPIInterfaceServiceService
+        Map<String, String> configMap = new HashMap<>();
+        configMap.put("mode", "live");
+        configMap.put("acct1.UserName", api_username);
+        configMap.put("acct1.Password", api_password);
+        configMap.put("acct1.Signature", signature);
+
+        PayPalAPIInterfaceServiceService service = new PayPalAPIInterfaceServiceService(configMap);
+
+
+        BasicAmountType amountType = new BasicAmountType();
+        amountType.setValue("0.01");
+        amountType.setCurrencyID(CurrencyCodeType.AUD);
+
+        RefundTransactionRequestType refundTransactionRequestType = new RefundTransactionRequestType();
+        refundTransactionRequestType.setAmount(amountType);
+        refundTransactionRequestType.setTransactionID("TEST_19J52487X0420101R");
+        refundTransactionRequestType.setMemo("退款描述");
+        refundTransactionRequestType.setRefundType(RefundType.PARTIAL);
+
+        RefundTransactionReq refundTransactionReq = new RefundTransactionReq();
+        refundTransactionReq.setRefundTransactionRequest(refundTransactionRequestType);
+        RefundTransactionResponseType refundTransactionResponseType = service.refundTransaction(refundTransactionReq);
+
+        if (refundTransactionResponseType.getAck() == AckCodeType.SUCCESS) {
+            String refundTransactionId = refundTransactionResponseType.getRefundTransactionID();
+            refundTransactionId = refundTransactionId.replace("'", "");
+        } else {
+            List<ErrorType> errorTypeList = refundTransactionResponseType.getErrors();
+            for (ErrorType errorType : errorTypeList) {
+                System.out.println(errorType.getLongMessage());
+            }
+        }
     }
 }
