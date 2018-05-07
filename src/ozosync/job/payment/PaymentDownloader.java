@@ -94,8 +94,8 @@ public class PaymentDownloader {
         do {
             requestType.setEndDate(endTimeStr);
 
-            System.out.println("startTime: " + getTimeString(startTime.getTime()));
-            System.out.println("endTime: " + endTimeStr);
+            // System.out.println("startTime: " + getTimeString(startTime.getTime()));
+            // System.out.println("endTime: " + endTimeStr);
 
 
             // TransactionSearchReq
