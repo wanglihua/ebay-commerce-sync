@@ -165,8 +165,6 @@ public class PaymentDownloader {
                         log.fatal(Arrays.toString(exp.getStackTrace()).replace(",", "\r\n"));
                     }
                 }
-
-                endTimeStr = paymentTransactionSearchResultTypeList.get(resultCount - 1).getTimestamp();
             }
 
             if (response.getAck() == AckCodeType.FAILURE) {
