@@ -42,6 +42,8 @@ Signature：AB0YTf4hFkAG5QvPtq2A-oOChxRNATZl570inmmXuRssw4HDbkR5w-8i
         paypalAccountInfo.setApiUserName(api_username);
         paypalAccountInfo.setApiPassword(api_password);
         paypalAccountInfo.setSignature(signature);
+        paypalAccountInfo.setId(1L);
+        paypalAccountInfo.setPaypalAccount("support@ozoestore.com.au");
 
         paymentDownloader.downloadAccountPaymentList(paypalAccountInfo);
     }

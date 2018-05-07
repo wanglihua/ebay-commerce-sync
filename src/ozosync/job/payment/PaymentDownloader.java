@@ -34,6 +34,7 @@ public class PaymentDownloader {
 
     private static final int NUMBER_OF_DAY = 1;
     private static final int MAX_FETCH_COUNT = 100;
+    private static final int MAX_CALL_COUNT = 30;
 
     private Logger log = Logger.getLogger(PaymentDownloader.class);
 
@@ -88,7 +89,12 @@ public class PaymentDownloader {
 
         int resultCount = 0;
 
+        int totalCallCount = 0;
+
         do {
+            System.out.println("startTime: " + getTimeString(startTime.getTime()));
+            System.out.println("endTime: " + endTimeStr);
+
             requestType.setEndDate(endTimeStr);
 
             // TransactionSearchReq
@@ -148,6 +154,8 @@ public class PaymentDownloader {
                             paypalPaymentInfo.setUpdateTime(new Date());
 
                             session.save(paypalPaymentInfo);
+
+                            System.out.println("timestamp: " + searchResultType.getTimestamp());
                         }
                     } catch (Exception exp) {
                         log.fatal(exp);
@@ -155,7 +163,7 @@ public class PaymentDownloader {
                     }
                 }
 
-                endTimeStr = paymentTransactionSearchResultTypeList.get(0).getTimestamp();
+                endTimeStr = paymentTransactionSearchResultTypeList.get(resultCount - 1).getTimestamp();
             }
 
             if (response.getAck() == AckCodeType.FAILURE) {
@@ -165,7 +173,8 @@ public class PaymentDownloader {
                     log.fatal(errorType.getLongMessage());
                 }
             }
-        } while (resultCount > 0 && resultCount >= MAX_FETCH_COUNT); // >= 中的 > 号是不成立的
+            totalCallCount++;
+        } while (resultCount > 0 && resultCount >= MAX_FETCH_COUNT && totalCallCount <= MAX_CALL_COUNT); // >= 中的 > 号是不成立的
 
         /*
         GetTransactionDetailsReq getDetailsReq = new GetTransactionDetailsReq();
