@@ -60,6 +60,12 @@ data class PaypalPaymentInfo(
     @Type(type = "timestamp")
     var payTime: Date = Date()
 
+    @Column(name = "order_id")
+    var orderId: Long = 0
+
+    @Column(name = "order_code")
+    var orderCode: String = ""
+
     @Column(name = "create_time")
     @Type(type = "timestamp")
     var createTime: Date = Date()
