@@ -21,9 +21,11 @@ import ozosync.domain.OrderExternalTransactionInfo;
 import ozosync.domain.OrderInfo;
 import ozosync.domain.OrderStatus;
 import ozosync.domain.OrderTypeId;
+import ozosync.domain.PaypalPaymentInfo;
 import ozosync.domain.ShopAccountInfo;
 import ozosync.domain.schema.OrderExternalTransactionSchema;
 import ozosync.domain.schema.OrderSchema;
+import ozosync.domain.schema.PaypalPaymentSchema;
 import ozosync.service.ExchangeRateService;
 import ozosync.service.OrderHistoryService;
 
@@ -252,22 +254,44 @@ public class OrderDownloadService {
                 String transactionId = externalTransaction.getExternalTransactionID();
                 Date transactionTime = externalTransaction.getExternalTransactionTime().getTime();
 
+                // 保存 order external transaction， 更新 paypal payment 中的 order_id 和 order_code
+
                 OrderExternalTransactionInfo orderExternalTransactionInfo = (OrderExternalTransactionInfo) session.createCriteria(OrderExternalTransactionInfo.class)
                         .add(Restrictions.eq(OrderExternalTransactionSchema.orderId, orderId))
                         .add(Restrictions.eq(OrderExternalTransactionSchema.transactionId, transactionId))
                         .setMaxResults(1)
                         .uniqueResult();
 
+                PaypalPaymentInfo paypalPaymentInfo = (PaypalPaymentInfo) session.createCriteria(PaypalPaymentInfo.class)
+                        .add(Restrictions.eq(PaypalPaymentSchema.transactionId, transactionId))
+                        .setMaxResults(1)
+                        .uniqueResult();
+
                 if (orderExternalTransactionInfo == null) {
                     orderExternalTransactionInfo = new OrderExternalTransactionInfo();
+                    orderExternalTransactionInfo.setOrderId(orderId);
+                    orderExternalTransactionInfo.setTransactionId(transactionId);
+                    orderExternalTransactionInfo.setTransactionTime(transactionTime);
+                    orderExternalTransactionInfo.setOrderId(0L);
+
+                    if (paypalPaymentInfo != null) {
+                        orderExternalTransactionInfo.setPaymentId(paypalPaymentInfo.getId());
+                    } else {
+                        orderExternalTransactionInfo.setPaymentId(0L);
+                    }
+
+                    session.save(orderExternalTransactionInfo);
+
+                    if (paypalPaymentInfo != null) {
+                        paypalPaymentInfo.setOrderId(orderInDb.getId());
+                        paypalPaymentInfo.setOrderCode(orderInDb.getCode());
+
+                        session.update(paypalPaymentInfo);
+                    }
+
+                    session.flush();
                 }
 
-                orderExternalTransactionInfo.setOrderId(orderId);
-                orderExternalTransactionInfo.setTransactionId(transactionId);
-                orderExternalTransactionInfo.setTransactionTime(transactionTime);
-
-                session.saveOrUpdate(orderExternalTransactionInfo);
-                session.flush();
             }
         }
 
