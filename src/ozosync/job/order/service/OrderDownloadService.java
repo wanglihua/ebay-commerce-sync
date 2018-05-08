@@ -17,10 +17,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ozosync.domain.EBayApiConfigInfo;
 import ozosync.domain.ExchangeRateInfo;
+import ozosync.domain.OrderExternalTransactionInfo;
 import ozosync.domain.OrderInfo;
 import ozosync.domain.OrderStatus;
 import ozosync.domain.OrderTypeId;
 import ozosync.domain.ShopAccountInfo;
+import ozosync.domain.schema.OrderExternalTransactionSchema;
 import ozosync.domain.schema.OrderSchema;
 import ozosync.service.ExchangeRateService;
 import ozosync.service.OrderHistoryService;
@@ -237,6 +239,35 @@ public class OrderDownloadService {
 
             if (statusId != orderInDb.getStatusId()) {
                 orderHistoryService.insertOrderHistory(orderInDb, "订单下载状态更新");
+            }
+        }
+
+        // order external transaction
+        Long orderId = orderInDb.getId();
+        ExternalTransactionType[] externalTransactionList = orderDownload.getExternalTransaction();
+        int externalTransactionLength = orderDownload.getExternalTransactionLength();
+        if (externalTransactionList != null && externalTransactionLength != 0) {
+            for (int index = 0; index < externalTransactionLength; index++) {
+                ExternalTransactionType externalTransaction = orderDownload.getExternalTransaction(index);
+                String transactionId = externalTransaction.getExternalTransactionID();
+                Date transactionTime = externalTransaction.getExternalTransactionTime().getTime();
+
+                OrderExternalTransactionInfo orderExternalTransactionInfo = (OrderExternalTransactionInfo) session.createCriteria(OrderExternalTransactionInfo.class)
+                        .add(Restrictions.eq(OrderExternalTransactionSchema.orderId, orderId))
+                        .add(Restrictions.eq(OrderExternalTransactionSchema.transactionId, transactionId))
+                        .setMaxResults(1)
+                        .uniqueResult();
+
+                if (orderExternalTransactionInfo == null) {
+                    orderExternalTransactionInfo = new OrderExternalTransactionInfo();
+                }
+
+                orderExternalTransactionInfo.setOrderId(orderId);
+                orderExternalTransactionInfo.setTransactionId(transactionId);
+                orderExternalTransactionInfo.setTransactionTime(transactionTime);
+
+                session.saveOrUpdate(orderExternalTransactionInfo);
+                session.flush();
             }
         }
 
