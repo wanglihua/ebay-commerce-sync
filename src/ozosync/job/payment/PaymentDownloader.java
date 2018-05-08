@@ -6,8 +6,10 @@ import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ozosync.domain.OrderExternalTransactionInfo;
 import ozosync.domain.PaypalAccountInfo;
 import ozosync.domain.PaypalPaymentInfo;
+import ozosync.domain.schema.OrderExternalTransactionSchema;
 import ozosync.domain.schema.PaypalPaymentSchema;
 import ozosync.service.PaypalApiConfigService;
 import urn.ebay.api.PayPalAPI.PayPalAPIInterfaceServiceService;
@@ -155,6 +157,21 @@ public class PaymentDownloader {
                             paypalPaymentInfo.setUpdateTime(new Date());
 
                             session.save(paypalPaymentInfo);
+
+                            session.flush();
+
+                            OrderExternalTransactionInfo orderExternalTransactionInfo = (OrderExternalTransactionInfo) session.createCriteria(OrderExternalTransactionInfo.class)
+                                    .add(Restrictions.eq(OrderExternalTransactionSchema.transactionId, transactionId))
+                                    .setMaxResults(1)
+                                    .uniqueResult();
+
+                            if (orderExternalTransactionInfo != null) {
+                                orderExternalTransactionInfo.setPaymentId(paypalPaymentInfo.getId());
+                                orderExternalTransactionInfo.setUpdateTime(new Date());
+                                session.update(orderExternalTransactionInfo);
+                            }
+
+                            session.flush();
 
                             if (endTimeStr.compareTo(searchResultType.getTimestamp()) > 0) {
                                 endTimeStr = searchResultType.getTimestamp();

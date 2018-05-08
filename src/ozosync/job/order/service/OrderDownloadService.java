@@ -282,9 +282,12 @@ public class OrderDownloadService {
 
                     session.save(orderExternalTransactionInfo);
 
+                    session.flush();
+
                     if (paypalPaymentInfo != null) {
                         paypalPaymentInfo.setOrderId(orderInDb.getId());
                         paypalPaymentInfo.setOrderCode(orderInDb.getCode());
+                        paypalPaymentInfo.setUpdateTime(new Date());
 
                         session.update(paypalPaymentInfo);
                     }
