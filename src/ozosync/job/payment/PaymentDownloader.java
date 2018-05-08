@@ -1,5 +1,14 @@
 package ozosync.job.payment;
 
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -19,16 +28,6 @@ import urn.ebay.api.PayPalAPI.TransactionSearchResponseType;
 import urn.ebay.apis.eBLBaseComponents.AckCodeType;
 import urn.ebay.apis.eBLBaseComponents.ErrorType;
 import urn.ebay.apis.eBLBaseComponents.PaymentTransactionSearchResultType;
-
-import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
 
 
 @Service
@@ -96,10 +95,6 @@ public class PaymentDownloader {
         do {
             requestType.setEndDate(endTimeStr);
 
-            // System.out.println("startTime: " + getTimeString(startTime.getTime()));
-            // System.out.println("endTime: " + endTimeStr);
-
-
             // TransactionSearchReq
             TransactionSearchReq transactionSearchReq = new TransactionSearchReq();
             transactionSearchReq.setTransactionSearchRequest(requestType);
@@ -112,7 +107,6 @@ public class PaymentDownloader {
             resultCount = paymentTransactionSearchResultTypeList.size();
 
             if (resultCount > 0) {
-
                 for (PaymentTransactionSearchResultType searchResultType : paymentTransactionSearchResultTypeList) {
                     try {
                         String transactionId = searchResultType.getTransactionID();
@@ -159,23 +153,23 @@ public class PaymentDownloader {
                             session.save(paypalPaymentInfo);
 
                             session.flush();
+                        }
 
-                            OrderExternalTransactionInfo orderExternalTransactionInfo = (OrderExternalTransactionInfo) session.createCriteria(OrderExternalTransactionInfo.class)
-                                    .add(Restrictions.eq(OrderExternalTransactionSchema.transactionId, transactionId))
-                                    .setMaxResults(1)
-                                    .uniqueResult();
+                        OrderExternalTransactionInfo orderExternalTransactionInfo = (OrderExternalTransactionInfo) session.createCriteria(OrderExternalTransactionInfo.class)
+                                .add(Restrictions.eq(OrderExternalTransactionSchema.transactionId, transactionId))
+                                .setMaxResults(1)
+                                .uniqueResult();
 
-                            if (orderExternalTransactionInfo != null) {
-                                orderExternalTransactionInfo.setPaymentId(paypalPaymentInfo.getId());
-                                orderExternalTransactionInfo.setUpdateTime(new Date());
-                                session.update(orderExternalTransactionInfo);
-                            }
+                        if (orderExternalTransactionInfo != null && orderExternalTransactionInfo.getPaymentId() == 0L) {
+                            orderExternalTransactionInfo.setPaymentId(paypalPaymentInfo.getId());
+                            orderExternalTransactionInfo.setUpdateTime(new Date());
+                            session.update(orderExternalTransactionInfo);
+                        }
 
-                            session.flush();
+                        session.flush();
 
-                            if (endTimeStr.compareTo(searchResultType.getTimestamp()) > 0) {
-                                endTimeStr = searchResultType.getTimestamp();
-                            }
+                        if (endTimeStr.compareTo(searchResultType.getTimestamp()) > 0) {
+                            endTimeStr = searchResultType.getTimestamp();
                         }
                     } catch (Exception exp) {
                         log.fatal(exp);
