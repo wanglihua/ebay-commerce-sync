@@ -190,16 +190,6 @@ public class PaymentDownloader {
             }
             totalCallCount++;
         } while (resultCount > 0 && resultCount >= MAX_FETCH_COUNT && totalCallCount <= MAX_CALL_COUNT); // >= 中的 > 号是不成立的
-
-        /*
-        GetTransactionDetailsReq getDetailsReq = new GetTransactionDetailsReq();
-        GetTransactionDetailsRequestType getDetailsReqType = new GetTransactionDetailsRequestType();
-        getDetailsReqType.setTransactionID(id);
-        getDetailsReq.setGetTransactionDetailsRequest(getDetailsReqType);
-
-        GetTransactionDetailsResponseType getDetailsResp = null;
-        getDetailsResp = service.getTransactionDetails(getDetailsReq);
-        */
     }
 
     private String getTimeString(Date time) {

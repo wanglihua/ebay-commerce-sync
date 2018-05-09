@@ -14,12 +14,12 @@ import ozosync.domain.OrderStatus;
 import ozosync.domain.schema.OrderShippingAddressSchema;
 
 @Service
-public class OrderDownloadShippingAddressService {
+public class OrderDownloadEbayShippingAddressService {
 
     @Autowired
     private SessionFactory sessionFactory;
 
-    public void saveOrderShippingAddress(OrderType orderDownload, OrderInfo orderInfo) {
+    public void saveOrderShippingAddress(OrderInfo orderInfo, OrderType orderDownload) {
         Session session = sessionFactory.getCurrentSession();
 
         // 只同步已支付及之前的订单内容

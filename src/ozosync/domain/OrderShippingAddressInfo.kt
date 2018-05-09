@@ -73,6 +73,9 @@ data class OrderShippingAddressInfo(
     @VerboseName("外部地址id")
     var externalAddressId: String = ""
 
+    @Column(name = "transaction_id")
+    var transactionId: String = ""
+
     @Column(name = "modified")
     @VerboseName("是否地址已人工修改")
     var modified: Long = 0

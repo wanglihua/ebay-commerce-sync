@@ -85,6 +85,7 @@ Signature：AB0YTf4hFkAG5QvPtq2A-oOChxRNATZl570inmmXuRssw4HDbkR5w-8i
         getTransactionDetailsReq.setGetTransactionDetailsRequest(requestType);
         GetTransactionDetailsResponseType responseType = service.getTransactionDetails(getTransactionDetailsReq);
 
+        int i = 1 + 1;
     }
 
     @Test

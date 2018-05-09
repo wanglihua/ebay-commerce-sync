@@ -20,7 +20,10 @@ public class OrderDownloadFacadeService {
     private OrderDownloadEntryService orderDownloadEntryService;
 
     @Autowired
-    private OrderDownloadShippingAddressService orderDownloadShippingAddressService;
+    private OrderDownloadEbayShippingAddressService orderDownloadEbayShippingAddressService;
+
+    @Autowired
+    private OrderDownloadExternalTransactionService orderDownloadExternalTransactionService;
 
 
     public void save(OrderType orderDownload, EBayApiConfigInfo apiConfigInfo) {
@@ -42,8 +45,14 @@ public class OrderDownloadFacadeService {
 
             // 这样可以在保存明细出错时，继续保存收货地址
             try {
-                // order shipping address
-                orderDownloadShippingAddressService.saveOrderShippingAddress(orderDownload, orderInfo);
+                orderDownloadEbayShippingAddressService.saveOrderShippingAddress(orderInfo, orderDownload);
+            } catch (Exception exp) {
+                log.fatal(exp);
+                log.fatal(Arrays.toString(exp.getStackTrace()).replace(",", "\r\n"));
+            }
+
+            try {
+                orderDownloadExternalTransactionService.saveOrderExternalTransaction(orderInfo, orderDownload);
             } catch (Exception exp) {
                 log.fatal(exp);
                 log.fatal(Arrays.toString(exp.getStackTrace()).replace(",", "\r\n"));
