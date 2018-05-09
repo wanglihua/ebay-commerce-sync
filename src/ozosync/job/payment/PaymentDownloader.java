@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -16,16 +17,23 @@ import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ozosync.domain.OrderExternalTransactionInfo;
+import ozosync.domain.OrderShippingAddressInfo;
 import ozosync.domain.PaypalAccountInfo;
 import ozosync.domain.PaypalPaymentInfo;
 import ozosync.domain.schema.OrderExternalTransactionSchema;
+import ozosync.domain.schema.OrderShippingAddressSchema;
 import ozosync.domain.schema.PaypalPaymentSchema;
+import ozosync.service.AddressFormatService;
 import ozosync.service.PaypalApiConfigService;
+import urn.ebay.api.PayPalAPI.GetTransactionDetailsReq;
+import urn.ebay.api.PayPalAPI.GetTransactionDetailsRequestType;
+import urn.ebay.api.PayPalAPI.GetTransactionDetailsResponseType;
 import urn.ebay.api.PayPalAPI.PayPalAPIInterfaceServiceService;
 import urn.ebay.api.PayPalAPI.TransactionSearchReq;
 import urn.ebay.api.PayPalAPI.TransactionSearchRequestType;
 import urn.ebay.api.PayPalAPI.TransactionSearchResponseType;
 import urn.ebay.apis.eBLBaseComponents.AckCodeType;
+import urn.ebay.apis.eBLBaseComponents.AddressType;
 import urn.ebay.apis.eBLBaseComponents.ErrorType;
 import urn.ebay.apis.eBLBaseComponents.PaymentTransactionSearchResultType;
 
@@ -44,6 +52,9 @@ public class PaymentDownloader {
 
     @Autowired
     private SessionFactory sessionFactory;
+
+    @Autowired
+    private AddressFormatService addressFormatService;
 
     @SuppressWarnings("unchecked")
     public void download() {
@@ -158,6 +169,7 @@ public class PaymentDownloader {
                             session.flush();
                         }
 
+                        // order extrenal transaction
                         OrderExternalTransactionInfo orderExternalTransactionInfo = (OrderExternalTransactionInfo) session.createCriteria(OrderExternalTransactionInfo.class)
                                 .add(Restrictions.eq(OrderExternalTransactionSchema.transactionId, transactionId))
                                 .setMaxResults(1)
@@ -170,6 +182,57 @@ public class PaymentDownloader {
                         }
 
                         session.flush();
+
+                        // ship address
+                        OrderShippingAddressInfo orderShippingAddressInfo = (OrderShippingAddressInfo) session.createCriteria(OrderShippingAddressInfo.class)
+                                .add(Restrictions.eq(OrderShippingAddressSchema.transactionId, transactionId))
+                                .setMaxResults(1)
+                                .uniqueResult();
+
+                        if (orderShippingAddressInfo == null) {
+                            GetTransactionDetailsReq getTransactionDetailsReq = new GetTransactionDetailsReq();
+                            GetTransactionDetailsRequestType detailsRequestType = new GetTransactionDetailsRequestType();
+                            requestType.setTransactionID(transactionId);
+                            getTransactionDetailsReq.setGetTransactionDetailsRequest(detailsRequestType);
+                            GetTransactionDetailsResponseType detailsResponseType = service.getTransactionDetails(getTransactionDetailsReq);
+
+                            AddressType addressType = null;
+
+                            if (detailsResponseType != null && detailsResponseType.getPaymentTransactionDetails() != null && detailsResponseType.getPaymentTransactionDetails().getPayerInfo() != null) {
+                                addressType = detailsResponseType.getPaymentTransactionDetails().getPayerInfo().getAddress();
+                            }
+
+                            if (addressType != null) {
+                                orderShippingAddressInfo = new OrderShippingAddressInfo();
+                                orderShippingAddressInfo.setOrderId(0L); // 还不知道是哪个订单的
+                                orderShippingAddressInfo.setName(StringEscapeUtils.unescapeXml(nullToEmpty(addressType.getName())));
+                                orderShippingAddressInfo.setStreet1(StringEscapeUtils.unescapeXml(nullToEmpty(addressType.getStreet1())));
+                                orderShippingAddressInfo.setStreet2(StringEscapeUtils.unescapeXml(nullToEmpty(addressType.getStreet2())));
+                                orderShippingAddressInfo.setPhone(nullToEmpty(normalizePhone(addressType.getPhone())));
+                                orderShippingAddressInfo.setCityName(StringEscapeUtils.unescapeXml(nullToEmpty(addressType.getCityName())));
+                                orderShippingAddressInfo.setProvince(nullToEmpty(addressType.getStateOrProvince()));
+
+                                if (addressType.getCountry() != null) {
+                                    orderShippingAddressInfo.setCountry(nullToEmpty(addressType.getCountry().getValue()));
+                                } else {
+                                    orderShippingAddressInfo.setCountry("");
+                                }
+
+                                orderShippingAddressInfo.setCountryName(nullToEmpty(addressType.getCountryName()));
+                                orderShippingAddressInfo.setPostalCode(nullToEmpty(addressType.getPostalCode()));
+                                orderShippingAddressInfo.setAddressId(nullToEmpty(addressType.getAddressID()));
+
+                                if (addressType.getAddressOwner() != null) {
+                                    orderShippingAddressInfo.setAddressOwner(nullToEmpty(addressType.getAddressOwner().getValue()));
+                                } else {
+                                    orderShippingAddressInfo.setAddressOwner(nullToEmpty(""));
+                                }
+                                orderShippingAddressInfo.setExternalAddressId(nullToEmpty(addressType.getExternalAddressID()));
+
+                                session.saveOrUpdate(orderShippingAddressInfo);
+                                session.flush();
+                            }
+                        }
 
                         if (endTimeStr.compareTo(searchResultType.getTimestamp()) > 0) {
                             endTimeStr = searchResultType.getTimestamp();
@@ -199,5 +262,13 @@ public class PaymentDownloader {
         timeFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
 
         return String.format("%sT%s.000Z", dateFormat.format(time), timeFormat.format(time));
+    }
+
+    private String normalizePhone(String phone) {
+        return addressFormatService.normalizePhone(phone);
+    }
+
+    private String nullToEmpty(String str) {
+        return addressFormatService.nullToEmpty(str);
     }
 }

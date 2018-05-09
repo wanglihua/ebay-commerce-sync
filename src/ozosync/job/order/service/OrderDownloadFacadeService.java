@@ -23,6 +23,9 @@ public class OrderDownloadFacadeService {
     private OrderDownloadEbayShippingAddressService orderDownloadEbayShippingAddressService;
 
     @Autowired
+    private OrderDownloadPaypalShippingAddressService orderDownloadPaypalShippingAddressService;
+
+    @Autowired
     private OrderDownloadExternalTransactionService orderDownloadExternalTransactionService;
 
 
@@ -53,6 +56,13 @@ public class OrderDownloadFacadeService {
 
             try {
                 orderDownloadExternalTransactionService.saveOrderExternalTransaction(orderInfo, orderDownload);
+            } catch (Exception exp) {
+                log.fatal(exp);
+                log.fatal(Arrays.toString(exp.getStackTrace()).replace(",", "\r\n"));
+            }
+
+            try {
+                orderDownloadPaypalShippingAddressService.saveOrderShippingAddress(orderInfo, orderDownload);
             } catch (Exception exp) {
                 log.fatal(exp);
                 log.fatal(Arrays.toString(exp.getStackTrace()).replace(",", "\r\n"));

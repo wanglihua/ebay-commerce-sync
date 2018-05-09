@@ -13,12 +13,16 @@ import ozosync.domain.OrderInfo;
 import ozosync.domain.OrderShippingAddressInfo;
 import ozosync.domain.OrderStatus;
 import ozosync.domain.schema.OrderShippingAddressSchema;
+import ozosync.service.AddressFormatService;
 
 @Service
 public class OrderDownloadPaypalShippingAddressService {
 
     @Autowired
     private SessionFactory sessionFactory;
+
+    @Autowired
+    private AddressFormatService addressFormatService;
 
     public void saveOrderShippingAddress(OrderInfo orderInfo, OrderType orderDownload) {
         Session session = sessionFactory.getCurrentSession();
@@ -37,7 +41,20 @@ public class OrderDownloadPaypalShippingAddressService {
             for (int index = 0; index < externalTransactionLength; index++) {
                 ExternalTransactionType externalTransaction = orderDownload.getExternalTransaction(index);
                 String transactionId = externalTransaction.getExternalTransactionID();
-                
+
+                OrderShippingAddressInfo shippingAddressInDb = (OrderShippingAddressInfo) session.createCriteria(OrderShippingAddressInfo.class)
+                        .add(Restrictions.eq(OrderShippingAddressSchema.transactionId, transactionId))
+                        .add(Restrictions.eq(OrderShippingAddressSchema.orderId, 0L))
+                        .uniqueResult();
+
+                shippingAddressInDb.setOrderId(orderId);
+
+                session.update(shippingAddressInDb);
+
+                orderInfo.setAddressId(shippingAddressInDb.getId());
+                session.update(orderInfo);
+
+                session.flush();
             }
         }
 
@@ -114,22 +131,10 @@ public class OrderDownloadPaypalShippingAddressService {
     }
 
     private String normalizePhone(String phone) {
-        if (phone != null && (!phone.equals(""))) {
-            phone = phone.replace(" ", "");
-
-            if (phone.length() > 4) {
-                return phone.substring(0, 4) + " " + phone.substring(4);
-            }
-        }
-
-        return phone;
+        return addressFormatService.normalizePhone(phone);
     }
 
     private String nullToEmpty(String str) {
-        if (str == null) {
-            str = "";
-        }
-
-        return str;
+        return addressFormatService.nullToEmpty(str);
     }
 }
