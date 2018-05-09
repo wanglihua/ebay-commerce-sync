@@ -145,7 +145,10 @@ public class PaymentDownloader {
 
                             SimpleDateFormat payTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                             String payTimeStr = searchResultType.getTimestamp().replace("T", " ").replace("Z", "");
-                            paypalPaymentInfo.setPayTime(payTimeFormat.parse(payTimeStr));
+                            Calendar calendar = Calendar.getInstance();
+                            calendar.setTime(payTimeFormat.parse(payTimeStr));
+                            calendar.add(Calendar.HOUR, 8); // 转成本地时间
+                            paypalPaymentInfo.setPayTime(calendar.getTime());
 
                             paypalPaymentInfo.setCreateTime(new Date());
                             paypalPaymentInfo.setUpdateTime(new Date());

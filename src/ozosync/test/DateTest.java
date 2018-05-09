@@ -107,4 +107,12 @@ public class DateTest {
 
         return String.format("%sT%sZ", dateFormat.format(time), timeFormat.format(time));
     }
+
+    @Test
+    public void testDateAddHours() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.add(Calendar.HOUR, 8);
+        System.out.println(calendar.getTime());
+    }
 }
