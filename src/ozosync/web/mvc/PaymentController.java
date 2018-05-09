@@ -2,6 +2,8 @@ package ozosync.web.mvc;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -14,7 +16,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 import ozosync.domain.OrderExternalTransactionInfo;
+import ozosync.domain.PaypalAccountInfo;
+import ozosync.domain.PaypalPaymentInfo;
 import ozosync.domain.schema.OrderExternalTransactionSchema;
+import urn.ebay.api.PayPalAPI.PayPalAPIInterfaceServiceService;
+import urn.ebay.api.PayPalAPI.RefundTransactionReq;
+import urn.ebay.api.PayPalAPI.RefundTransactionRequestType;
+import urn.ebay.api.PayPalAPI.RefundTransactionResponseType;
+import urn.ebay.apis.CoreComponentTypes.BasicAmountType;
+import urn.ebay.apis.eBLBaseComponents.AckCodeType;
+import urn.ebay.apis.eBLBaseComponents.CurrencyCodeType;
+import urn.ebay.apis.eBLBaseComponents.ErrorType;
+import urn.ebay.apis.eBLBaseComponents.RefundType;
 
 @Controller
 @RequestMapping(value = "/payment")
@@ -27,7 +40,9 @@ public class PaymentController {
 
     @SuppressWarnings("unchecked")
     @RequestMapping(value = "/refund", method = RequestMethod.POST)
-    public ModelAndView refund(@RequestParam(value = "transactionId") Long transactionId, @RequestParam(value = "amount") BigDecimal amount) throws Exception {
+    public ModelAndView refund(@RequestParam(value = "transactionId") Long transactionId,
+                               @RequestParam(value = "amount") BigDecimal amount,
+                               @RequestParam(value = "memo") String memo) throws Exception {
 
         Session session = sessionFactory.getCurrentSession();
 
@@ -36,44 +51,36 @@ public class PaymentController {
                 .setMaxResults(1)
                 .uniqueResult();
 
-        if (orderExternalTransactionInfo == null) {
+        if (orderExternalTransactionInfo == null || orderExternalTransactionInfo.getPaymentId() != 0L) {
             throw new Exception(String.format("Transaction: %s 不存在对应的订单付款信息", transactionId));
         }
 
-        session.flush();
-
-        return new ModelAndView(new MappingJackson2JsonView(), new HashMap<String, Object>() {{
-            put("success", true);
-            put("message", "退款成功！");
-        }});
-    }
-}
-
-/*
-
-        String api_username = "support_api1.ozoestore.com.au";
-        String api_password = "4VZZNR4CK3GG9GHW";
-        String signature = "AB0YTf4hFkAG5QvPtq2A-oOChxRNATZl570inmmXuRssw4HDbkR5w-8i";
+        PaypalPaymentInfo paypalPaymentInfo = (PaypalPaymentInfo) session.get(PaypalPaymentInfo.class, orderExternalTransactionInfo.getPaymentId());
+        PaypalAccountInfo paypalAccountInfo = (PaypalAccountInfo) session.get(PaypalAccountInfo.class, paypalPaymentInfo.getAccountId());
 
         // PayPalAPIInterfaceServiceService
         Map<String, String> configMap = new HashMap<>();
         configMap.put("mode", "live");
-        configMap.put("acct1.UserName", api_username);
-        configMap.put("acct1.Password", api_password);
-        configMap.put("acct1.Signature", signature);
+        configMap.put("acct1.UserName", paypalAccountInfo.getApiUserName());
+        configMap.put("acct1.Password", paypalAccountInfo.getApiPassword());
+        configMap.put("acct1.Signature", paypalAccountInfo.getSignature());
 
         PayPalAPIInterfaceServiceService service = new PayPalAPIInterfaceServiceService(configMap);
 
 
         BasicAmountType amountType = new BasicAmountType();
-        amountType.setValue("0.01");
+        amountType.setValue(amount.toString());
         amountType.setCurrencyID(CurrencyCodeType.AUD);
 
         RefundTransactionRequestType refundTransactionRequestType = new RefundTransactionRequestType();
         refundTransactionRequestType.setAmount(amountType);
-        refundTransactionRequestType.setTransactionID("TEST_19J52487X0420101R");
-        refundTransactionRequestType.setMemo("退款描述");
-        refundTransactionRequestType.setRefundType(RefundType.PARTIAL);
+        refundTransactionRequestType.setTransactionID(paypalPaymentInfo.getTransactionId());
+        refundTransactionRequestType.setMemo(memo);
+        if (paypalPaymentInfo.getGrossAmount().compareTo(amount) > 0) {
+            refundTransactionRequestType.setRefundType(RefundType.PARTIAL);
+        } else {
+            refundTransactionRequestType.setRefundType(RefundType.FULL);
+        }
 
         RefundTransactionReq refundTransactionReq = new RefundTransactionReq();
         refundTransactionReq.setRefundTransactionRequest(refundTransactionRequestType);
@@ -85,8 +92,17 @@ public class PaymentController {
         } else {
             List<ErrorType> errorTypeList = refundTransactionResponseType.getErrors();
             for (ErrorType errorType : errorTypeList) {
-                System.out.println(errorType.getLongMessage());
+                log.error("退款错误！");
+                log.error(errorType.getShortMessage());
+                log.error(errorType.getLongMessage());
             }
         }
 
- */
+        session.flush();
+
+        return new ModelAndView(new MappingJackson2JsonView(), new HashMap<String, Object>() {{
+            put("success", true);
+            put("message", "退款成功！");
+        }});
+    }
+}
