@@ -166,7 +166,12 @@ public class PaymentDownloader {
                             paypalPaymentInfo.setUpdateTime(new Date());
 
                             session.save(paypalPaymentInfo);
+                            session.flush();
+                        } else {
+                            paypalPaymentInfo.setStatus(searchResultType.getStatus());
+                            paypalPaymentInfo.setUpdateTime(new Date());
 
+                            session.update(paypalPaymentInfo);
                             session.flush();
                         }
 
