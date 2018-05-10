@@ -54,10 +54,12 @@ public class OrderDownloadPaypalShippingAddressService {
                         .add(Restrictions.eq(OrderShippingAddressSchema.orderId, orderId))
                         .uniqueResult();
 
+                /* 优先使用 ebay 的地址，所以这里的代码就用不着了
                 if (paypalShippingAddressInDb.getName() != null && !paypalShippingAddressInDb.getName().equals("") && !isAddressSame(paypalShippingAddressInDb, ebayShippingAddressInDb)) {
                     orderInfo.setAddressId(paypalShippingAddressInDb.getId());
                     session.update(orderInfo);
                 }
+                */
             }
         }
     }
