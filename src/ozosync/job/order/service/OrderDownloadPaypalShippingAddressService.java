@@ -54,7 +54,7 @@ public class OrderDownloadPaypalShippingAddressService {
                         .add(Restrictions.eq(OrderShippingAddressSchema.orderId, orderId))
                         .uniqueResult();
 
-                if (!isAddressSame(paypalShippingAddressInDb, ebayShippingAddressInDb)) {
+                if (paypalShippingAddressInDb.getName() != null && !paypalShippingAddressInDb.getName().equals("") && !isAddressSame(paypalShippingAddressInDb, ebayShippingAddressInDb)) {
                     orderInfo.setAddressId(paypalShippingAddressInDb.getId());
                     session.update(orderInfo);
                 }

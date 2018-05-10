@@ -210,7 +210,7 @@ public class PaymentDownloader {
                                     addressType = detailsResponseType.getPaymentTransactionDetails().getPayerInfo().getAddress();
                                 }
 
-                                if (addressType != null) {
+                                if (addressType != null && addressType.getName() != null && !addressType.getName().equals("")) {
                                     orderShippingAddressInfo = new OrderShippingAddressInfo();
                                     orderShippingAddressInfo.setOrderId(0L); // 还不知道是哪个订单的
                                     orderShippingAddressInfo.setName(StringEscapeUtils.unescapeXml(nullToEmpty(addressType.getName())));
