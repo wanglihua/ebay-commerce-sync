@@ -1,14 +1,5 @@
 package ozosync.job.payment;
 
-import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
@@ -36,6 +27,16 @@ import urn.ebay.apis.eBLBaseComponents.AckCodeType;
 import urn.ebay.apis.eBLBaseComponents.AddressType;
 import urn.ebay.apis.eBLBaseComponents.ErrorType;
 import urn.ebay.apis.eBLBaseComponents.PaymentTransactionSearchResultType;
+
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
 
 
 @Service
@@ -90,11 +91,11 @@ public class PaymentDownloader {
         PayPalAPIInterfaceServiceService service = new PayPalAPIInterfaceServiceService(configMap);
 
         // TransactionSearchRequestType
-        TransactionSearchRequestType requestType = new TransactionSearchRequestType();
+        TransactionSearchRequestType searchRequestType = new TransactionSearchRequestType();
 
         Calendar startTime = Calendar.getInstance();
         startTime.add(Calendar.DATE, -NUMBER_OF_DAY);
-        requestType.setStartDate(getTimeString(startTime.getTime()));
+        searchRequestType.setStartDate(getTimeString(startTime.getTime()));
 
         Calendar endTime = Calendar.getInstance();
         String endTimeStr = getTimeString(endTime.getTime());
@@ -104,11 +105,11 @@ public class PaymentDownloader {
         int totalCallCount = 0;
 
         do {
-            requestType.setEndDate(endTimeStr);
+            searchRequestType.setEndDate(endTimeStr);
 
             // TransactionSearchReq
             TransactionSearchReq transactionSearchReq = new TransactionSearchReq();
-            transactionSearchReq.setTransactionSearchRequest(requestType);
+            transactionSearchReq.setTransactionSearchRequest(searchRequestType);
 
             // TransactionSearchResponseType
             TransactionSearchResponseType response = service.transactionSearch(transactionSearchReq);
@@ -192,45 +193,47 @@ public class PaymentDownloader {
                         if (orderShippingAddressInfo == null) {
                             GetTransactionDetailsReq getTransactionDetailsReq = new GetTransactionDetailsReq();
                             GetTransactionDetailsRequestType detailsRequestType = new GetTransactionDetailsRequestType();
-                            requestType.setTransactionID(transactionId);
+                            detailsRequestType.setTransactionID(transactionId);
                             getTransactionDetailsReq.setGetTransactionDetailsRequest(detailsRequestType);
                             GetTransactionDetailsResponseType detailsResponseType = service.getTransactionDetails(getTransactionDetailsReq);
+                            if (detailsResponseType != null && detailsResponseType.getAck() == AckCodeType.SUCCESS) {
 
-                            AddressType addressType = null;
-
-                            if (detailsResponseType != null && detailsResponseType.getPaymentTransactionDetails() != null && detailsResponseType.getPaymentTransactionDetails().getPayerInfo() != null) {
-                                addressType = detailsResponseType.getPaymentTransactionDetails().getPayerInfo().getAddress();
-                            }
-
-                            if (addressType != null) {
-                                orderShippingAddressInfo = new OrderShippingAddressInfo();
-                                orderShippingAddressInfo.setOrderId(0L); // 还不知道是哪个订单的
-                                orderShippingAddressInfo.setName(StringEscapeUtils.unescapeXml(nullToEmpty(addressType.getName())));
-                                orderShippingAddressInfo.setStreet1(StringEscapeUtils.unescapeXml(nullToEmpty(addressType.getStreet1())));
-                                orderShippingAddressInfo.setStreet2(StringEscapeUtils.unescapeXml(nullToEmpty(addressType.getStreet2())));
-                                orderShippingAddressInfo.setPhone(nullToEmpty(normalizePhone(addressType.getPhone())));
-                                orderShippingAddressInfo.setCityName(StringEscapeUtils.unescapeXml(nullToEmpty(addressType.getCityName())));
-                                orderShippingAddressInfo.setProvince(nullToEmpty(addressType.getStateOrProvince()));
-
-                                if (addressType.getCountry() != null) {
-                                    orderShippingAddressInfo.setCountry(nullToEmpty(addressType.getCountry().getValue()));
-                                } else {
-                                    orderShippingAddressInfo.setCountry("");
+                                AddressType addressType = null;
+                                if (detailsResponseType.getPaymentTransactionDetails() != null && detailsResponseType.getPaymentTransactionDetails().getPayerInfo() != null) {
+                                    addressType = detailsResponseType.getPaymentTransactionDetails().getPayerInfo().getAddress();
                                 }
 
-                                orderShippingAddressInfo.setCountryName(nullToEmpty(addressType.getCountryName()));
-                                orderShippingAddressInfo.setPostalCode(nullToEmpty(addressType.getPostalCode()));
-                                orderShippingAddressInfo.setAddressId(nullToEmpty(addressType.getAddressID()));
+                                if (addressType != null) {
+                                    orderShippingAddressInfo = new OrderShippingAddressInfo();
+                                    orderShippingAddressInfo.setOrderId(0L); // 还不知道是哪个订单的
+                                    orderShippingAddressInfo.setName(StringEscapeUtils.unescapeXml(nullToEmpty(addressType.getName())));
+                                    orderShippingAddressInfo.setStreet1(StringEscapeUtils.unescapeXml(nullToEmpty(addressType.getStreet1())));
+                                    orderShippingAddressInfo.setStreet2(StringEscapeUtils.unescapeXml(nullToEmpty(addressType.getStreet2())));
+                                    orderShippingAddressInfo.setPhone(nullToEmpty(normalizePhone(addressType.getPhone())));
+                                    orderShippingAddressInfo.setCityName(StringEscapeUtils.unescapeXml(nullToEmpty(addressType.getCityName())));
+                                    orderShippingAddressInfo.setProvince(nullToEmpty(addressType.getStateOrProvince()));
 
-                                if (addressType.getAddressOwner() != null) {
-                                    orderShippingAddressInfo.setAddressOwner(nullToEmpty(addressType.getAddressOwner().getValue()));
-                                } else {
-                                    orderShippingAddressInfo.setAddressOwner(nullToEmpty(""));
+                                    if (addressType.getCountry() != null) {
+                                        orderShippingAddressInfo.setCountry(nullToEmpty(addressType.getCountry().getValue()));
+                                    } else {
+                                        orderShippingAddressInfo.setCountry("");
+                                    }
+
+                                    orderShippingAddressInfo.setCountryName(nullToEmpty(addressType.getCountryName()));
+                                    orderShippingAddressInfo.setPostalCode(nullToEmpty(addressType.getPostalCode()));
+                                    orderShippingAddressInfo.setAddressId(nullToEmpty(addressType.getAddressID()));
+
+                                    if (addressType.getAddressOwner() != null) {
+                                        orderShippingAddressInfo.setAddressOwner(nullToEmpty(addressType.getAddressOwner().getValue()));
+                                    } else {
+                                        orderShippingAddressInfo.setAddressOwner(nullToEmpty(""));
+                                    }
+                                    orderShippingAddressInfo.setExternalAddressId(nullToEmpty(addressType.getExternalAddressID()));
+                                    orderShippingAddressInfo.setTransactionId(transactionId);
+
+                                    session.save(orderShippingAddressInfo);
+                                    session.flush();
                                 }
-                                orderShippingAddressInfo.setExternalAddressId(nullToEmpty(addressType.getExternalAddressID()));
-
-                                session.saveOrUpdate(orderShippingAddressInfo);
-                                session.flush();
                             }
                         }
 

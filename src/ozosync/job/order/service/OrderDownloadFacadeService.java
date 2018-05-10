@@ -1,12 +1,13 @@
 package ozosync.job.order.service;
 
 import com.ebay.soap.eBLBaseComponents.OrderType;
-import java.util.Arrays;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ozosync.domain.EBayApiConfigInfo;
 import ozosync.domain.OrderInfo;
+
+import java.util.Arrays;
 
 @Service
 public class OrderDownloadFacadeService {

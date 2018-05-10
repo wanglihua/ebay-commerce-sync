@@ -1,9 +1,7 @@
 package ozosync.job.order.service;
 
-import com.ebay.soap.eBLBaseComponents.AddressType;
 import com.ebay.soap.eBLBaseComponents.ExternalTransactionType;
 import com.ebay.soap.eBLBaseComponents.OrderType;
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
@@ -42,91 +40,25 @@ public class OrderDownloadPaypalShippingAddressService {
                 ExternalTransactionType externalTransaction = orderDownload.getExternalTransaction(index);
                 String transactionId = externalTransaction.getExternalTransactionID();
 
-                OrderShippingAddressInfo shippingAddressInDb = (OrderShippingAddressInfo) session.createCriteria(OrderShippingAddressInfo.class)
+                OrderShippingAddressInfo paypalShippingAddressInDb = (OrderShippingAddressInfo) session.createCriteria(OrderShippingAddressInfo.class)
                         .add(Restrictions.eq(OrderShippingAddressSchema.transactionId, transactionId))
                         .add(Restrictions.eq(OrderShippingAddressSchema.orderId, 0L))
                         .uniqueResult();
 
-                shippingAddressInDb.setOrderId(orderId);
-
-                session.update(shippingAddressInDb);
-
-                orderInfo.setAddressId(shippingAddressInDb.getId());
-                session.update(orderInfo);
-
-                session.flush();
-            }
-        }
-
-        AddressType shippingAddress = orderDownload.getShippingAddress();
-
-        if (shippingAddress != null) {
-
-            String addressOwner = "PayPal";
-            if (shippingAddress.getAddressOwner() != null) {
-                addressOwner = shippingAddress.getAddressOwner().value();
-            }
-
-            OrderShippingAddressInfo shippingAddressInDb = (OrderShippingAddressInfo) session.createCriteria(OrderShippingAddressInfo.class)
-                    .add(Restrictions.and(
-                            Restrictions.eq(OrderShippingAddressSchema.addressOwner, addressOwner),
-                            Restrictions.eq(OrderShippingAddressSchema.orderId, orderInfo.getId())
-                    ))
-                    .uniqueResult();
-
-            boolean orderHasShippingAddress = shippingAddressInDb != null;
-
-            if (shippingAddressInDb == null) {
-                shippingAddressInDb = new OrderShippingAddressInfo();
-            }
-
-            if (shippingAddressInDb.getModified() != 0) {
-                return;
-            }
-
-            shippingAddressInDb.setOrderId(orderInfo.getId());
-            shippingAddressInDb.setName(StringEscapeUtils.unescapeXml(nullToEmpty(shippingAddress.getName())));
-            shippingAddressInDb.setStreet1(StringEscapeUtils.unescapeXml(nullToEmpty(shippingAddress.getStreet1())));
-            shippingAddressInDb.setStreet2(StringEscapeUtils.unescapeXml(nullToEmpty(shippingAddress.getStreet2())));
-            shippingAddressInDb.setPhone(nullToEmpty(normalizePhone(shippingAddress.getPhone())));
-            shippingAddressInDb.setCityName(StringEscapeUtils.unescapeXml(nullToEmpty(shippingAddress.getCityName())));
-            shippingAddressInDb.setProvince(nullToEmpty(shippingAddress.getStateOrProvince()));
-
-            if (shippingAddress.getCountry() != null) {
-                shippingAddressInDb.setCountry(nullToEmpty(shippingAddress.getCountry().value()));
-            } else {
-                shippingAddressInDb.setCountry("");
-            }
-
-            shippingAddressInDb.setCountryName(nullToEmpty(shippingAddress.getCountryName()));
-            shippingAddressInDb.setPostalCode(nullToEmpty(shippingAddress.getPostalCode()));
-            shippingAddressInDb.setAddressId(nullToEmpty(shippingAddress.getAddressID()));
-
-            if (shippingAddress.getAddressOwner() != null) {
-                shippingAddressInDb.setAddressOwner(nullToEmpty(shippingAddress.getAddressOwner().value()));
-            } else {
-                shippingAddressInDb.setAddressOwner(nullToEmpty(""));
-            }
-            shippingAddressInDb.setExternalAddressId(nullToEmpty(shippingAddress.getExternalAddressID()));
-
-            Long addressId = shippingAddressInDb.getId();
-            if (orderHasShippingAddress) {
-                // do update
-                session.update(shippingAddressInDb);
+                paypalShippingAddressInDb.setOrderId(orderId);
+                session.update(paypalShippingAddressInDb);
                 session.flush();
 
-                addressId = shippingAddressInDb.getId();
-            } else {
-                // do insert
-                session.save(shippingAddressInDb);
-                session.flush();
+                OrderShippingAddressInfo ebayShippingAddressInDb = (OrderShippingAddressInfo) session.createCriteria(OrderShippingAddressInfo.class)
+                        .add(Restrictions.eq(OrderShippingAddressSchema.addressOwner, "eBay"))
+                        .add(Restrictions.eq(OrderShippingAddressSchema.orderId, orderId))
+                        .uniqueResult();
 
-                addressId = shippingAddressInDb.getId();
+                if (!isAddressSame(paypalShippingAddressInDb, ebayShippingAddressInDb)) {
+                    orderInfo.setAddressId(paypalShippingAddressInDb.getId());
+                    session.update(orderInfo);
+                }
             }
-
-            orderInfo.setAddressId(addressId);
-            session.update(orderInfo);
-            session.flush();
         }
     }
 
@@ -136,5 +68,53 @@ public class OrderDownloadPaypalShippingAddressService {
 
     private String nullToEmpty(String str) {
         return addressFormatService.nullToEmpty(str);
+    }
+
+    private boolean isAddressSame(OrderShippingAddressInfo address1, OrderShippingAddressInfo address2) {
+        if (address1 == address2) {
+            return true;
+        }
+
+        if (address1 == null || address2 == null) {
+            return false;
+        }
+
+        if (!nullToEmpty(address1.getName()).equals(nullToEmpty(address2.getName()))) {
+            return false;
+        }
+
+        if (!nullToEmpty(address1.getStreet1()).equals(nullToEmpty(address2.getStreet1()))) {
+            return false;
+        }
+
+        if (!nullToEmpty(address1.getStreet2()).equals(nullToEmpty(address2.getStreet2()))) {
+            return false;
+        }
+
+        if (!nullToEmpty(address1.getCityName()).equals(nullToEmpty(address2.getCityName()))) {
+            return false;
+        }
+
+        if (!nullToEmpty(address1.getProvince()).equals(nullToEmpty(address2.getProvince()))) {
+            return false;
+        }
+
+        if (!nullToEmpty(address1.getCountry()).equals(nullToEmpty(address2.getCountry()))) {
+            return false;
+        }
+
+        if (!nullToEmpty(address1.getCountryName()).equals(nullToEmpty(address2.getCountryName()))) {
+            return false;
+        }
+
+        if (!nullToEmpty(address1.getPhone()).equals(nullToEmpty(address2.getPhone()))) {
+            return false;
+        }
+
+        if (!nullToEmpty(address1.getPostalCode()).equals(nullToEmpty(address2.getPostalCode()))) {
+            return false;
+        }
+
+        return true;
     }
 }
