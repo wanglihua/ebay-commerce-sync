@@ -168,11 +168,13 @@ public class PaymentDownloader {
                             session.save(paypalPaymentInfo);
                             session.flush();
                         } else {
-                            paypalPaymentInfo.setStatus(searchResultType.getStatus());
-                            paypalPaymentInfo.setUpdateTime(new Date());
+                            if (!paypalPaymentInfo.getStatus().equals(searchResultType.getStatus())) {
+                                paypalPaymentInfo.setStatus(searchResultType.getStatus());
+                                paypalPaymentInfo.setUpdateTime(new Date());
 
-                            session.update(paypalPaymentInfo);
-                            session.flush();
+                                session.update(paypalPaymentInfo);
+                                session.flush();
+                            }
                         }
 
                         // order extrenal transaction
