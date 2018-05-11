@@ -16,9 +16,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 import ozosync.domain.OrderExternalTransactionInfo;
+import ozosync.domain.OrderInfo;
+import ozosync.domain.OrderRefundInfo;
 import ozosync.domain.PaypalAccountInfo;
 import ozosync.domain.PaypalPaymentInfo;
 import ozosync.domain.schema.OrderExternalTransactionSchema;
+import ozosync.service.OrderHistoryService;
 import urn.ebay.api.PayPalAPI.PayPalAPIInterfaceServiceService;
 import urn.ebay.api.PayPalAPI.RefundTransactionReq;
 import urn.ebay.api.PayPalAPI.RefundTransactionRequestType;
@@ -37,6 +40,9 @@ public class PaymentController {
 
     @Autowired
     private SessionFactory sessionFactory;
+
+    @Autowired
+    private OrderHistoryService orderHistoryService;
 
     @SuppressWarnings("unchecked")
     @RequestMapping(value = "/refund", method = RequestMethod.POST)
@@ -89,6 +95,27 @@ public class PaymentController {
         if (refundTransactionResponseType.getAck() == AckCodeType.SUCCESS) {
             String refundTransactionId = refundTransactionResponseType.getRefundTransactionID();
             refundTransactionId = refundTransactionId.replace("'", "");
+
+            // 记录订单退款信息
+            OrderRefundInfo orderRefundInfo = new OrderRefundInfo();
+            orderRefundInfo.setOrderId(orderExternalTransactionInfo.getOrderId());
+            orderRefundInfo.setTransactionId(refundTransactionId);
+            orderRefundInfo.setAmount(amount);
+            orderRefundInfo.setDescription(memo);
+
+            session.save(orderRefundInfo);
+
+            // 记录订单历史信息
+            OrderInfo orderInfo = (OrderInfo) session.get(OrderInfo.class, orderExternalTransactionInfo.getOrderId());
+            orderHistoryService.insertOrderHistory(orderInfo, "订单退款, 金额:" + amount.toString());
+
+            session.flush();
+
+            return new ModelAndView(new MappingJackson2JsonView(), new HashMap<String, Object>() {{
+                put("success", true);
+                put("message", "退款成功！");
+            }});
+
         } else {
             List<ErrorType> errorTypeList = refundTransactionResponseType.getErrors();
             for (ErrorType errorType : errorTypeList) {
@@ -96,13 +123,11 @@ public class PaymentController {
                 log.error(errorType.getShortMessage());
                 log.error(errorType.getLongMessage());
             }
+
+            return new ModelAndView(new MappingJackson2JsonView(), new HashMap<String, Object>() {{
+                put("success", false);
+                put("message", "退款失败！");
+            }});
         }
-
-        session.flush();
-
-        return new ModelAndView(new MappingJackson2JsonView(), new HashMap<String, Object>() {{
-            put("success", true);
-            put("message", "退款成功！");
-        }});
     }
 }
