@@ -1,6 +1,7 @@
 package ozosync.web.mvc;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,10 +47,10 @@ public class PaymentController {
 
     @SuppressWarnings("unchecked")
     @RequestMapping(value = "/refund", method = RequestMethod.POST)
-    public ModelAndView refund(@RequestParam(value = "transactionId") Long transactionId,
-                               @RequestParam(value = "amount") BigDecimal amount,
+    public ModelAndView refund(@RequestParam(value = "transactionId") String transactionId,
+                               @RequestParam(value = "amount") double amount,
                                @RequestParam(value = "memo") String memo) throws Exception {
-
+        
         Session session = sessionFactory.getCurrentSession();
 
         OrderExternalTransactionInfo orderExternalTransactionInfo = (OrderExternalTransactionInfo) session.createCriteria(OrderExternalTransactionInfo.class)
@@ -75,14 +76,14 @@ public class PaymentController {
 
 
         BasicAmountType amountType = new BasicAmountType();
-        amountType.setValue(amount.toString());
+        amountType.setValue(new DecimalFormat("0.00").format(amount));
         amountType.setCurrencyID(CurrencyCodeType.AUD);
 
         RefundTransactionRequestType refundTransactionRequestType = new RefundTransactionRequestType();
         refundTransactionRequestType.setAmount(amountType);
         refundTransactionRequestType.setTransactionID(paypalPaymentInfo.getTransactionId());
         refundTransactionRequestType.setMemo(memo);
-        if (paypalPaymentInfo.getGrossAmount().compareTo(amount) > 0) {
+        if (paypalPaymentInfo.getGrossAmount().compareTo(new BigDecimal(amount)) > 0) {
             refundTransactionRequestType.setRefundType(RefundType.PARTIAL);
         } else {
             refundTransactionRequestType.setRefundType(RefundType.FULL);
@@ -100,14 +101,14 @@ public class PaymentController {
             OrderRefundInfo orderRefundInfo = new OrderRefundInfo();
             orderRefundInfo.setOrderId(orderExternalTransactionInfo.getOrderId());
             orderRefundInfo.setTransactionId(refundTransactionId);
-            orderRefundInfo.setAmount(amount);
+            orderRefundInfo.setAmount(new BigDecimal(amount));
             orderRefundInfo.setDescription(memo);
 
             session.save(orderRefundInfo);
 
             // 记录订单历史信息
             OrderInfo orderInfo = (OrderInfo) session.get(OrderInfo.class, orderExternalTransactionInfo.getOrderId());
-            orderHistoryService.insertOrderHistory(orderInfo, "订单退款, 金额:" + amount.toString());
+            orderHistoryService.insertOrderHistory(orderInfo, "订单退款, 金额:" + new DecimalFormat("0.00").format(amount));
 
             session.flush();
 
