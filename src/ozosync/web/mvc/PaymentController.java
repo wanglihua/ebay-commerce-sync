@@ -50,7 +50,7 @@ public class PaymentController {
     public ModelAndView refund(@RequestParam(value = "transactionId") String transactionId,
                                @RequestParam(value = "amount") double amount,
                                @RequestParam(value = "memo") String memo) throws Exception {
-        
+
         Session session = sessionFactory.getCurrentSession();
 
         OrderExternalTransactionInfo orderExternalTransactionInfo = (OrderExternalTransactionInfo) session.createCriteria(OrderExternalTransactionInfo.class)
@@ -58,7 +58,7 @@ public class PaymentController {
                 .setMaxResults(1)
                 .uniqueResult();
 
-        if (orderExternalTransactionInfo == null || orderExternalTransactionInfo.getPaymentId() != 0L) {
+        if (orderExternalTransactionInfo == null || orderExternalTransactionInfo.getPaymentId() == 0L) {
             throw new Exception(String.format("Transaction: %s 不存在对应的订单付款信息", transactionId));
         }
 

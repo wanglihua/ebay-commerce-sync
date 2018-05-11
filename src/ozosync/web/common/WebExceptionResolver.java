@@ -28,8 +28,9 @@ public class WebExceptionResolver implements HandlerExceptionResolver {
 
         //将错误信息传到页面
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-        modelAndView.addObject("message", String.format("%s，系统出现错误，请联系管理员！", simpleDateFormat.format(curDateTime)));
+        modelAndView.addObject("message", String.format("%s，系统出现错误，请联系管理员！详情：%s", simpleDateFormat.format(curDateTime), message));
 
+        /*
         if (isAjaxRequest(request)) {
             modelAndView.addObject("success", false);
             modelAndView.setView(new MappingJackson2JsonView());
@@ -37,6 +38,10 @@ public class WebExceptionResolver implements HandlerExceptionResolver {
             //指向到错误界面
             modelAndView.setViewName("error");
         }
+        */
+
+        modelAndView.addObject("success", false);
+        modelAndView.setView(new MappingJackson2JsonView());
 
         return modelAndView;
     }
