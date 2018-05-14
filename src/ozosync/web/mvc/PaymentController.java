@@ -19,6 +19,8 @@ import ozosync.domain.OrderInfo;
 import ozosync.domain.OrderRefundInfo;
 import ozosync.domain.PaypalAccountInfo;
 import ozosync.domain.PaypalPaymentInfo;
+import ozosync.domain.RefundStatus;
+import ozosync.domain.StatusInfo;
 import ozosync.domain.schema.PaypalPaymentSchema;
 import ozosync.service.OrderHistoryService;
 import urn.ebay.api.PayPalAPI.PayPalAPIInterfaceServiceService;
@@ -52,6 +54,10 @@ public class PaymentController {
         OrderRefundInfo orderRefundInfo = (OrderRefundInfo) session.get(OrderRefundInfo.class, orderRefundId);
         if (orderRefundInfo == null) {
             throw new Exception(String.format("不存在对应的订单退款申请信息！ %d", orderRefundId));
+        }
+
+        if (orderRefundInfo.getStatusId() != RefundStatus.REFUND_STATUS_YSH && orderRefundInfo.getStatusId() != RefundStatus.REFUND_STATUS_YSB) {
+            throw new Exception(String.format("订单退款当前不是已审核或已失败状态！ %d", orderRefundId));
         }
 
         PaypalPaymentInfo paypalPaymentInfo = (PaypalPaymentInfo) session.createCriteria(PaypalPaymentInfo.class)
@@ -97,6 +103,15 @@ public class PaymentController {
             String refundTransactionId = refundTransactionResponseType.getRefundTransactionID();
             refundTransactionId = refundTransactionId.replace("'", "");
 
+            orderRefundInfo.setTransactionId(refundTransactionId);
+
+            StatusInfo refundSuccessStatus = (StatusInfo) session.get(StatusInfo.class, RefundStatus.REFUND_STATUS_YCG);
+            orderRefundInfo.setStatusId(RefundStatus.REFUND_STATUS_YCG);
+            orderRefundInfo.setStatusName(refundSuccessStatus.getName());
+
+            session.update(orderRefundInfo);
+            session.flush();
+
             // 记录订单历史信息
             OrderInfo orderInfo = (OrderInfo) session.get(OrderInfo.class, orderRefundInfo.getOrderId());
             orderHistoryService.insertOrderHistory(orderInfo, "订单退款, 金额:" + new DecimalFormat("0.00").format(orderRefundInfo.getRefundAmount()));
@@ -109,6 +124,14 @@ public class PaymentController {
             }});
 
         } else {
+
+            StatusInfo refundFailedStatus = (StatusInfo) session.get(StatusInfo.class, RefundStatus.REFUND_STATUS_YSB);
+            orderRefundInfo.setStatusId(RefundStatus.REFUND_STATUS_YSB);
+            orderRefundInfo.setStatusName(refundFailedStatus.getName());
+
+            session.update(orderRefundInfo);
+            session.flush();
+
             List<ErrorType> errorTypeList = refundTransactionResponseType.getErrors();
             for (ErrorType errorType : errorTypeList) {
                 log.error("退款错误！");
