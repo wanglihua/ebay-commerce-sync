@@ -9,6 +9,6 @@ object LogisticsCompanySchema {
     const val statusId = "statusId"
     const val iconFile = "iconFile"
     const val ord = "ord"
-    const val ebayName = "ebayName"
     const val addressSpecialWord = "addressSpecialWord"
+    const val ebayName = "ebayName"
 }
