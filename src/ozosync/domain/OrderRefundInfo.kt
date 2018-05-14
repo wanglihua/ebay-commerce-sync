@@ -34,7 +34,7 @@ data class OrderRefundInfo(
     var orderId: Long = 0
 
     @Column(name = "order_code")
-    var orderCode: Long = 0
+    var orderCode: String = ""
 
     @Column(name = "order_amount")
     var orderAmount: BigDecimal = BigDecimal.ZERO
