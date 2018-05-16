@@ -5,7 +5,7 @@ object OrderExternalTransactionSchema {
     const val orderId = "orderId"
     const val createTime = "createTime"
     const val updateTime = "updateTime"
+    const val transactionTime = "transactionTime"
     const val transactionId = "transactionId"
     const val paymentId = "paymentId"
-    const val transactionTime = "transactionTime"
 }

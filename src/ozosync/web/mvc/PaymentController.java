@@ -1,6 +1,5 @@
 package ozosync.web.mvc;
 
-import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.List;
@@ -16,12 +15,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
-import ozosync.domain.OrderExternalTransactionInfo;
 import ozosync.domain.OrderInfo;
 import ozosync.domain.OrderRefundInfo;
 import ozosync.domain.PaypalAccountInfo;
 import ozosync.domain.PaypalPaymentInfo;
-import ozosync.domain.schema.OrderExternalTransactionSchema;
+import ozosync.domain.RefundStatus;
+import ozosync.domain.StatusInfo;
+import ozosync.domain.schema.PaypalPaymentSchema;
 import ozosync.service.OrderHistoryService;
 import urn.ebay.api.PayPalAPI.PayPalAPIInterfaceServiceService;
 import urn.ebay.api.PayPalAPI.RefundTransactionReq;
@@ -47,22 +47,28 @@ public class PaymentController {
 
     @SuppressWarnings("unchecked")
     @RequestMapping(value = "/refund", method = RequestMethod.POST)
-    public ModelAndView refund(@RequestParam(value = "transactionId") String transactionId,
-                               @RequestParam(value = "amount") double amount,
-                               @RequestParam(value = "memo") String memo) throws Exception {
+    public ModelAndView refund(@RequestParam(value = "order_refund_id") Long orderRefundId) throws Exception {
 
         Session session = sessionFactory.getCurrentSession();
 
-        OrderExternalTransactionInfo orderExternalTransactionInfo = (OrderExternalTransactionInfo) session.createCriteria(OrderExternalTransactionInfo.class)
-                .add(Restrictions.eq(OrderExternalTransactionSchema.transactionId, transactionId))
+        OrderRefundInfo orderRefundInfo = (OrderRefundInfo) session.get(OrderRefundInfo.class, orderRefundId);
+        if (orderRefundInfo == null) {
+            throw new Exception(String.format("不存在对应的订单退款申请信息！ %d", orderRefundId));
+        }
+
+        if (orderRefundInfo.getStatusId() != RefundStatus.REFUND_STATUS_YSH && orderRefundInfo.getStatusId() != RefundStatus.REFUND_STATUS_YSB) {
+            throw new Exception(String.format("订单退款当前不是已审核或已失败状态！ %d", orderRefundId));
+        }
+
+        PaypalPaymentInfo paypalPaymentInfo = (PaypalPaymentInfo) session.createCriteria(PaypalPaymentInfo.class)
+                .add(Restrictions.eq(PaypalPaymentSchema.transactionId, orderRefundInfo.getPayTranId()))
                 .setMaxResults(1)
                 .uniqueResult();
 
-        if (orderExternalTransactionInfo == null || orderExternalTransactionInfo.getPaymentId() == 0L) {
-            throw new Exception(String.format("Transaction: %s 不存在对应的订单付款信息", transactionId));
+        if (paypalPaymentInfo == null) {
+            throw new Exception(String.format("不存在对应的订单付款信息！ %s", orderRefundInfo.getPayTranId()));
         }
 
-        PaypalPaymentInfo paypalPaymentInfo = (PaypalPaymentInfo) session.get(PaypalPaymentInfo.class, orderExternalTransactionInfo.getPaymentId());
         PaypalAccountInfo paypalAccountInfo = (PaypalAccountInfo) session.get(PaypalAccountInfo.class, paypalPaymentInfo.getAccountId());
 
         // PayPalAPIInterfaceServiceService
@@ -76,14 +82,14 @@ public class PaymentController {
 
 
         BasicAmountType amountType = new BasicAmountType();
-        amountType.setValue(new DecimalFormat("0.00").format(amount));
+        amountType.setValue(new DecimalFormat("0.00").format(orderRefundInfo.getRefundAmount()));
         amountType.setCurrencyID(CurrencyCodeType.AUD);
 
         RefundTransactionRequestType refundTransactionRequestType = new RefundTransactionRequestType();
         refundTransactionRequestType.setAmount(amountType);
         refundTransactionRequestType.setTransactionID(paypalPaymentInfo.getTransactionId());
-        refundTransactionRequestType.setMemo(memo);
-        if (paypalPaymentInfo.getGrossAmount().compareTo(new BigDecimal(amount)) > 0) {
+        refundTransactionRequestType.setMemo(String.format("ebay order %s refund", orderRefundInfo.getOrderCode()));
+        if (paypalPaymentInfo.getGrossAmount().compareTo(orderRefundInfo.getRefundAmount()) > 0) {
             refundTransactionRequestType.setRefundType(RefundType.PARTIAL);
         } else {
             refundTransactionRequestType.setRefundType(RefundType.FULL);
@@ -97,18 +103,18 @@ public class PaymentController {
             String refundTransactionId = refundTransactionResponseType.getRefundTransactionID();
             refundTransactionId = refundTransactionId.replace("'", "");
 
-            // 记录订单退款信息
-            OrderRefundInfo orderRefundInfo = new OrderRefundInfo();
-            orderRefundInfo.setOrderId(orderExternalTransactionInfo.getOrderId());
             orderRefundInfo.setTransactionId(refundTransactionId);
-            orderRefundInfo.setAmount(new BigDecimal(amount));
-            orderRefundInfo.setDescription(memo);
 
-            session.save(orderRefundInfo);
+            StatusInfo refundSuccessStatus = (StatusInfo) session.get(StatusInfo.class, RefundStatus.REFUND_STATUS_YCG);
+            orderRefundInfo.setStatusId(RefundStatus.REFUND_STATUS_YCG);
+            orderRefundInfo.setStatusName(refundSuccessStatus.getName());
+
+            session.update(orderRefundInfo);
+            session.flush();
 
             // 记录订单历史信息
-            OrderInfo orderInfo = (OrderInfo) session.get(OrderInfo.class, orderExternalTransactionInfo.getOrderId());
-            orderHistoryService.insertOrderHistory(orderInfo, "订单退款, 金额:" + new DecimalFormat("0.00").format(amount));
+            OrderInfo orderInfo = (OrderInfo) session.get(OrderInfo.class, orderRefundInfo.getOrderId());
+            orderHistoryService.insertOrderHistory(orderInfo, "订单退款, 金额:" + new DecimalFormat("0.00").format(orderRefundInfo.getRefundAmount()));
 
             session.flush();
 
@@ -118,6 +124,14 @@ public class PaymentController {
             }});
 
         } else {
+
+            StatusInfo refundFailedStatus = (StatusInfo) session.get(StatusInfo.class, RefundStatus.REFUND_STATUS_YSB);
+            orderRefundInfo.setStatusId(RefundStatus.REFUND_STATUS_YSB);
+            orderRefundInfo.setStatusName(refundFailedStatus.getName());
+
+            session.update(orderRefundInfo);
+            session.flush();
+
             List<ErrorType> errorTypeList = refundTransactionResponseType.getErrors();
             for (ErrorType errorType : errorTypeList) {
                 log.error("退款错误！");

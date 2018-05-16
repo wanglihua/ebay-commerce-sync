@@ -8,9 +8,9 @@ object ShopAccountSchema {
     const val desc = "desc"
     const val updateTime = "updateTime"
     const val statusId = "statusId"
+    const val paypalAccount = "paypalAccount"
     const val platformId = "platformId"
     const val manager = "manager"
     const val tokenResult = "tokenResult"
     const val tokenExpire = "tokenExpire"
-    const val paypalAccount = "paypalAccount"
 }
