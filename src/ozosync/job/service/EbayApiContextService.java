@@ -27,7 +27,7 @@ public class EbayApiContextService {
                 .uniqueResult();
 
         if (ebayApiConfigInfo == null) {
-            throw new Exception(String.format("指定的 shop 不存在, shopId: %d", shopId));
+            throw new Exception(String.format("指定的 shop, ebay 配置 不存在, shopId: %d", shopId));
         }
 
         return getApiContextByConfig(ebayApiConfigInfo);
