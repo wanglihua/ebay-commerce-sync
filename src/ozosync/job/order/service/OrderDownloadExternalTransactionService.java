@@ -2,7 +2,6 @@ package ozosync.job.order.service;
 
 import com.ebay.soap.eBLBaseComponents.ExternalTransactionType;
 import com.ebay.soap.eBLBaseComponents.OrderType;
-import java.util.Date;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
@@ -14,6 +13,8 @@ import ozosync.domain.OrderStatus;
 import ozosync.domain.PaypalPaymentInfo;
 import ozosync.domain.schema.OrderExternalTransactionSchema;
 import ozosync.domain.schema.PaypalPaymentSchema;
+
+import java.util.Date;
 
 @Service
 public class OrderDownloadExternalTransactionService {
@@ -58,7 +59,6 @@ public class OrderDownloadExternalTransactionService {
                     orderExternalTransactionInfo.setOrderId(orderId);
                     orderExternalTransactionInfo.setTransactionId(transactionId);
                     orderExternalTransactionInfo.setTransactionTime(transactionTime);
-                    orderExternalTransactionInfo.setOrderId(0L);
 
                     if (paypalPaymentInfo != null) {
                         orderExternalTransactionInfo.setPaymentId(paypalPaymentInfo.getId());
