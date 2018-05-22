@@ -75,6 +75,16 @@ data class MessageInfo(
     @Column(name = "status_id")
     var statusId: Long = 0
 
+    // MemberMessage download time
+    @Column(name = "member_download_time")
+    @Type(type = "timestamp")
+    var memberDownloadTime: Date? = null
+
+    // MyMessage download time
+    @Column(name = "my_download_time")
+    @Type(type = "timestamp")
+    var myDownloadTime: Date? = null
+
     @Column(name = "create_time")
     @Type(type = "timestamp")
     @VerboseName("创建时间")

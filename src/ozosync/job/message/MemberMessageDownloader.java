@@ -9,6 +9,7 @@ import com.ebay.soap.eBLBaseComponents.MessageTypeCodeType;
 import com.ebay.soap.eBLBaseComponents.PaginationType;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
@@ -73,6 +74,8 @@ public class MemberMessageDownloader {
                                 if (messageInfo == null) {
                                     messageInfo = new MessageInfo();
                                 }
+
+                                messageInfo.setMemberDownloadTime(new Date());
 
                                 messageInfo.setMessageId(messageId);
                                 messageInfo.setShopId(ebayApiConfigInfo.getShopId());

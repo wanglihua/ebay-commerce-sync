@@ -6,6 +6,7 @@ import com.ebay.soap.eBLBaseComponents.DetailLevelCodeType;
 import com.ebay.soap.eBLBaseComponents.MyMessagesMessageType;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
@@ -16,7 +17,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ozosync.domain.EBayApiConfigInfo;
 import ozosync.domain.MessageInfo;
+import ozosync.domain.ProductInfo;
+import ozosync.domain.ProductStoreItemInfo;
 import ozosync.domain.schema.MessageSchema;
+import ozosync.domain.schema.ProductStoreItemSchema;
 import ozosync.job.service.EbayApiContextService;
 import ozosync.service.EBayApiConfigService;
 
@@ -101,6 +105,9 @@ public class MyMessageDownloader {
     }
 
     private void retrieveMessages(EBayApiConfigInfo ebayApiConfigInfo, int page, int totalPages, List<MyMessagesMessageType> messageHeaderList) throws Exception {
+
+        Session session = sessionFactory.getCurrentSession();
+
         GetMyMessagesCall getMyMessagesCall = createGetMyMessagesCall(ebayApiConfigInfo);
 
         String[] messageIds = null;
@@ -132,11 +139,80 @@ public class MyMessageDownloader {
         getMyMessagesCall.setMessageIDs(messageIds);
         getMyMessagesCall.getMyMessages();
 
-        // todo 处理消息
         MyMessagesMessageType[] messages = getMyMessagesCall.getReturnedMyMessages();
         if (messages != null) {
             for (MyMessagesMessageType message : messages) {
-                System.out.println(message.getText());
+                // System.out.println(message.getText());
+                String messageId = message.getMessageID();
+
+                MessageInfo messageInfo = (MessageInfo) session.createCriteria(MessageInfo.class)
+                        .add(Restrictions.eq(MessageSchema.messageId, messageId))
+                        .setMaxResults(1)
+                        .uniqueResult();
+
+                if (messageInfo == null) {
+                    messageInfo = new MessageInfo();
+                }
+
+                messageInfo.setMyDownloadTime(new Date());
+
+                messageInfo.setMessageId(messageId);
+                messageInfo.setShopId(ebayApiConfigInfo.getShopId());
+
+                String itemId = message.getItemID();
+
+                if (itemId == null || itemId.equals("")) {
+                    messageInfo.setItemId("");
+                    messageInfo.setProductId(0L);
+                    messageInfo.setSku("");
+                } else {
+                    messageInfo.setItemId(itemId);
+
+                    ProductStoreItemInfo productStoreItemInfo = (ProductStoreItemInfo) session.createCriteria(ProductStoreItemInfo.class)
+                            .add(Restrictions.eq(ProductStoreItemSchema.itemId, itemId))
+                            .setMaxResults(1)
+                            .uniqueResult();
+
+                    if (productStoreItemInfo == null) {
+                        // throw new Exception("商品店铺 item id 不存在！");
+                        messageInfo.setProductId(0L);
+                        messageInfo.setSku("");
+                    } else {
+                        Long productId = productStoreItemInfo.getProductId();
+                        messageInfo.setProductId(productId);
+
+                        ProductInfo productInfo = (ProductInfo) session.get(ProductInfo.class, productId);
+                        if (productInfo == null) {
+                            // throw new Exception(String.format("指定的商品 id:%d 不存在！", productId));
+                            messageInfo.setSku("");
+                        } else {
+                            messageInfo.setSku(productInfo.getSku());
+                        }
+                    }
+                }
+
+                // messageInfo.setDisplayToPublic(memberMessageType.isDisplayToPublic());
+                messageInfo.setMessageType(message.getMessageType().value());
+                messageInfo.setQuestionType(message.getQuestionType().value());
+
+                /*
+
+                messageInfo.setRecipientId(memberMessageType.getRecipientID(0));
+                messageInfo.setSenderEmail(memberMessageType.getSenderEmail());
+                messageInfo.setSenderId(memberMessageType.getSenderID());
+                messageInfo.setSubject(memberMessageType.getSubject());
+                messageInfo.setBody(memberMessageType.getBody());
+
+                 */
+
+                messageInfo.setRecipientId(message.getRecipientUserID());
+                // messageInfo.setSenderEmail(message.getSender());
+                messageInfo.setSenderId(message.getSender());
+                messageInfo.setSubject(message.getSubject());
+                // messageInfo.setBody(message.getBody());
+
+                session.saveOrUpdate(messageInfo);
+                session.flush();
             }
         }
 
