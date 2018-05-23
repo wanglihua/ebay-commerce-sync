@@ -12,7 +12,6 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -54,7 +53,9 @@ public class MyMessageDownloader {
 
                     // 过滤掉 message id 数据库中已存在的
                     List<MyMessagesMessageType> newMessageHeaderList = new ArrayList<>();
+
                     for (MyMessagesMessageType messageHeader : messageHeaders) {
+                        /*
                         String messageId = messageHeader.getMessageID();
                         Long count = (Long) session.createCriteria(MessageInfo.class)
                                 .add(Restrictions.eq(MessageSchema.messageId, messageId))
@@ -64,7 +65,12 @@ public class MyMessageDownloader {
                         if (count == 0) {
                             newMessageHeaderList.add(messageHeader);
                         }
+                        */
+
+                        // 先不过滤了
+                        newMessageHeaderList.add(messageHeader);
                     }
+
 
                     // If there are Messages
                     if (newMessageHeaderList.size() != 0) {
@@ -204,8 +210,12 @@ public class MyMessageDownloader {
                 }
 
                 // messageInfo.setDisplayToPublic(memberMessageType.isDisplayToPublic());
-                messageInfo.setMessageType(message.getMessageType().value());
-                messageInfo.setQuestionType(message.getQuestionType().value());
+                if (message.getMessageType() != null) {
+                    messageInfo.setMessageType(message.getMessageType().value());
+                }
+                if (message.getQuestionType() != null) {
+                    messageInfo.setQuestionType(message.getQuestionType().value());
+                }
 
                 /*
 
