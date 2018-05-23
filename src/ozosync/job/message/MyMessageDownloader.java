@@ -6,6 +6,7 @@ import com.ebay.soap.eBLBaseComponents.DetailLevelCodeType;
 import com.ebay.soap.eBLBaseComponents.MyMessagesMessageType;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import org.apache.log4j.Logger;
@@ -26,6 +27,8 @@ import ozosync.service.EBayApiConfigService;
 
 @Service
 public class MyMessageDownloader {
+
+    private static final int NUMBER_OF_DAY = 1;
 
     private Logger log = Logger.getLogger(MyMessageDownloader.class);
 
@@ -100,7 +103,16 @@ public class MyMessageDownloader {
         };
 
         getMyMessagesCall.setDetailLevel(detailLevels);
+
+        Calendar startTime = Calendar.getInstance();
+        startTime.add(Calendar.DATE, -NUMBER_OF_DAY);
+        getMyMessagesCall.setStartTime(startTime);
+
+        Calendar endTime = Calendar.getInstance();
+        getMyMessagesCall.setEndTime(endTime);
+
         getMyMessagesCall.getMyMessages();
+
         return getMyMessagesCall.getReturnedMyMessages();
     }
 
