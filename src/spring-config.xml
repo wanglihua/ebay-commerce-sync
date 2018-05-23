@@ -211,6 +211,23 @@
         <property name="startDelay" value="1000"/>
     </bean>
 
+    <!-- Message 任务 -->
+    <bean id="messageJobDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="jobClass" value="ozosync.job.message.MessageJob"/>
+        <property name="durability" value="true"/>
+        <property name="jobDataAsMap">
+            <map>
+                <entry key="sessionFactory" value-ref="sessionFactory"/>
+            </map>
+        </property>
+    </bean>
+    <bean id="messageJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="messageJobDetail"/>
+        <!--<property name="cronExpression" value="0 0 23 * * ? "/>-->
+        <property name="cronExpression" value="0 40 0/2 * * ? *"/>
+        <property name="startDelay" value="1000"/>
+    </bean>
+
     <bean id="jobFactory" class="ozosync.job.JobFactory"/>
     <bean id="schedulerFactoryBean" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
         <property name="jobFactory" ref="jobFactory"/>
@@ -221,6 +238,7 @@
                 <ref bean="orderJobTrigger"/>
                 <ref bean="orderFeedbackJobTrigger"/>
                 <ref bean="paymentJobTrigger"/>
+                <ref bean="messageJobTrigger"/>
             </list>
         </property>
     </bean>

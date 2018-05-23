@@ -12,9 +12,13 @@ public class MessageJob extends SyncJob {
     @Autowired
     private MyMessageDownloader myMessageDownloader;
 
+    @Autowired
+    private MemberMessageDownloader memberMessageDownloader;
+
     @Override
     protected void executeInternal() {
         try {
+            memberMessageDownloader.download();
             myMessageDownloader.download();
         } catch (Exception exp) {
             log.fatal(exp);
