@@ -39,7 +39,15 @@ data class MessageInfo(
     var sku: String = ""
 
     @Column(name = "creation_date")
-    var creationDate: Date? = null
+    var creationDate: Date? = null // member?, my
+
+    var receiveDate: Date? = null // my
+
+    var expirationDate: Date? = null // my
+
+    var externalMessageId: String = "" // my
+
+    var parentMessageId: String = "" // member
 
     @Column(name = "last_modified_date")
     var lastModifiedDate: Date? = null
@@ -84,6 +92,7 @@ data class MessageInfo(
     @Column(name = "my_download_time")
     @Type(type = "timestamp")
     var myDownloadTime: Date? = null
+
 
     @Column(name = "create_time")
     @Type(type = "timestamp")

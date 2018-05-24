@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ozosync.domain.EBayApiConfigInfo;
 import ozosync.domain.MessageInfo;
+import ozosync.domain.MessageStatus;
 import ozosync.domain.ProductInfo;
 import ozosync.domain.ProductStoreItemInfo;
 import ozosync.domain.schema.MessageSchema;
@@ -232,6 +233,12 @@ public class MyMessageDownloader {
                 messageInfo.setSenderId(message.getSender());
                 messageInfo.setSubject(message.getSubject());
                 // messageInfo.setBody(message.getBody());
+                
+                if (message.isReplied()) {
+                    messageInfo.setStatusId(MessageStatus.ANSWERED);
+                } else {
+                    messageInfo.setStatusId(MessageStatus.UNANSWERED);
+                }
 
                 session.saveOrUpdate(messageInfo);
                 session.flush();
