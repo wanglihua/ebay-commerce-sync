@@ -4,11 +4,6 @@ import com.ebay.sdk.ApiContext;
 import com.ebay.sdk.call.GetMyMessagesCall;
 import com.ebay.soap.eBLBaseComponents.DetailLevelCodeType;
 import com.ebay.soap.eBLBaseComponents.MyMessagesMessageType;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -24,6 +19,12 @@ import ozosync.domain.schema.MessageSchema;
 import ozosync.domain.schema.ProductStoreItemSchema;
 import ozosync.job.service.EbayApiContextService;
 import ozosync.service.EBayApiConfigService;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 @Service
 public class MyMessageDownloader {
@@ -80,7 +81,7 @@ public class MyMessageDownloader {
                         if (messageHeaders.length % 10 != 0) {
                             totalPages = messageHeaders.length / 10 + 1;
                         } else {
-                            totalPages = messageHeaders.length;
+                            totalPages = messageHeaders.length / 10;
                         }
                         // make second GetMyMessages call
                         retrieveMessages(ebayApiConfigInfo, page, totalPages, newMessageHeaderList);
