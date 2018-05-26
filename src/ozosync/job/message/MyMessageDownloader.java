@@ -17,6 +17,7 @@ import ozosync.domain.ProductInfo;
 import ozosync.domain.ProductStoreItemInfo;
 import ozosync.domain.schema.MessageSchema;
 import ozosync.domain.schema.ProductStoreItemSchema;
+import ozosync.job.message.service.MyMessageService;
 import ozosync.job.service.EbayApiContextService;
 import ozosync.service.EBayApiConfigService;
 
@@ -41,6 +42,9 @@ public class MyMessageDownloader {
 
     @Autowired
     private SessionFactory sessionFactory;
+
+    @Autowired
+    private MyMessageService myMessageService;
 
     @SuppressWarnings("unchecked")
     public void download() {
@@ -162,7 +166,6 @@ public class MyMessageDownloader {
         MyMessagesMessageType[] messages = getMyMessagesCall.getReturnedMyMessages();
         if (messages != null) {
             for (MyMessagesMessageType message : messages) {
-                // System.out.println(message.getText());
                 String messageId = message.getMessageID();
 
                 MessageInfo messageInfo = (MessageInfo) session.createCriteria(MessageInfo.class)
@@ -212,6 +215,7 @@ public class MyMessageDownloader {
                 }
 
                 // messageInfo.setDisplayToPublic(memberMessageType.isDisplayToPublic());
+                messageInfo.setDisplayToPublic(false);
                 if (message.getMessageType() != null) {
                     messageInfo.setMessageType(message.getMessageType().value());
                 }
@@ -219,22 +223,13 @@ public class MyMessageDownloader {
                     messageInfo.setQuestionType(message.getQuestionType().value());
                 }
 
-                /*
-
-                messageInfo.setRecipientId(memberMessageType.getRecipientID(0));
-                messageInfo.setSenderEmail(memberMessageType.getSenderEmail());
-                messageInfo.setSenderId(memberMessageType.getSenderID());
-                messageInfo.setSubject(memberMessageType.getSubject());
-                messageInfo.setBody(memberMessageType.getBody());
-
-                 */
-
                 messageInfo.setRecipientId(message.getRecipientUserID());
                 // messageInfo.setSenderEmail(message.getSender());
+                messageInfo.setSenderEmail("");
                 messageInfo.setSenderId(message.getSender());
                 messageInfo.setSubject(message.getSubject());
-                // messageInfo.setBody(message.getBody());
-                
+                messageInfo.setBody(myMessageService.getMessageBody(message.getText()));
+
                 if (message.isReplied()) {
                     messageInfo.setStatusId(MessageStatus.ANSWERED);
                 } else {
