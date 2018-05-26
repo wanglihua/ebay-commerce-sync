@@ -112,8 +112,13 @@ public class MemberMessageDownloader {
                                     }
                                 }
 
-                                messageInfo.setCreateTime(memberMessageExchangeType.getCreationDate().getTime());
-                                messageInfo.setLastModifiedDate(memberMessageExchangeType.getLastModifiedDate().getTime());
+                                if (memberMessageExchangeType.getCreationDate() != null) {
+                                    messageInfo.setCreateTime(memberMessageExchangeType.getCreationDate().getTime());
+                                }
+
+                                if (memberMessageExchangeType.getLastModifiedDate() != null) {
+                                    messageInfo.setLastModifiedDate(memberMessageExchangeType.getLastModifiedDate().getTime());
+                                }
 
                                 if (memberMessageExchangeType.getMessageStatus() == MessageStatusTypeCodeType.ANSWERED) {
                                     messageInfo.setStatusId(MessageStatus.ANSWERED);

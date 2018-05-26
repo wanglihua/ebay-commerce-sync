@@ -216,6 +216,7 @@ public class MyMessageDownloader {
 
                 // messageInfo.setDisplayToPublic(memberMessageType.isDisplayToPublic());
                 messageInfo.setDisplayToPublic(false);
+
                 if (message.getMessageType() != null) {
                     messageInfo.setMessageType(message.getMessageType().value());
                 }
@@ -224,11 +225,17 @@ public class MyMessageDownloader {
                 }
 
                 messageInfo.setRecipientId(message.getRecipientUserID());
+
                 // messageInfo.setSenderEmail(message.getSender());
                 messageInfo.setSenderEmail("");
+                
                 messageInfo.setSenderId(message.getSender());
                 messageInfo.setSubject(message.getSubject());
                 messageInfo.setBody(myMessageService.getMessageBody(message.getText()));
+
+                if (message.getCreationDate() != null) {
+                    messageInfo.setCreationDate(message.getCreationDate().getTime());
+                }
 
                 if (message.isReplied()) {
                     messageInfo.setStatusId(MessageStatus.ANSWERED);
