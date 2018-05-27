@@ -41,13 +41,17 @@ data class MessageInfo(
     @Column(name = "creation_date")
     var creationDate: Date? = null // member?, my
 
-    // var receiveDate: Date? = null // my
+    @Column(name = "receive_date")
+    var receiveDate: Date? = null // my
 
-    // var expirationDate: Date? = null // my
+    @Column(name = "expiration_date")
+    var expirationDate: Date? = null // my
 
-    // var externalMessageId: String = "" // my
+    @Column(name = "external_message_id")
+    var externalMessageId: String = "" // my
 
-    // var parentMessageId: String = "" // member
+    @Column(name = "parent_message_id")
+    var parentMessageId: String = "" // member
 
     @Column(name = "last_modified_date")
     var lastModifiedDate: Date? = null
