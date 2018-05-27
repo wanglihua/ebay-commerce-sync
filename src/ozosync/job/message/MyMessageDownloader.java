@@ -234,6 +234,10 @@ public class MyMessageDownloader {
 
                 String messageBody = myMessageService.getMessageBody(message.getText());
 
+                if (messageBody.equals("")) {
+                    messageBody = "missing: " + message.getMessageID();
+                }
+
                 messageInfo.setBody(messageBody);
 
                 if (message.getCreationDate() != null) {
