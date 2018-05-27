@@ -228,10 +228,13 @@ public class MyMessageDownloader {
 
                 // messageInfo.setSenderEmail(message.getSender());
                 messageInfo.setSenderEmail("");
-                
+
                 messageInfo.setSenderId(message.getSender());
                 messageInfo.setSubject(message.getSubject());
-                messageInfo.setBody(myMessageService.getMessageBody(message.getText()));
+
+                String messageBody = myMessageService.getMessageBody(message.getText());
+
+                messageInfo.setBody(messageBody);
 
                 if (message.getCreationDate() != null) {
                     messageInfo.setCreationDate(message.getCreationDate().getTime());

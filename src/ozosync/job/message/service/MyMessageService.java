@@ -1,5 +1,7 @@
 package ozosync.job.message.service;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -11,9 +13,12 @@ public class MyMessageService {
 
     public String getMessageBody(String messageHtmlPage) {
 
+        messageHtmlPage = messageHtmlPage.replace("<![CDATA[", "");
+        messageHtmlPage = messageHtmlPage.replace("]]>", "");
+
         StringBuilder bodyBuilder = new StringBuilder();
 
-        Document document = Jsoup.parse(messageHtmlPage);
+        Document document = Jsoup.parse(messageHtmlPage, "UTF-8");
         Elements userInputtedTextElements = document.select("#UserInputtedText");
 
         if (userInputtedTextElements.size() != 0) {
@@ -34,4 +39,23 @@ public class MyMessageService {
 
         return bodyBuilder.toString();
     }
+
+    public String getCData1(String cdataStr) {
+        Pattern pattern = Pattern.compile("\\<\\!\\[CDATA\\[(?<text>[^\\]]*)\\]\\]\\>");
+        Matcher matcher = pattern.matcher(cdataStr);
+
+        if (matcher.matches()) {
+            return matcher.group(1);
+        } else {
+            return cdataStr;
+        }
+    }
+
+    public String getCData2(String cdataStr) {
+        cdataStr = cdataStr.replace("<![CDATA[", "");
+        cdataStr = cdataStr.replace("]]>", "");
+
+        return cdataStr;
+    }
+
 }
