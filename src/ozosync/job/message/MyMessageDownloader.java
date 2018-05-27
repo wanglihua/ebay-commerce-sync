@@ -245,9 +245,23 @@ public class MyMessageDownloader {
                 }
 
                 if (message.isReplied()) {
+                    messageInfo.setMessageStatus("replied");
                     messageInfo.setStatusId(MessageStatus.ANSWERED);
                 } else {
+                    messageInfo.setMessageStatus("unreplied");
                     messageInfo.setStatusId(MessageStatus.UNANSWERED);
+                }
+
+                if (message.getReceiveDate() != null) {
+                    messageInfo.setReceiveDate(message.getReceiveDate().getTime());
+                }
+
+                if (message.getExpirationDate() != null) {
+                    messageInfo.setExpirationDate(message.getExpirationDate().getTime());
+                }
+
+                if (message.getExternalMessageID() != null) {
+                    messageInfo.setExternalMessageId(message.getExternalMessageID());
                 }
 
                 session.saveOrUpdate(messageInfo);

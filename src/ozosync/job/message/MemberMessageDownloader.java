@@ -120,6 +120,12 @@ public class MemberMessageDownloader {
                                     messageInfo.setLastModifiedDate(memberMessageExchangeType.getLastModifiedDate().getTime());
                                 }
 
+                                if (memberMessageType.getParentMessageID() != null) {
+                                    messageInfo.setParentMessageId(memberMessageType.getParentMessageID());
+                                }
+
+                                messageInfo.setMessageStatus(memberMessageExchangeType.getMessageStatus().value());
+
                                 if (memberMessageExchangeType.getMessageStatus() == MessageStatusTypeCodeType.ANSWERED) {
                                     messageInfo.setStatusId(MessageStatus.ANSWERED);
                                 } else if (memberMessageExchangeType.getMessageStatus() == MessageStatusTypeCodeType.UNANSWERED) {
