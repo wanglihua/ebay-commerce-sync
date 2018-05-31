@@ -45,12 +45,13 @@ public class MyMessageServiceTest {
         return new GetMyMessagesCall(apiContext);
     }
 
+    @Test
     public void testDownloadSingleMessage() throws Exception {
 
         Session session = sessionFactory.getCurrentSession();
 
         Long shopId = 1L;
-        String messageId = "";
+        String messageId = "98304616329";
 
         EBayApiConfigInfo ebayApiConfigInfo = (EBayApiConfigInfo) session.createCriteria(EBayApiConfigInfo.class)
                 .add(Restrictions.eq(EBayApiConfigSchema.shopId, shopId))
@@ -64,7 +65,7 @@ public class MyMessageServiceTest {
         };
 
         getMyMessagesCall.setDetailLevel(detailLevel);
-        getMyMessagesCall.setMessageIDs(new String[]{});
+        getMyMessagesCall.setMessageIDs(new String[]{messageId});
         getMyMessagesCall.getMyMessages();
 
         MyMessagesMessageType[] messages = getMyMessagesCall.getReturnedMyMessages();
