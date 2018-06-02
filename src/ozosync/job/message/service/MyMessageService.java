@@ -27,6 +27,7 @@ public class MyMessageService {
         selectorList.add("#UserInputtedText");
         selectorList.add("#bodyContainer > tbody > tr > td > table > tbody > tr > td > p");
         selectorList.add("#SingleItemCTA > div > table > tbody > tr > td > font > div");
+        selectorList.add("body > table.device-width:nth-child(3) > tbody > tr > td > table.header-logo > tbody > tr > td > h1");
 
         int selectorCount = selectorList.size();
 

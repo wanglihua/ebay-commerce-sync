@@ -65,5 +65,16 @@ public class JsoupTest {
         }
     }
 
-    // #SingleItemCTA > div > table > tbody > tr > td:nth-child(1) > font > div
+    @Test
+    public void testMyMessage4() throws Exception {
+        // File file = new File("C:\\projects\\ozosync\\src\\ozosync\\test\\jsoup\\html\\ebay_mymessage_test4.html");
+        File file = new File("Z:\\projects\\ozosync\\src\\ozosync\\test\\jsoup\\html\\ebay_mymessage_test4.html");
+        Document document = Jsoup.parse(file, "UTF-8");
+
+        Elements elements = document.select("body > table.device-width:nth-child(3) > tbody > tr > td > table.header-logo > tbody > tr > td > h1");
+
+        for (Element element : elements) {
+            System.out.println(element.html());
+        }
+    }
 }

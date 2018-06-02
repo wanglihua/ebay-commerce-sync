@@ -234,7 +234,7 @@ public class MyMessageDownloader {
 
                 String messageBody = myMessageService.getMessageBody(message.getText());
 
-                if (messageBody.equals("")) {
+                if ("".equals(messageBody)) {
                     messageBody = "missing: " + message.getMessageID();
                 }
 
