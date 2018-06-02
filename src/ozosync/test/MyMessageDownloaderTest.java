@@ -48,7 +48,7 @@ public class MyMessageDownloaderTest {
 
         Long shopId = 6L; // oz.sunshine
 
-        String messageId = "98482746749";
+        String messageId = "98485891879";
 
         EBayApiConfigInfo ebayApiConfigInfo = (EBayApiConfigInfo) session.createCriteria(EBayApiConfigInfo.class)
                 .add(Restrictions.eq(EBayApiConfigSchema.shopId, shopId))
