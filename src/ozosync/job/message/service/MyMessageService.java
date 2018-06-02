@@ -1,12 +1,15 @@
 package ozosync.job.message.service;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class MyMessageService {
@@ -19,23 +22,30 @@ public class MyMessageService {
         StringBuilder bodyBuilder = new StringBuilder();
 
         Document document = Jsoup.parse(messageHtmlPage, "UTF-8");
-        Elements userInputtedTextElements = document.select("#UserInputtedText");
 
-        if (userInputtedTextElements.size() != 0) {
-            bodyBuilder.append("<p>");
-            for (Element element : userInputtedTextElements) {
-                bodyBuilder.append(element.html());
-            }
-            bodyBuilder.append("</p>");
-        } else {
-            String selector = "#bodyContainer > tbody > tr > td > table > tbody > tr > td > p";
+        List<String> selectorList = new ArrayList<String>();
+        selectorList.add("#UserInputtedText");
+        selectorList.add("#bodyContainer > tbody > tr > td > table > tbody > tr > td > p");
+        selectorList.add("#SingleItemCTA > div > table > tbody > tr > td > font > div");
+
+        int selectorCount = selectorList.size();
+
+        int index = 0;
+        boolean found = false;
+        do {
+            String selector = selectorList.get(index);
             Elements messageElements = document.select(selector);
-            for (Element element : messageElements) {
-                bodyBuilder.append("<p>");
-                bodyBuilder.append(element.html());
-                bodyBuilder.append("</p>");
+            if (messageElements.size() > 0) {
+                found = true;
+                for (Element element : messageElements) {
+                    bodyBuilder.append("<p>");
+                    bodyBuilder.append(element.html());
+                    bodyBuilder.append("</p>");
+                }
             }
-        }
+
+            index++;
+        } while ((!found) && index < selectorCount);
 
         return bodyBuilder.toString();
     }
