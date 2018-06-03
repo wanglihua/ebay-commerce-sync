@@ -46,9 +46,11 @@ public class MyMessageDownloaderTest {
 
         Session session = sessionFactory.getCurrentSession();
 
-        Long shopId = 6L; // oz.sunshine
+        // 7--99556875124
 
-        String messageId = "98485891879";
+        Long shopId = 7L; // oz.sunshine
+
+        String messageId = "99556875124";
 
         EBayApiConfigInfo ebayApiConfigInfo = (EBayApiConfigInfo) session.createCriteria(EBayApiConfigInfo.class)
                 .add(Restrictions.eq(EBayApiConfigSchema.shopId, shopId))
