@@ -77,4 +77,23 @@ public class JsoupTest {
             System.out.println(element.html());
         }
     }
+
+    @Test
+    public void testMyMessage5() throws Exception {
+        File file = new File("C:\\projects\\ozosync\\src\\ozosync\\test\\jsoup\\html\\ebay_mymessage_test6.html");
+        // File file = new File("Z:\\projects\\ozosync\\src\\ozosync\\test\\jsoup\\html\\ebay_mymessage_test5.html");
+        Document document = Jsoup.parse(file, "UTF-8");
+
+        Elements elements = document.select(".mobile-dealmaker-headline");
+
+        for (Element element : elements) {
+            System.out.println(element.html());
+        }
+
+        elements = document.select(".mobile-dealmaker-storyline");
+
+        for (Element element : elements) {
+            System.out.println(element.html());
+        }
+    }
 }
