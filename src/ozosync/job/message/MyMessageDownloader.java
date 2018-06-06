@@ -4,6 +4,11 @@ import com.ebay.sdk.ApiContext;
 import com.ebay.sdk.call.GetMyMessagesCall;
 import com.ebay.soap.eBLBaseComponents.DetailLevelCodeType;
 import com.ebay.soap.eBLBaseComponents.MyMessagesMessageType;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -20,12 +25,6 @@ import ozosync.domain.schema.ProductStoreItemSchema;
 import ozosync.job.message.service.MyMessageService;
 import ozosync.job.service.EbayApiContextService;
 import ozosync.service.EBayApiConfigService;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
 
 @Service
 public class MyMessageDownloader {
@@ -235,7 +234,7 @@ public class MyMessageDownloader {
                 String messageBody = myMessageService.getMessageBody(message.getText());
 
                 if ("".equals(messageBody)) {
-                    messageBody = "missing: " + message.getMessageID();
+                    messageBody = "missing: " + ebayApiConfigInfo.getShopId() + "--" + message.getMessageID();
                 }
 
                 messageInfo.setBody(messageBody);
