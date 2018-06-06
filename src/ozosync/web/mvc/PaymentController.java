@@ -126,13 +126,6 @@ public class PaymentController {
 
         } else {
 
-            StatusInfo refundFailedStatus = (StatusInfo) session.get(StatusInfo.class, RefundStatus.REFUND_STATUS_YSB);
-            orderRefundInfo.setStatusId(RefundStatus.REFUND_STATUS_YSB);
-            orderRefundInfo.setStatusName(refundFailedStatus.getName());
-
-            session.update(orderRefundInfo);
-            session.flush();
-
             final StringBuilder sb = new StringBuilder();
             List<ErrorType> errorTypeList = refundTransactionResponseType.getErrors();
             for (ErrorType errorType : errorTypeList) {
@@ -144,9 +137,22 @@ public class PaymentController {
                 sb.append(errorType.getLongMessage());
             }
 
+            final String failedCause = sb.toString();
+
+            orderRefundInfo.setFailedCause(failedCause);
+
+            StatusInfo refundFailedStatus = (StatusInfo) session.get(StatusInfo.class, RefundStatus.REFUND_STATUS_YSB);
+            orderRefundInfo.setStatusId(RefundStatus.REFUND_STATUS_YSB);
+            orderRefundInfo.setStatusName(refundFailedStatus.getName());
+
+
+            session.update(orderRefundInfo);
+            session.flush();
+
+
             return new ModelAndView(new MappingJackson2JsonView(), new HashMap<String, Object>() {{
                 put("success", false);
-                put("message", "退款失败！" + sb.toString());
+                put("message", "退款失败！" + failedCause);
             }});
         }
     }

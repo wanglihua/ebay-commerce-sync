@@ -94,6 +94,9 @@ data class OrderRefundInfo(
     @Type(type = "timestamp")
     var applyTime: Date = Date()
 
+    @Column(name = "failed_cause")
+    var failedCause: String = ""
+
     @Column(name = "status_id")
     var statusId: Long = 0
 
