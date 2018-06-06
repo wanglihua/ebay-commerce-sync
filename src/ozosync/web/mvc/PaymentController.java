@@ -1,9 +1,5 @@
 package ozosync.web.mvc;
 
-import java.text.DecimalFormat;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -32,6 +28,11 @@ import urn.ebay.apis.eBLBaseComponents.AckCodeType;
 import urn.ebay.apis.eBLBaseComponents.CurrencyCodeType;
 import urn.ebay.apis.eBLBaseComponents.ErrorType;
 import urn.ebay.apis.eBLBaseComponents.RefundType;
+
+import java.text.DecimalFormat;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping(value = "/payment")
@@ -132,16 +133,20 @@ public class PaymentController {
             session.update(orderRefundInfo);
             session.flush();
 
+            final StringBuilder sb = new StringBuilder();
             List<ErrorType> errorTypeList = refundTransactionResponseType.getErrors();
             for (ErrorType errorType : errorTypeList) {
                 log.error("退款错误！");
                 log.error(errorType.getShortMessage());
                 log.error(errorType.getLongMessage());
+
+                sb.append(errorType.getShortMessage());
+                sb.append(errorType.getLongMessage());
             }
 
             return new ModelAndView(new MappingJackson2JsonView(), new HashMap<String, Object>() {{
                 put("success", false);
-                put("message", "退款失败！");
+                put("message", "退款失败！" + sb.toString());
             }});
         }
     }
