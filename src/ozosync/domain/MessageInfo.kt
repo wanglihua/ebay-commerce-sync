@@ -111,7 +111,6 @@ data class MessageInfo(
 
      */
 
-
     @Column(name = "create_time")
     @Type(type = "timestamp")
     @VerboseName("创建时间")
