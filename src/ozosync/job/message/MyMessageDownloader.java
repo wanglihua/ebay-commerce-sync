@@ -201,13 +201,14 @@ public class MyMessageDownloader {
                         messageInfo.setSku("");
                     } else {
                         Long productId = productStoreItemInfo.getProductId();
-                        messageInfo.setProductId(productId);
 
                         ProductInfo productInfo = (ProductInfo) session.get(ProductInfo.class, productId);
                         if (productInfo == null) {
                             // throw new Exception(String.format("指定的商品 id:%d 不存在！", productId));
+                            messageInfo.setProductId(0L);
                             messageInfo.setSku("");
                         } else {
+                            messageInfo.setProductId(productId);
                             messageInfo.setSku(productInfo.getSku());
                         }
                     }
