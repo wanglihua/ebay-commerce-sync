@@ -22,6 +22,7 @@ import ozosync.domain.MessageInfo;
 import ozosync.domain.MessageStatus;
 import ozosync.domain.ProductInfo;
 import ozosync.domain.ProductStoreItemInfo;
+import ozosync.domain.UserInfo;
 import ozosync.domain.schema.MessageSchema;
 import ozosync.domain.schema.ProductStoreItemSchema;
 import ozosync.job.service.EbayApiContextService;
@@ -111,6 +112,27 @@ public class MemberMessageDownloader {
                                             messageInfo.setSku(productInfo.getSku());
 
                                             if (productInfo.getSaleUserId() != 0L) {
+                                                UserInfo userInfo = (UserInfo) session.get(UserInfo.class, productInfo.getSaleUserId());
+                                                if (userInfo != null) {
+                                                    messageInfo.setSaleUserId(userInfo.getId());
+                                                    messageInfo.setSaleUser(userInfo.getLoginName() + "(" + userInfo.getNickName() + ")");
+                                                }
+                                            }
+
+                                            if (productInfo.getServiceUserId() != 0L) {
+                                                UserInfo userInfo = (UserInfo) session.get(UserInfo.class, productInfo.getServiceUserId());
+                                                if (userInfo != null) {
+                                                    messageInfo.setServiceUserId(userInfo.getId());
+                                                    messageInfo.setServiceUser(userInfo.getLoginName() + "(" + userInfo.getNickName() + ")");
+                                                }
+                                            }
+
+                                            if (productInfo.getDevUserId() != 0L) {
+                                                UserInfo userInfo = (UserInfo) session.get(UserInfo.class, productInfo.getDevUserId());
+                                                if (userInfo != null) {
+                                                    messageInfo.setDevUserId(userInfo.getId());
+                                                    messageInfo.setDevUser(userInfo.getLoginName() + "(" + userInfo.getNickName() + ")");
+                                                }
                                             }
                                         }
                                     }
