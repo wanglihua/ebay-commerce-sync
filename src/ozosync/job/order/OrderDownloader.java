@@ -69,13 +69,11 @@ public class OrderDownloader {
 
                     } while (getOrdersCall.getReturnedHasMoreOrders());
                 } catch (Exception exp) {
-                    log.fatal(exp);
-                    log.fatal(Arrays.toString(exp.getStackTrace()).replace(",", "\r\n"));
+                    log.fatal(exp.getMessage(), exp);
                 }
             }
         } catch (Exception exp) {
-            log.fatal(exp);
-            log.fatal(Arrays.toString(exp.getStackTrace()).replace(",", "\r\n"));
+            log.fatal(exp.getMessage(), exp);
         }
     }
 

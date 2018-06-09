@@ -7,8 +7,6 @@ import org.springframework.stereotype.Service;
 import ozosync.domain.EBayApiConfigInfo;
 import ozosync.domain.OrderInfo;
 
-import java.util.Arrays;
-
 @Service
 public class OrderDownloadFacadeService {
 
@@ -43,34 +41,29 @@ public class OrderDownloadFacadeService {
                 // order entry
                 orderDownloadEntryService.saveOrderEntries(orderInfo, orderDownload);
             } catch (Exception exp) {
-                log.fatal(exp);
-                log.fatal(Arrays.toString(exp.getStackTrace()).replace(",", "\r\n"));
+                log.fatal(exp.getMessage(), exp);
             }
 
             // 这样可以在保存明细出错时，继续保存收货地址
             try {
                 orderDownloadEbayShippingAddressService.saveOrderShippingAddress(orderInfo, orderDownload);
             } catch (Exception exp) {
-                log.fatal(exp);
-                log.fatal(Arrays.toString(exp.getStackTrace()).replace(",", "\r\n"));
+                log.fatal(exp.getMessage(), exp);
             }
 
             try {
                 orderDownloadExternalTransactionService.saveOrderExternalTransaction(orderInfo, orderDownload);
             } catch (Exception exp) {
-                log.fatal(exp);
-                log.fatal(Arrays.toString(exp.getStackTrace()).replace(",", "\r\n"));
+                log.fatal(exp.getMessage(), exp);
             }
 
             try {
                 orderDownloadPaypalShippingAddressService.saveOrderShippingAddress(orderInfo, orderDownload);
             } catch (Exception exp) {
-                log.fatal(exp);
-                log.fatal(Arrays.toString(exp.getStackTrace()).replace(",", "\r\n"));
+                log.fatal(exp.getMessage(), exp);
             }
         } catch (Exception exp) {
-            log.fatal(exp);
-            log.fatal(Arrays.toString(exp.getStackTrace()).replace(",", "\r\n"));
+            log.fatal(exp.getMessage(), exp);
         }
     }
 }

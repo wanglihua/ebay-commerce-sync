@@ -27,8 +27,7 @@ public class MessageServiceTest {
         try {
             messageService.reply(15945L, "OK,OK");
         } catch (Exception exp) {
-            log.fatal(exp);
-            log.fatal(Arrays.toString(exp.getStackTrace()).replace(",", "\r\n"));
+            log.fatal(exp.getMessage(), exp);
         }
     }
 }

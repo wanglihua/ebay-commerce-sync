@@ -7,7 +7,6 @@ import com.ebay.soap.eBLBaseComponents.MemberMessageType;
 import com.ebay.soap.eBLBaseComponents.MessageStatusTypeCodeType;
 import com.ebay.soap.eBLBaseComponents.MessageTypeCodeType;
 import com.ebay.soap.eBLBaseComponents.PaginationType;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -176,13 +175,11 @@ public class MemberMessageDownloader {
                     session.flush();
 
                 } catch (Exception exp) {
-                    log.fatal(exp);
-                    log.fatal(Arrays.toString(exp.getStackTrace()).replace(",", "\r\n"));
+                    log.fatal(exp.getMessage(), exp);
                 }
             }
         } catch (Exception exp) {
-            log.fatal(exp);
-            log.fatal(Arrays.toString(exp.getStackTrace()).replace(",", "\r\n"));
+            log.fatal(exp.getMessage(), exp);
         }
     }
 

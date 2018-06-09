@@ -4,7 +4,6 @@ import com.ebay.sdk.ApiContext;
 import com.ebay.sdk.call.CompleteSaleCall;
 import com.ebay.soap.eBLBaseComponents.ShipmentTrackingDetailsType;
 import com.ebay.soap.eBLBaseComponents.ShipmentType;
-import java.util.Arrays;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -57,8 +56,7 @@ public class OrderService {
             session.update(orderInfo);
             session.flush();
         } catch (Exception exp) {
-            log.fatal(exp);
-            log.fatal(Arrays.toString(exp.getStackTrace()).replace(",", "\r\n"));
+            log.fatal(exp.getMessage(), exp);
         }
     }
 }

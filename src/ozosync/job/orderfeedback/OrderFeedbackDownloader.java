@@ -139,8 +139,7 @@ WHERE (o.status_id = 4200 OR o.status_id = 4300)
                 log.error("no order item to download feedback");
             }
         } catch (Exception exp) {
-            log.fatal(exp);
-            log.fatal(Arrays.toString(exp.getStackTrace()).replace(",", "\r\n"));
+            log.fatal(exp.getMessage(), exp);
         }
     }
 }

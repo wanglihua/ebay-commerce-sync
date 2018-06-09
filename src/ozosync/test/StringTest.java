@@ -27,8 +27,7 @@ public class StringTest {
             throw new Exception("abcdef");
 
         } catch (Exception exp) {
-            log.fatal(exp);
-            log.fatal(Arrays.toString(exp.getStackTrace()).replace(",", "\r\n"));
+            log.fatal(exp.getMessage(), exp);
         }
     }
 

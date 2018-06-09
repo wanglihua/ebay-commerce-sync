@@ -1,6 +1,5 @@
 package ozosync.web.mvc;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import org.apache.log4j.Logger;
@@ -100,8 +99,7 @@ public class OrderController {
                     orderService.ship(orderInfo);
                 }
             } catch (Exception exp) {
-                log.fatal(exp);
-                log.fatal(Arrays.toString(exp.getStackTrace()).replace(",", "\r\n"));
+                log.fatal(exp.getMessage(), exp);
             }
         }
 

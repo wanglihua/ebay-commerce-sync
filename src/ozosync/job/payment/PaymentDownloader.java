@@ -1,5 +1,13 @@
 package ozosync.job.payment;
 
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
@@ -27,16 +35,6 @@ import urn.ebay.apis.eBLBaseComponents.AckCodeType;
 import urn.ebay.apis.eBLBaseComponents.AddressType;
 import urn.ebay.apis.eBLBaseComponents.ErrorType;
 import urn.ebay.apis.eBLBaseComponents.PaymentTransactionSearchResultType;
-
-import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
 
 
 @Service
@@ -67,13 +65,11 @@ public class PaymentDownloader {
                 try {
                     downloadAccountPaymentList(paypalAccountInfo);
                 } catch (Exception exp) {
-                    log.fatal(exp);
-                    log.fatal(Arrays.toString(exp.getStackTrace()).replace(",", "\r\n"));
+                    log.fatal(exp.getMessage(), exp);
                 }
             }
         } catch (Exception exp) {
-            log.fatal(exp);
-            log.fatal(Arrays.toString(exp.getStackTrace()).replace(",", "\r\n"));
+            log.fatal(exp.getMessage(), exp);
         }
     }
 
@@ -248,8 +244,7 @@ public class PaymentDownloader {
                             endTimeStr = searchResultType.getTimestamp();
                         }
                     } catch (Exception exp) {
-                        log.fatal(exp);
-                        log.fatal(Arrays.toString(exp.getStackTrace()).replace(",", "\r\n"));
+                        log.fatal(exp.getMessage(), exp);
                     }
                 }
             }

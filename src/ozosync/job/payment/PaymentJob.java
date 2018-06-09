@@ -4,8 +4,6 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import ozosync.job.SyncJob;
 
-import java.util.Arrays;
-
 public class PaymentJob extends SyncJob {
 
     private Logger log = Logger.getLogger(PaymentJob.class);
@@ -18,8 +16,7 @@ public class PaymentJob extends SyncJob {
         try {
             paymentDownloader.download();
         } catch (Exception exp) {
-            log.fatal(exp);
-            log.fatal(Arrays.toString(exp.getStackTrace()).replace(",", "\r\n"));
+            log.fatal(exp.getMessage(), exp);
         }
     }
 }

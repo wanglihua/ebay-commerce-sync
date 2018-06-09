@@ -1,6 +1,5 @@
 package ozosync.web.mvc;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +26,7 @@ public class MessageController {
         try {
             messageService.reply(messageId, messageBody);
         } catch (final Exception exp) {
-            log.fatal(exp);
-            log.fatal(Arrays.toString(exp.getStackTrace()).replace(",", "\r\n"));
+            log.fatal(exp.getMessage(), exp);
 
             return new ModelAndView(new MappingJackson2JsonView(), new HashMap<String, Object>() {{
                 put("success", false);
