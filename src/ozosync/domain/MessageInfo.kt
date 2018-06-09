@@ -97,19 +97,35 @@ data class MessageInfo(
     @Type(type = "timestamp")
     var myDownloadTime: Date? = null
 
-    /*
-	SaleUserId         int64             `xorm:"bigint notnull index 'sale_user_id' default(0)" json:"sale_user_id" smith:"verbose_name=销售人员"`
-	SaleUser           string            `xorm:"nvarchar(255) notnull 'sale_user'" json:"sale_user"`
-	ServiceUserId      int64             `xorm:"bigint notnull index 'service_user_id' default(0)" json:"service_user_id" smith:"verbose_name=客服人员"`
-	ServiceUser        string            `xorm:"nvarchar(255) notnull 'service_user'" json:"service_user"`
-	DevUserId          int64             `xorm:"bigint notnull index 'dev_user_id' default(0)" json:"dev_user_id" smith:"verbose_name=开发人员"`
-	DevUser            string            `xorm:"nvarchar(255) notnull 'dev_user'" json:"dev_user"`
-	AssignedUserId     int64             `xorm:"bigint notnull index 'assigned_user_id' default(0)" json:"assigned_user_id" smith:"verbose_name=指派人员"`
-	AssignedUser       string            `xorm:"nvarchar(255) notnull 'assigned_user'" json:"assigned_user"`
-	TypeId             int64             `xorm:"bigint notnull index 'type_id' default(0)" json:"type_id"`
-	TypeName           string            `xorm:"nvarchar(100) notnull 'type_name'" json:"type_name"`
+    @Column(name = "sale_user_id")
+    var saleUserId: Long = 0
 
-     */
+    @Column(name = "sale_user")
+    var saleUser: String = ""
+
+    @Column(name = "service_user_id")
+    var serviceUserId: Long = 0
+
+    @Column(name = "service_user")
+    var serviceUser: String = ""
+
+    @Column(name = "dev_user_id")
+    var devUserId: Long = 0
+
+    @Column(name = "dev_user")
+    var devUser: String = ""
+
+    @Column(name = "assigned_user_id")
+    var assignedUserId: Long = 0
+
+    @Column(name = "assigned_user")
+    var assignedUser: String = ""
+
+    @Column(name = "type_id")
+    var typeId: Long = 0
+
+    @Column(name = "type_name")
+    var typeName: String = ""
 
     @Column(name = "create_time")
     @Type(type = "timestamp")
