@@ -18,6 +18,12 @@ data class MessageTypeInfo(
         @Column(name = "id")
         var id: Long = 0) {
 
+    @Column(name = "big_type_id")
+    var bigTypeId: Long = 0
+
+    @Column(name = "big_type_name")
+    var bigTypeName: String = ""
+
     @Column(name = "type_name")
     var typeName: String = ""
 
