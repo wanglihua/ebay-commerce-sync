@@ -5,7 +5,6 @@ import com.ebay.sdk.call.GetMyMessagesCall;
 import com.ebay.soap.eBLBaseComponents.DetailLevelCodeType;
 import com.ebay.soap.eBLBaseComponents.MyMessagesMessageType;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -18,6 +17,7 @@ import org.springframework.stereotype.Service;
 import ozosync.domain.EBayApiConfigInfo;
 import ozosync.domain.MessageInfo;
 import ozosync.domain.MessageStatus;
+import ozosync.domain.MessageTypeInfo;
 import ozosync.domain.ProductInfo;
 import ozosync.domain.ProductStoreItemInfo;
 import ozosync.domain.UserInfo;
@@ -26,6 +26,7 @@ import ozosync.domain.schema.ProductStoreItemSchema;
 import ozosync.job.message.service.MyMessageService;
 import ozosync.job.service.EbayApiContextService;
 import ozosync.service.EBayApiConfigService;
+import ozosync.service.MessageTypeService;
 
 @Service
 public class MyMessageDownloader {
@@ -45,6 +46,9 @@ public class MyMessageDownloader {
 
     @Autowired
     private MyMessageService myMessageService;
+
+    @Autowired
+    private MessageTypeService messageTypeService;
 
     @SuppressWarnings("unchecked")
     public void download() {
@@ -285,6 +289,13 @@ public class MyMessageDownloader {
 
                 if (message.getExternalMessageID() != null) {
                     messageInfo.setExternalMessageId(message.getExternalMessageID());
+                }
+
+                MessageTypeInfo messageTypeInfo = messageTypeService.parseMessageType(messageInfo);
+                if (messageTypeInfo != null) {
+                    // messageInfo.setbig
+                    messageInfo.setTypeId(messageTypeInfo.getId());
+                    messageInfo.setTypeName(messageTypeInfo.getTypeName());
                 }
 
                 session.saveOrUpdate(messageInfo);
