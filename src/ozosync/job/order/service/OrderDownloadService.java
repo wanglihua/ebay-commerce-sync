@@ -1,5 +1,6 @@
 package ozosync.job.order.service;
 
+import com.ebay.soap.eBLBaseComponents.CancelStatusCodeType;
 import com.ebay.soap.eBLBaseComponents.CompleteStatusCodeType;
 import com.ebay.soap.eBLBaseComponents.ExternalTransactionType;
 import com.ebay.soap.eBLBaseComponents.OrderType;
@@ -170,12 +171,37 @@ public class OrderDownloadService {
             }
 
             // 有可能是新增的订单（最有可能），或者是原来 已创建 的状态过来的。这时支付时间不为空
-            if (statusId < OrderStatus.ID_YZF
-                    && orderDownload.getPaidTime() != null
-                    && orderDownload.getCheckoutStatus().getStatus() != CompleteStatusCodeType.INCOMPLETE
-                    && orderDownload.getCheckoutStatus().getStatus() != CompleteStatusCodeType.PENDING) {
-                // && orderDownload.getCheckoutStatus().getStatus() == CompleteStatusCodeType.COMPLETE) { // statusId < OrderStatus.ORDER_STATUS_YZF 这个状态检查不能少，否则 待配货，已发货的状态可能会被覆盖
-                orderInDb.setStatusId(OrderStatus.ID_YZF); // 这个状态，有可能会被接下来的状态逻辑所修改，可能会，更进一步改成 “已完成”
+            if (statusId < OrderStatus.ID_YZF) {
+                if (orderDownload.getPaidTime() != null
+                        && orderDownload.getCheckoutStatus().getStatus() != CompleteStatusCodeType.INCOMPLETE
+                        && orderDownload.getCheckoutStatus().getStatus() != CompleteStatusCodeType.PENDING) {
+                    // && orderDownload.getCheckoutStatus().getStatus() == CompleteStatusCodeType.COMPLETE) { // statusId < OrderStatus.ORDER_STATUS_YZF 这个状态检查不能少，否则 待配货，已发货的状态可能会被覆盖
+                    orderInDb.setStatusId(OrderStatus.ID_YZF); // 这个状态，有可能会被接下来的状态逻辑所修改，可能会，更进一步改成 “已完成”
+                }
+
+                // 处理 已取消 的订单的状态
+                // INVALID
+                // NOT_APPLICABLE
+                // CANCEL_REQUESTED
+                // CANCEL_PENDING
+                // CANCEL_REJECTED
+                // CANCEL_CLOSED_NO_REFUND
+                // CANCEL_CLOSED_WITH_REFUND
+                // CANCEL_CLOSED_UNKNOWN_REFUND
+                // CANCEL_CLOSED_FOR_COMMITMENT
+                // CANCEL_COMPLETE
+                // CANCEL_FAILED
+                // CUSTOM_CODE
+
+                // 处理创建后未付款取消的订单，其他状态的订单系统下载时不做取消
+                CancelStatusCodeType cancelStatus = orderDownload.getCancelStatus();
+                if (cancelStatus == CancelStatusCodeType.CANCEL_CLOSED_NO_REFUND ||
+                        cancelStatus == CancelStatusCodeType.CANCEL_CLOSED_WITH_REFUND ||
+                        cancelStatus == CancelStatusCodeType.CANCEL_CLOSED_UNKNOWN_REFUND ||
+                        cancelStatus == CancelStatusCodeType.CANCEL_CLOSED_FOR_COMMITMENT ||
+                        cancelStatus == CancelStatusCodeType.CANCEL_COMPLETE) {
+                    orderInDb.setStatusId(OrderStatus.ID_YQX);
+                }
             }
         }
         /*
