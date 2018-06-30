@@ -7,6 +7,8 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import ozosync.Mock;
 
@@ -69,6 +71,7 @@ public class DomainSchemaGenerator {
                 fileWriter.write(lineSeparator);
 
                 Method[] methods = domainClass.getDeclaredMethods();
+                Arrays.sort(methods, new MethodComprator());
                 for (Method method : methods) {
                     String methodName = method.getName();
                     if (methodName.startsWith("get")) {
@@ -147,5 +150,27 @@ public class DomainSchemaGenerator {
                 }
             }
         }
+    }
+}
+
+class MethodComprator implements Comparator {
+    public int compare(Object arg1, Object arg2) {
+        if (arg1 == arg2) {
+            return 0;
+        }
+
+        if (arg1 == null) {
+            return -1;
+        }
+
+        if (arg2 == null) {
+            return 1;
+        }
+
+        Method method1 = (Method) arg1;
+        Method method2 = (Method) arg2;
+
+        int methodNameCompareResult = method1.getName().compareTo(method2.getName());
+        return Integer.compare(methodNameCompareResult, 0);
     }
 }
