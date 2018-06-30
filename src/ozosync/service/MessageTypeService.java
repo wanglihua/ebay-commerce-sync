@@ -14,6 +14,7 @@ public class MessageTypeService {
     @Autowired
     private SessionFactory sessionFactory;
 
+    // todo 参数是不是应该改为 MyMessage 比较合适，是不是只有 MyMessage 才需要分析消息类型
     public MessageTypeInfo parseMessageType(MessageInfo messageInfo) {
         Session session = sessionFactory.getCurrentSession();
 
@@ -44,5 +45,4 @@ public class MessageTypeService {
 
         return (MessageTypeInfo) session.get(MessageTypeInfo.class, MessageType.MESSAGE_TYPE_BEFORE_SALE);
     }
-
 }
