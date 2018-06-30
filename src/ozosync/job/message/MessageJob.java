@@ -18,7 +18,7 @@ public class MessageJob extends SyncJob {
     protected void executeInternal() {
         try {
             memberMessageDownloader.download();
-            myMessageDownloader.download();
+            // myMessageDownloader.download();
         } catch (Exception exp) {
             log.fatal(exp.getMessage(), exp);
         }

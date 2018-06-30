@@ -19,6 +19,8 @@ import org.springframework.stereotype.Service;
 import ozosync.domain.EBayApiConfigInfo;
 import ozosync.domain.MessageInfo;
 import ozosync.domain.MessageStatus;
+import ozosync.domain.MessageType;
+import ozosync.domain.MessageTypeInfo;
 import ozosync.domain.ProductInfo;
 import ozosync.domain.ProductStoreItemInfo;
 import ozosync.domain.UserInfo;
@@ -73,6 +75,13 @@ public class MemberMessageDownloader {
 
                                 if (messageInfo == null) {
                                     messageInfo = new MessageInfo();
+                                }
+
+                                messageInfo.setTypeId(MessageType.MESSAGE_TYPE_SALE);
+
+                                MessageTypeInfo messageTypeInfo = (MessageTypeInfo) session.get(MessageTypeInfo.class, MessageType.MESSAGE_TYPE_SALE);
+                                if (messageTypeInfo != null) {
+                                    messageInfo.setTypeName(messageTypeInfo.getTypeName());
                                 }
 
                                 messageInfo.setMemberDownloadTime(new Date());
