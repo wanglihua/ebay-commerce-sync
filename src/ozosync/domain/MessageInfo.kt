@@ -26,6 +26,9 @@ data class MessageInfo(
     @Column(name = "shop_id")
     var shopId: Long = 0
 
+    @Column(name = "shop_name")
+    var shopName: String = ""
+
     @Column(name = "message_id")
     var messageId: String = ""
 
@@ -34,6 +37,9 @@ data class MessageInfo(
 
     @Column(name = "item_id")
     var itemId: String = ""
+
+    @Column(name = "view_item_url")
+    var viewItemUrl: String = ""
 
     @Column(name = "sku")
     var sku: String = ""
@@ -86,6 +92,9 @@ data class MessageInfo(
 
     @Column(name = "status_id")
     var statusId: Long = 0
+
+    @Column(name = "status_name")
+    var statusName: String = ""
 
     // MemberMessage download time
     @Column(name = "member_download_time")

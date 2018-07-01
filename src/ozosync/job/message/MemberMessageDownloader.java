@@ -17,12 +17,15 @@ import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ozosync.domain.EBayApiConfigInfo;
+import ozosync.domain.ECommercePatformInfo;
 import ozosync.domain.MessageInfo;
 import ozosync.domain.MessageStatus;
 import ozosync.domain.MessageType;
 import ozosync.domain.MessageTypeInfo;
 import ozosync.domain.ProductInfo;
 import ozosync.domain.ProductStoreItemInfo;
+import ozosync.domain.ShopAccountInfo;
+import ozosync.domain.StatusInfo;
 import ozosync.domain.UserInfo;
 import ozosync.domain.schema.MessageSchema;
 import ozosync.domain.schema.ProductStoreItemSchema;
@@ -89,6 +92,14 @@ public class MemberMessageDownloader {
                                 messageInfo.setMessageId(messageId);
                                 messageInfo.setShopId(ebayApiConfigInfo.getShopId());
 
+                                ShopAccountInfo shopAccountInfo = (ShopAccountInfo) session.get(ShopAccountInfo.class, ebayApiConfigInfo.getShopId());
+                                if (shopAccountInfo != null) {
+                                    ECommercePatformInfo eCommercePatformInfo = (ECommercePatformInfo) session.get(ECommercePatformInfo.class, shopAccountInfo.getPlatformId());
+                                    if (eCommercePatformInfo != null) {
+                                        messageInfo.setShopName(eCommercePatformInfo.getName() + " " + shopAccountInfo.getName());
+                                    }
+                                }
+
                                 if (memberMessageExchangeType.getItem() == null) {
                                     messageInfo.setItemId("");
                                     messageInfo.setProductId(0L);
@@ -108,6 +119,8 @@ public class MemberMessageDownloader {
                                         messageInfo.setProductId(0L);
                                         messageInfo.setSku("");
                                     } else {
+                                        messageInfo.setViewItemUrl(productStoreItemInfo.getViewItemUrl());
+
                                         Long productId = productStoreItemInfo.getProductId();
 
                                         ProductInfo productInfo = (ProductInfo) session.get(ProductInfo.class, productId);
@@ -162,8 +175,17 @@ public class MemberMessageDownloader {
 
                                 if (memberMessageExchangeType.getMessageStatus() == MessageStatusTypeCodeType.ANSWERED) {
                                     messageInfo.setStatusId(MessageStatus.ANSWERED);
+                                    StatusInfo statusInfo = (StatusInfo) session.get(StatusInfo.class, MessageStatus.ANSWERED);
+                                    if (statusInfo != null) {
+                                        messageInfo.setStatusName(statusInfo.getName());
+                                    }
+
                                 } else if (memberMessageExchangeType.getMessageStatus() == MessageStatusTypeCodeType.UNANSWERED) {
                                     messageInfo.setStatusId(MessageStatus.UNANSWERED);
+                                    StatusInfo statusInfo = (StatusInfo) session.get(StatusInfo.class, MessageStatus.UNANSWERED);
+                                    if (statusInfo != null) {
+                                        messageInfo.setStatusName(statusInfo.getName());
+                                    }
                                 }
 
                                 messageInfo.setDisplayToPublic(memberMessageType.isDisplayToPublic());
