@@ -37,6 +37,10 @@ public class OrderDownloadEbayShippingAddressService {
                 addressOwner = shippingAddress.getAddressOwner().value();
             }
 
+            if ("eBay".equals(addressOwner) == false) { // 排除掉其他的非法的地址信息
+                return;
+            }
+
             OrderShippingAddressInfo shippingAddressInDb = (OrderShippingAddressInfo) session.createCriteria(OrderShippingAddressInfo.class)
                     .add(Restrictions.and(
                             Restrictions.eq(OrderShippingAddressSchema.addressOwner, addressOwner),
