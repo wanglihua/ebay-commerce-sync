@@ -1,6 +1,7 @@
 package ozosync.web.mvc;
 
 import java.util.HashMap;
+import java.util.List;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -37,6 +38,33 @@ public class MessageController {
         return new ModelAndView(new MappingJackson2JsonView(), new HashMap<String, Object>() {{
             put("success", true);
             put("message", "消息回复成功！");
+        }});
+    }
+
+    @RequestMapping(value = "/send/message/to/customers", method = RequestMethod.POST)
+    public ModelAndView sendMessageToCustomers(@RequestParam(value = "orderIdList") List<Long> orderIdList,
+                                               @RequestParam(value = "subject") String subject,
+                                               @RequestParam(value = "body") String body) throws Exception {
+
+        if (orderIdList == null || orderIdList.size() == 0) {
+            return new ModelAndView(new MappingJackson2JsonView(), new HashMap<String, Object>() {{
+                put("success", true);
+                put("message", "订单列表不能为空！");
+            }});
+        }
+
+        final List<String> failOrderCodeList = messageService.sendMessageToCustomers(orderIdList, subject, body);
+
+        if (failOrderCodeList != null && failOrderCodeList.size() != 0) {
+            return new ModelAndView(new MappingJackson2JsonView(), new HashMap<String, Object>() {{
+                put("success", false);
+                put("message", String.format("订单 %s 消息发送失败！", String.join(",", failOrderCodeList)));
+            }});
+        }
+
+        return new ModelAndView(new MappingJackson2JsonView(), new HashMap<String, Object>() {{
+            put("success", true);
+            put("message", "消息发送成功！");
         }});
     }
 }
