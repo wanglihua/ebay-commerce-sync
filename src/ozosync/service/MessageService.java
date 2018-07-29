@@ -4,6 +4,8 @@ import com.ebay.sdk.ApiContext;
 import com.ebay.sdk.call.AddMemberMessageAAQToPartnerCall;
 import com.ebay.sdk.call.AddMemberMessageRTQCall;
 import com.ebay.soap.eBLBaseComponents.MemberMessageType;
+import com.ebay.soap.eBLBaseComponents.MessageTypeCodeType;
+import com.ebay.soap.eBLBaseComponents.QuestionTypeCodeType;
 import java.util.List;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
@@ -59,10 +61,19 @@ public class MessageService {
         for (OrderItemMessageViewInfo orderItem : orderItemList) {
             ApiContext apiContext = ebayApiContextService.getApiContextByShopId(orderItem.getShopId());
             AddMemberMessageAAQToPartnerCall addMemberMessageAAQToPartnerCall = new AddMemberMessageAAQToPartnerCall(apiContext);
+            addMemberMessageAAQToPartnerCall.setItemID(orderItem.getItemId());
+
+            MemberMessageType memberMessageType = new MemberMessageType();
+            memberMessageType.setMessageType(MessageTypeCodeType.CONTACT_EBAY_MEMBER);
+            memberMessageType.setSubject(subject);
+            memberMessageType.setBody(body);
+            memberMessageType.setEmailCopyToSender(true);
+            memberMessageType.setQuestionType(QuestionTypeCodeType.CUSTOMIZED_SUBJECT);
+            memberMessageType.setRecipientID(new String[]{orderItem.getBuyerUserId()});
+
+            addMemberMessageAAQToPartnerCall.setMemberMessage(memberMessageType);
+
+            addMemberMessageAAQToPartnerCall.addMemberMessageAAQToPartner();
         }
     }
 }
-
-/*
-AddMemberMessageAAQToPartner ???
- */
