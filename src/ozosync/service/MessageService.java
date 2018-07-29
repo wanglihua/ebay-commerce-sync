@@ -3,6 +3,7 @@ package ozosync.service;
 import com.ebay.sdk.ApiContext;
 import com.ebay.sdk.call.AddMemberMessageRTQCall;
 import com.ebay.soap.eBLBaseComponents.MemberMessageType;
+import java.util.List;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -40,6 +41,10 @@ public class MessageService {
         addMemberMessageRTQCall.setMemberMessage(memberMessage);
 
         addMemberMessageRTQCall.addMemberMessageRTQ();
+    }
+
+    public void sendMessageToCustomers(List<Long> orderIdList, String subject, String body) {
+
     }
 }
 
