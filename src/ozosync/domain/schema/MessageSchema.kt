@@ -31,10 +31,13 @@ object MessageSchema {
     const val serviceUser = "serviceUser"
     const val serviceUserId = "serviceUserId"
     const val shopId = "shopId"
+    const val shopName = "shopName"
     const val sku = "sku"
     const val statusId = "statusId"
+    const val statusName = "statusName"
     const val subject = "subject"
     const val typeId = "typeId"
     const val typeName = "typeName"
     const val updateTime = "updateTime"
+    const val viewItemUrl = "viewItemUrl"
 }

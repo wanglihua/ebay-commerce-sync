@@ -1,15 +1,19 @@
 package ozosync.service;
 
 import com.ebay.sdk.ApiContext;
+import com.ebay.sdk.call.AddMemberMessageAAQToPartnerCall;
 import com.ebay.sdk.call.AddMemberMessageRTQCall;
 import com.ebay.soap.eBLBaseComponents.MemberMessageType;
 import java.util.List;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ozosync.domain.MessageInfo;
+import ozosync.domain.OrderItemMessageViewInfo;
+import ozosync.domain.schema.OrderItemMessageViewSchema;
 import ozosync.job.service.EbayApiContextService;
 
 @Service
@@ -43,8 +47,19 @@ public class MessageService {
         addMemberMessageRTQCall.addMemberMessageRTQ();
     }
 
-    public void sendMessageToCustomers(List<Long> orderIdList, String subject, String body) {
+    @SuppressWarnings("unchecked")
+    public void sendMessageToCustomers(List<Long> orderIdList, String subject, String body) throws Exception {
+        Session session = sessionFactory.getCurrentSession();
 
+
+        List<OrderItemMessageViewInfo> orderItemList = session.createCriteria(OrderItemMessageViewInfo.class)
+                .add(Restrictions.in(OrderItemMessageViewSchema.orderId, orderIdList))
+                .list();
+
+        for (OrderItemMessageViewInfo orderItem : orderItemList) {
+            ApiContext apiContext = ebayApiContextService.getApiContextByShopId(orderItem.getShopId());
+            AddMemberMessageAAQToPartnerCall addMemberMessageAAQToPartnerCall = new AddMemberMessageAAQToPartnerCall(apiContext);
+        }
     }
 }
 

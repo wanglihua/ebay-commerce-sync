@@ -11,6 +11,7 @@ import javax.persistence.Id
 SELECT
     oi.id           AS id,
     o.id            AS order_id,
+    o.shop_id       AS shop_id,
     o.buyer_user_id AS buyer_user_id,
     oi.item_id      AS item_id
 FROM erp_order_item oi
@@ -24,6 +25,9 @@ data class OrderItemMessageViewInfo(
 
     @Column(name = "order_id")
     var orderId: Long = 0
+
+    @Column(name = "shop_id")
+    var shopId: Long = 0
 
     @Column(name = "buyer_user_id")
     var buyerUserId: String = ""
