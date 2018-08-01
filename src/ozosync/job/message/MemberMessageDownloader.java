@@ -140,7 +140,7 @@ public class MemberMessageDownloader {
                                                 }
                                             }
 
-                                            if (productInfo.getServiceUserId() != 0L) {
+                                            if (productInfo.getServiceUserId() != 0L && messageInfo.getServiceUserId() == 0L) { // 客服人员后面会被修改，修改过的不能被覆盖
                                                 UserInfo userInfo = (UserInfo) session.get(UserInfo.class, productInfo.getServiceUserId());
                                                 if (userInfo != null) {
                                                     messageInfo.setServiceUserId(userInfo.getId());
