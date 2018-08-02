@@ -7,16 +7,15 @@ import com.ebay.soap.eBLBaseComponents.OrderStatusCodeType;
 import com.ebay.soap.eBLBaseComponents.OrderType;
 import com.ebay.soap.eBLBaseComponents.PaginationType;
 import com.ebay.soap.eBLBaseComponents.TradingRoleCodeType;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ozosync.domain.EBayApiConfigInfo;
+import ozosync.job.order.service.OrderDownloadFacadeService;
 import ozosync.job.service.EbayApiContextService;
 import ozosync.service.EBayApiConfigService;
-import ozosync.job.order.service.OrderDownloadFacadeService;
 
 @Service
 public class OrderDownloader {
@@ -69,7 +68,7 @@ public class OrderDownloader {
 
                     } while (getOrdersCall.getReturnedHasMoreOrders());
                 } catch (Exception exp) {
-                    log.fatal(exp.getMessage(), exp);
+                    log.fatal("shop id: " + ebayApiConfigInfo.getShopId() + "  " + exp.getMessage(), exp);
                 }
             }
         } catch (Exception exp) {
