@@ -3,12 +3,15 @@ package ozosync.service;
 import com.ebay.sdk.ApiContext;
 import com.ebay.sdk.call.AddMemberMessageAAQToPartnerCall;
 import com.ebay.sdk.call.AddMemberMessageRTQCall;
+import com.ebay.sdk.call.GetMemberMessagesCall;
 import com.ebay.soap.eBLBaseComponents.MemberMessageExchangeType;
 import com.ebay.soap.eBLBaseComponents.MemberMessageType;
 import com.ebay.soap.eBLBaseComponents.MessageStatusTypeCodeType;
 import com.ebay.soap.eBLBaseComponents.MessageTypeCodeType;
+import com.ebay.soap.eBLBaseComponents.PaginationType;
 import com.ebay.soap.eBLBaseComponents.QuestionTypeCodeType;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import org.apache.log4j.Logger;
@@ -42,6 +45,9 @@ public class MessageService {
     private Logger log = Logger.getLogger(MessageService.class);
 
     @Autowired
+    private EBayApiConfigService eBayApiConfigService;
+
+    @Autowired
     private SessionFactory sessionFactory;
 
     @Autowired
@@ -65,6 +71,8 @@ public class MessageService {
         addMemberMessageRTQCall.setMemberMessage(memberMessage);
 
         addMemberMessageRTQCall.addMemberMessageRTQ();
+
+        downloadMemberMessagesCallByItemId(messageInfo.getShopId(), messageInfo.getItemId());
     }
 
     @SuppressWarnings("unchecked")
@@ -262,5 +270,65 @@ public class MessageService {
 
         session.saveOrUpdate(messageInfo);
         session.flush();
+    }
+
+    public void downloadMemberMessagesCallByTimeRange(EBayApiConfigInfo ebayApiConfigInfo, int numberOfDay) throws Exception {
+        ApiContext apiContext = ebayApiContextService.getApiContextByConfig(ebayApiConfigInfo);
+
+        GetMemberMessagesCall getMemberMessagesCall = new GetMemberMessagesCall(apiContext);
+        getMemberMessagesCall.setMailMessageType(MessageTypeCodeType.ALL);
+
+        Calendar startCreateTime = Calendar.getInstance();
+        startCreateTime.add(Calendar.DATE, -numberOfDay);
+        getMemberMessagesCall.setStartCreationTime(startCreateTime);
+
+        Calendar endCreateTime = Calendar.getInstance();
+        getMemberMessagesCall.setEndCreationTime(endCreateTime);
+
+        PaginationType pagination = new PaginationType();
+        pagination.setEntriesPerPage(200);
+        getMemberMessagesCall.setPagination(pagination);
+
+        int pageNumber = 0;
+
+        do {
+            getMemberMessagesCall.getPagination().setPageNumber(++pageNumber);
+            MemberMessageExchangeType[] memberMessageExchangeTypes = getMemberMessagesCall.getMemberMessages();
+
+            if (memberMessageExchangeTypes != null && memberMessageExchangeTypes.length != 0) {
+                for (MemberMessageExchangeType memberMessageExchangeType : memberMessageExchangeTypes) {
+                    saveDownloadMessage(ebayApiConfigInfo, memberMessageExchangeType);
+                }
+            }
+        } while (getMemberMessagesCall.getHasMoreItems());
+    }
+
+    public void downloadMemberMessagesCallByItemId(Long shopId, String itemId) throws Exception {
+
+        EBayApiConfigInfo ebayApiConfigInfo = eBayApiConfigService.getConfig(shopId);
+
+        ApiContext apiContext = ebayApiContextService.getApiContextByConfig(ebayApiConfigInfo);
+
+        GetMemberMessagesCall getMemberMessagesCall = new GetMemberMessagesCall(apiContext);
+        getMemberMessagesCall.setMailMessageType(MessageTypeCodeType.ALL);
+
+        getMemberMessagesCall.setItemID(itemId);
+
+        PaginationType pagination = new PaginationType();
+        pagination.setEntriesPerPage(200);
+        getMemberMessagesCall.setPagination(pagination);
+
+        int pageNumber = 0;
+
+        do {
+            getMemberMessagesCall.getPagination().setPageNumber(++pageNumber);
+            MemberMessageExchangeType[] memberMessageExchangeTypes = getMemberMessagesCall.getMemberMessages();
+
+            if (memberMessageExchangeTypes != null && memberMessageExchangeTypes.length != 0) {
+                for (MemberMessageExchangeType memberMessageExchangeType : memberMessageExchangeTypes) {
+                    saveDownloadMessage(ebayApiConfigInfo, memberMessageExchangeType);
+                }
+            }
+        } while (getMemberMessagesCall.getHasMoreItems());
     }
 }
