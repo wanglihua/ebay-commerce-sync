@@ -48,7 +48,7 @@ public class MessageController {
 
         if (orderIdList == null || orderIdList.size() == 0) {
             return new ModelAndView(new MappingJackson2JsonView(), new HashMap<String, Object>() {{
-                put("success", true);
+                put("success", false);
                 put("message", "订单列表不能为空！");
             }});
         }
