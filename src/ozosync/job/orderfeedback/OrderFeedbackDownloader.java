@@ -6,9 +6,6 @@ import com.ebay.soap.eBLBaseComponents.CommentTypeCodeType;
 import com.ebay.soap.eBLBaseComponents.DetailLevelCodeType;
 import com.ebay.soap.eBLBaseComponents.FeedbackDetailType;
 import com.ebay.soap.eBLBaseComponents.FeedbackTypeCodeType;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -18,6 +15,9 @@ import org.springframework.stereotype.Service;
 import ozosync.domain.OrderFeedbackInfo;
 import ozosync.domain.schema.OrderFeedbackSchema;
 import ozosync.job.service.EbayApiContextService;
+
+import java.util.Date;
+import java.util.List;
 
 @Service
 public class OrderFeedbackDownloader {
@@ -54,7 +54,7 @@ WHERE (o.status_id = 4200 OR o.status_id = 4300)
       AND o.seller_user_id <> ''
       AND oi.order_line_item_id <> ''
       AND of.id IS NULL
-      AND o.shipped_time > DATE_ADD(now(), INTERVAL -60 DAY);
+      AND o.shipped_time > DATE_ADD(now(), INTERVAL -30 DAY);
                  */
 
             StringBuilder sb = new StringBuilder();
@@ -75,7 +75,7 @@ WHERE (o.status_id = 4200 OR o.status_id = 4300)
             sb.append("      AND o.seller_user_id <> ''\n\r");
             sb.append("      AND oi.order_line_item_id <> ''\n\r");
             sb.append("      AND of.id IS NULL\n\r");
-            sb.append("      AND o.shipped_time > DATE_ADD(now(), INTERVAL -60 DAY);\n\r");
+            sb.append("      AND o.shipped_time > DATE_ADD(now(), INTERVAL -30 DAY);\n\r");
 
             List item_list = session.createSQLQuery(sb.toString()).list();
             if (item_list != null) {
