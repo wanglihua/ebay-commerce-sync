@@ -339,7 +339,7 @@ public class MessageService {
         } while (getMemberMessagesCall.getHasMoreItems());
     }
 
-    public void downloadMemberMessagesCallByItemId(Long shopId, String itemId) throws Exception {
+    public void downloadMemberMessagesByItemId(Long shopId, String itemId) throws Exception {
 
         EBayApiConfigInfo ebayApiConfigInfo = eBayApiConfigService.getConfig(shopId);
 
