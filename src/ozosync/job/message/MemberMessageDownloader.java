@@ -31,7 +31,7 @@ public class MemberMessageDownloader {
             List<EBayApiConfigInfo> ebayApiConfigList = eBayApiConfigService.getConfiglist();
             for (EBayApiConfigInfo ebayApiConfigInfo : ebayApiConfigList) {
                 try {
-                    messageService.downloadMemberMessagesCallByTimeRange(ebayApiConfigInfo, NUMBER_OF_DAY);
+                    messageService.downloadMemberMessagesInNumberOfDays(ebayApiConfigInfo, NUMBER_OF_DAY);
                 } catch (Exception exp) {
                     log.fatal(exp.getMessage(), exp);
                 }

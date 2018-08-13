@@ -72,7 +72,7 @@ public class MessageService {
 
         addMemberMessageRTQCall.addMemberMessageRTQ();
 
-        downloadMemberMessagesCallByItemId(messageInfo.getShopId(), messageInfo.getItemId());
+        downloadMemberMessagesInNumberOfMinutes(messageInfo.getShopId(), 10);
     }
 
     @SuppressWarnings("unchecked")
@@ -272,14 +272,50 @@ public class MessageService {
         session.flush();
     }
 
-    public void downloadMemberMessagesCallByTimeRange(EBayApiConfigInfo ebayApiConfigInfo, int numberOfDay) throws Exception {
+    public void downloadMemberMessagesInNumberOfDays(EBayApiConfigInfo ebayApiConfigInfo, int numberOfDays) throws Exception {
         ApiContext apiContext = ebayApiContextService.getApiContextByConfig(ebayApiConfigInfo);
 
         GetMemberMessagesCall getMemberMessagesCall = new GetMemberMessagesCall(apiContext);
         getMemberMessagesCall.setMailMessageType(MessageTypeCodeType.ALL);
 
         Calendar startCreateTime = Calendar.getInstance();
-        startCreateTime.add(Calendar.DATE, -numberOfDay);
+        startCreateTime.add(Calendar.DATE, -numberOfDays);
+        getMemberMessagesCall.setStartCreationTime(startCreateTime);
+
+        Calendar endCreateTime = Calendar.getInstance();
+        getMemberMessagesCall.setEndCreationTime(endCreateTime);
+
+        PaginationType pagination = new PaginationType();
+        pagination.setEntriesPerPage(200);
+        getMemberMessagesCall.setPagination(pagination);
+
+        int pageNumber = 0;
+
+        do {
+            getMemberMessagesCall.getPagination().setPageNumber(++pageNumber);
+            MemberMessageExchangeType[] memberMessageExchangeTypes = getMemberMessagesCall.getMemberMessages();
+
+            if (memberMessageExchangeTypes != null && memberMessageExchangeTypes.length != 0) {
+                for (MemberMessageExchangeType memberMessageExchangeType : memberMessageExchangeTypes) {
+                    saveDownloadMessage(ebayApiConfigInfo, memberMessageExchangeType);
+                }
+            }
+        } while (getMemberMessagesCall.getHasMoreItems());
+    }
+
+    public void downloadMemberMessagesInNumberOfMinutes(Long shopId, int numberOfMinutes) throws Exception {
+        EBayApiConfigInfo ebayApiConfigInfo = eBayApiConfigService.getConfig(shopId);
+        downloadMemberMessagesInNumberOfMinutes(ebayApiConfigInfo, numberOfMinutes);
+    }
+
+    public void downloadMemberMessagesInNumberOfMinutes(EBayApiConfigInfo ebayApiConfigInfo, int numberOfMinutes) throws Exception {
+        ApiContext apiContext = ebayApiContextService.getApiContextByConfig(ebayApiConfigInfo);
+
+        GetMemberMessagesCall getMemberMessagesCall = new GetMemberMessagesCall(apiContext);
+        getMemberMessagesCall.setMailMessageType(MessageTypeCodeType.ALL);
+
+        Calendar startCreateTime = Calendar.getInstance();
+        startCreateTime.add(Calendar.MINUTE, -numberOfMinutes);
         getMemberMessagesCall.setStartCreationTime(startCreateTime);
 
         Calendar endCreateTime = Calendar.getInstance();

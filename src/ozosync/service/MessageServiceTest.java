@@ -1,6 +1,5 @@
 package ozosync.service;
 
-import java.util.Arrays;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,6 +9,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 import ozosync.common.SpringConfigLocation;
+import ozosync.domain.EBayApiConfigInfo;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
@@ -21,6 +21,9 @@ public class MessageServiceTest {
     @Autowired
     private MessageService messageService;
 
+    @Autowired
+    private EBayApiConfigService eBayApiConfigService;
+
     @Test
     @Transactional
     public void reply() {
@@ -29,5 +32,12 @@ public class MessageServiceTest {
         } catch (Exception exp) {
             log.fatal(exp.getMessage(), exp);
         }
+    }
+
+    @Test
+    @Transactional
+    public void downloadMessageInFiveMinutes() throws Exception {
+        EBayApiConfigInfo eBayApiConfigInfo = eBayApiConfigService.getConfig(7L);
+        messageService.downloadMemberMessagesInNumberOfMinutes(eBayApiConfigInfo, 45);
     }
 }
