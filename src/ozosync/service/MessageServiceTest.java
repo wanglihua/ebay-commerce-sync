@@ -40,4 +40,16 @@ public class MessageServiceTest {
         EBayApiConfigInfo eBayApiConfigInfo = eBayApiConfigService.getConfig(7L);
         messageService.downloadMemberMessagesInNumberOfMinutes(eBayApiConfigInfo, 45);
     }
+
+    @Test
+    @Transactional
+    public void downloadMessageByMessageId() throws Exception {
+        messageService.downloadMemberMessagesByMessageId(7L, "1752913229010");
+    }
+
+    @Test
+    @Transactional
+    public void downloadMessageByItemId() throws Exception {
+        messageService.downloadMemberMessagesByItemId(6L, "222578847611");
+    }
 }

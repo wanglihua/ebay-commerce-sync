@@ -367,4 +367,33 @@ public class MessageService {
             }
         } while (getMemberMessagesCall.getHasMoreItems());
     }
+
+    public void downloadMemberMessagesByMessageId(Long shopId, String messageId) throws Exception {
+
+        EBayApiConfigInfo ebayApiConfigInfo = eBayApiConfigService.getConfig(shopId);
+
+        ApiContext apiContext = ebayApiContextService.getApiContextByConfig(ebayApiConfigInfo);
+
+        GetMemberMessagesCall getMemberMessagesCall = new GetMemberMessagesCall(apiContext);
+        getMemberMessagesCall.setMailMessageType(MessageTypeCodeType.ALL);
+
+        getMemberMessagesCall.setMemberMessageID(messageId);
+
+        PaginationType pagination = new PaginationType();
+        pagination.setEntriesPerPage(200);
+        getMemberMessagesCall.setPagination(pagination);
+
+        int pageNumber = 0;
+
+        do {
+            getMemberMessagesCall.getPagination().setPageNumber(++pageNumber);
+            MemberMessageExchangeType[] memberMessageExchangeTypes = getMemberMessagesCall.getMemberMessages();
+
+            if (memberMessageExchangeTypes != null && memberMessageExchangeTypes.length != 0) {
+                for (MemberMessageExchangeType memberMessageExchangeType : memberMessageExchangeTypes) {
+                    saveDownloadMessage(ebayApiConfigInfo, memberMessageExchangeType);
+                }
+            }
+        } while (getMemberMessagesCall.getHasMoreItems());
+    }
 }
